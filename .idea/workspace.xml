@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="rb_ui" targetName="std_msgs_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_py" />
+      <config projectName="rb_ui" targetName="std_msgs_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="gtest_main" />
+      <config projectName="rb_ui" targetName="download_extra_data" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="tests" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="run_tests" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_py" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="std_msgs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="rb_ui_autogen" />
+      <config projectName="rb_ui" targetName="gmock_main" />
+      <config projectName="rb_ui" targetName="clean_test_results" />
+      <config projectName="rb_ui" targetName="std_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="doxygen" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="gtest" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="rb_ui" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="std_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="gmock" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_eus" />
+    </generated>
+  </component>
+  <component name="CMakeSettings" AUTO_RELOAD="true">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" GENERATION_DIR="/tmp/ui/cmake-build-debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4e2e2d99-ccc6-4274-bec1-38a9f03afc38" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../logWithQt" beforeDir="false" afterPath="$PROJECT_DIR$/../logWithQt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$" beforeDir="false" afterPath="$PROJECT_DIR$" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/MainWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/MainWindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rubik_cube_solve" beforeDir="false" afterPath="$PROJECT_DIR$/../rubik_cube_solve" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CMakeLists.txt" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
+  <component name="ProjectId" id="1bsWOhLv7hhQmnxqBjeHA7AjzHG" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.build" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/include/rb_ui" />
+      <recent name="$PROJECT_DIR$/srv" />
+      <recent name="$PROJECT_DIR$/include" />
+      <recent name="$PROJECT_DIR$/include/msg" />
+      <recent name="$PROJECT_DIR$/include/log4cplus" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/photo" />
+      <recent name="$PROJECT_DIR$/include/rb_ui" />
+      <recent name="$PROJECT_DIR$/include/log4cplus" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="CMake Application.rb_ui">
+    <configuration name="clean_test_results" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="clean_test_results" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="download_extra_data" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="download_extra_data" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="doxygen" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="doxygen" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="geometry_msgs_generate_messages_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="geometry_msgs_generate_messages_cpp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="geometry_msgs_generate_messages_eus" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="geometry_msgs_generate_messages_eus" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="geometry_msgs_generate_messages_lisp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="geometry_msgs_generate_messages_lisp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="geometry_msgs_generate_messages_nodejs" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="geometry_msgs_generate_messages_nodejs" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="geometry_msgs_generate_messages_py" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="geometry_msgs_generate_messages_py" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gmock" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="gmock" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gmock_main" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="gmock_main" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gtest" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="gtest" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gtest_main" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="gtest_main" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rb_msgAndSrv_generate_messages_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rb_msgAndSrv_generate_messages_cpp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rb_msgAndSrv_generate_messages_eus" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rb_msgAndSrv_generate_messages_eus" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rb_msgAndSrv_generate_messages_lisp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rb_msgAndSrv_generate_messages_lisp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rb_msgAndSrv_generate_messages_nodejs" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rb_msgAndSrv_generate_messages_nodejs" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rb_msgAndSrv_generate_messages_py" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rb_msgAndSrv_generate_messages_py" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rb_ui" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rb_ui" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="rb_ui" RUN_TARGET_NAME="rb_ui">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rb_ui_autogen" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rb_ui_autogen" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="roscpp_generate_messages_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="roscpp_generate_messages_cpp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="roscpp_generate_messages_eus" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="roscpp_generate_messages_eus" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="roscpp_generate_messages_lisp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="roscpp_generate_messages_lisp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="roscpp_generate_messages_nodejs" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="roscpp_generate_messages_nodejs" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="roscpp_generate_messages_py" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="roscpp_generate_messages_py" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rosgraph_msgs_generate_messages_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rosgraph_msgs_generate_messages_cpp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rosgraph_msgs_generate_messages_eus" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rosgraph_msgs_generate_messages_eus" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rosgraph_msgs_generate_messages_lisp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rosgraph_msgs_generate_messages_lisp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rosgraph_msgs_generate_messages_nodejs" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rosgraph_msgs_generate_messages_nodejs" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rosgraph_msgs_generate_messages_py" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="rosgraph_msgs_generate_messages_py" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="run_tests" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="run_tests" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="sensor_msgs_generate_messages_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="sensor_msgs_generate_messages_cpp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="sensor_msgs_generate_messages_eus" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="sensor_msgs_generate_messages_eus" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="sensor_msgs_generate_messages_lisp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="sensor_msgs_generate_messages_lisp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="sensor_msgs_generate_messages_nodejs" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="sensor_msgs_generate_messages_nodejs" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="sensor_msgs_generate_messages_py" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="sensor_msgs_generate_messages_py" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="std_msgs_generate_messages_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="std_msgs_generate_messages_cpp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="std_msgs_generate_messages_eus" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="std_msgs_generate_messages_eus" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="std_msgs_generate_messages_lisp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="std_msgs_generate_messages_lisp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="std_msgs_generate_messages_nodejs" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="std_msgs_generate_messages_nodejs" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="std_msgs_generate_messages_py" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="std_msgs_generate_messages_py" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tests" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rb_ui" TARGET_NAME="tests" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.clean_test_results" />
+      <item itemvalue="CMake Application.download_extra_data" />
+      <item itemvalue="CMake Application.doxygen" />
+      <item itemvalue="CMake Application.geometry_msgs_generate_messages_cpp" />
+      <item itemvalue="CMake Application.geometry_msgs_generate_messages_eus" />
+      <item itemvalue="CMake Application.geometry_msgs_generate_messages_lisp" />
+      <item itemvalue="CMake Application.geometry_msgs_generate_messages_nodejs" />
+      <item itemvalue="CMake Application.geometry_msgs_generate_messages_py" />
+      <item itemvalue="CMake Application.rb_msgAndSrv_generate_messages_cpp" />
+      <item itemvalue="CMake Application.rb_msgAndSrv_generate_messages_eus" />
+      <item itemvalue="CMake Application.rb_msgAndSrv_generate_messages_lisp" />
+      <item itemvalue="CMake Application.rb_msgAndSrv_generate_messages_nodejs" />
+      <item itemvalue="CMake Application.rb_msgAndSrv_generate_messages_py" />
+      <item itemvalue="CMake Application.rb_ui" />
+      <item itemvalue="CMake Application.rb_ui_autogen" />
+      <item itemvalue="CMake Application.roscpp_generate_messages_cpp" />
+      <item itemvalue="CMake Application.roscpp_generate_messages_eus" />
+      <item itemvalue="CMake Application.roscpp_generate_messages_lisp" />
+      <item itemvalue="CMake Application.roscpp_generate_messages_nodejs" />
+      <item itemvalue="CMake Application.roscpp_generate_messages_py" />
+      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_cpp" />
+      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_eus" />
+      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_lisp" />
+      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_nodejs" />
+      <item itemvalue="CMake Application.rosgraph_msgs_generate_messages_py" />
+      <item itemvalue="CMake Application.run_tests" />
+      <item itemvalue="CMake Application.sensor_msgs_generate_messages_cpp" />
+      <item itemvalue="CMake Application.sensor_msgs_generate_messages_eus" />
+      <item itemvalue="CMake Application.sensor_msgs_generate_messages_lisp" />
+      <item itemvalue="CMake Application.sensor_msgs_generate_messages_nodejs" />
+      <item itemvalue="CMake Application.sensor_msgs_generate_messages_py" />
+      <item itemvalue="CMake Application.std_msgs_generate_messages_cpp" />
+      <item itemvalue="CMake Application.std_msgs_generate_messages_eus" />
+      <item itemvalue="CMake Application.std_msgs_generate_messages_lisp" />
+      <item itemvalue="CMake Application.std_msgs_generate_messages_nodejs" />
+      <item itemvalue="CMake Application.std_msgs_generate_messages_py" />
+      <item itemvalue="CMake Application.tests" />
+      <item itemvalue="CMake Application.gmock" />
+      <item itemvalue="CMake Application.gmock_main" />
+      <item itemvalue="CMake Application.gtest" />
+      <item itemvalue="CMake Application.gtest_main" />
+    </list>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4e2e2d99-ccc6-4274-bec1-38a9f03afc38" name="Default Changelist" comment="" />
+      <created>1589421250982</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1589421250982</updated>
+      <workItem from="1589421252175" duration="1543000" />
+      <workItem from="1589422910415" duration="49000" />
+      <workItem from="1589423031749" duration="55000" />
+      <workItem from="1589423449142" duration="1365000" />
+      <workItem from="1589425630749" duration="786000" />
+      <workItem from="1589429336386" duration="1299000" />
+      <workItem from="1589446199413" duration="7621000" />
+      <workItem from="1589502522154" duration="21862000" />
+      <workItem from="1589531952441" duration="9929000" />
+      <workItem from="1589543417406" duration="4473000" />
+      <workItem from="1589589086057" duration="5377000" />
+      <workItem from="1589595621901" duration="1280000" />
+      <workItem from="1589606762898" duration="8108000" />
+      <workItem from="1589617511606" duration="3870000" />
+      <workItem from="1589761792077" duration="681000" />
+      <workItem from="1589787575931" duration="8266000" />
+      <workItem from="1589800654734" duration="6748000" />
+      <workItem from="1589848555356" duration="13692000" />
+      <workItem from="1589867758826" duration="16839000" />
+      <workItem from="1589888539306" duration="1492000" />
+      <workItem from="1589890048873" duration="3311000" />
+      <workItem from="1589936584440" duration="607000" />
+      <workItem from="1589940358177" duration="4514000" />
+      <workItem from="1590127246948" duration="11978000" />
+      <workItem from="1590139870079" duration="2942000" />
+      <workItem from="1590194399393" duration="13734000" />
+      <workItem from="1590492764006" duration="595000" />
+      <workItem from="1590540081534" duration="609000" />
+      <workItem from="1590558964118" duration="4845000" />
+      <workItem from="1590565282093" duration="36000" />
+      <workItem from="1590566677370" duration="3118000" />
+      <workItem from="1590571954309" duration="382000" />
+      <workItem from="1590626357439" duration="1126000" />
+      <workItem from="1590631093925" duration="1931000" />
+      <workItem from="1590642927505" duration="1817000" />
+      <workItem from="1590645358304" duration="8342000" />
+      <workItem from="1590666358493" duration="735000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
