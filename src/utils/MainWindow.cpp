@@ -354,9 +354,12 @@ void MainWindow::thread_GagicRunSolve() {
 }
 
 void MainWindow::thread_RbGrepSet() {
-    int index1=comboBox_2->currentIndex();
-    int index2=comboBox_3->currentIndex();
-    int index3=comboBox->currentIndex();
+    int index1=comboBox->currentIndex();
+   int index2=comboBox_2->currentIndex();
+   int index3=comboBox_3->currentIndex();
+    // int index1=comboBox_2->currentIndex(); 
+    // int index2=comboBox_3->currentIndex();
+    // int index3=comboBox->currentIndex();
     cout<<index1<<"----"<<index2<<"----"<<index3<<endl;
 //    LOG("Warning")->logErrorMessage("rbGrepSetCommand_client接收消息失败!");
 //    int index1=comboBox->currentIndex();
