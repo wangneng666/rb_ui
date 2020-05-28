@@ -81,8 +81,12 @@ private:
     bool flag_rbConnStatus;//机器人连接状态标志
     bool flag_rbErrStatus;//机器人连接状态标志
     bool flag_sysRun;//系统运行标志
+    //rosparam参数
+    bool isRunning_solveMagic;
+    bool isRunning_grab;
     //ros节点
     ros::NodeHandle* Node;
+    QTimer* updateTimer;
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber camera_subscriber;//相机数据采集
@@ -92,6 +96,7 @@ private:
     ros::ServiceClient rbErrStatus_client;
     ros::ServiceClient rbGrepSetCommand_client;
     ros::ServiceClient rbRunCommand_client ;
+    ros::ServiceClient rbAutoSolveMagicCommand_client ;
     ros::ServiceClient MagicGetDataCommand_client;
     ros::ServiceClient MagicSolveCommand_client;
     ros::ServiceClient MagicRunSolveCommand_client;
@@ -105,6 +110,7 @@ private:
     qthreadForRos *thread_forGagicRunSolve;//执行魔方子线程
     qthreadForRos *thread_forRbGrepSet;//机器人抓取子线程
     qthreadForRos *thread_forLisionErrInfo;//监听故障子线程
+    qthreadForRos *thread_forAutoSolveMagic;//一键解魔方子线程
 private:
     //系统变量初始化
     void SysVarInit();
@@ -118,6 +124,7 @@ private:
     void rviz_statup();//按钮槽函数_rviz启动
     void run_statup();//按钮槽函数_运行启动
     void run_stop();//按钮槽函数_运行停止
+    void magicCube_AutoRun();//按钮槽函数_一键解魔方
     void magicCube_get();//按钮槽函数_采集魔方数据
     void magicCube_solve();//按钮槽函数_解算魔方数据
     void magicCube_execute();//按钮槽函数_执行解算魔方数据
@@ -127,6 +134,7 @@ private:
     void safety_rob2Stop();//按钮槽函数_机器人2停止
     void oputRecord();
     void clearRecord();
+    void timer_onUpdate();
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
@@ -142,6 +150,7 @@ private:
     void thread_GagicRunSolve();
     void thread_RbGrepSet();
     void thread_LisionErrInfo();
+    void thread_AutoSolveMagic();
 
 signals:
     void emitTextControl(QString text) const;
