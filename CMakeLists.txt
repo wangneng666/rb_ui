@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   rosmsg
   rospy
   std_msgs
+std_srvs
 rb_msgAndSrv
   message_generation
   sensor_msgs
