@@ -332,7 +332,7 @@ void MainWindow::thread_GagicRunSolve() {
     emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
-            index_magicStep=3;
+            index_magicStep=0;
             cout<<"执行解算魔方成功"<<endl;
         }
     } else{
