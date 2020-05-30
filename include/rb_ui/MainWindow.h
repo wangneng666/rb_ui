@@ -20,6 +20,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QDialog>
+
+#include <QDir>
 #include <QMessageBox>
 #include <QProcess>
 #include <QTimer>
@@ -28,21 +30,24 @@
 #include <iostream>
 #include <fstream>
 #include "QDebug"
+
+#include "qdebug.h"
 #include "ros/ros.h"
+#include "std_srvs/Empty.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt8MultiArray.h"
 #include "std_msgs/UInt16MultiArray.h"
 #include "roscpp_tutorials/TwoInts.h"
-#include "rb_msgs/rb_ArrayAndBool.h"
-#include "rb_msgs/rb_DoubleBool.h"
-#include "rb_msgs/robotConn.h"
-#include "rb_msgs/robotError.h"
+#include "rb_msgAndSrv/rb_ArrayAndBool.h"
+#include "rb_msgAndSrv/rb_DoubleBool.h"
+#include "rb_msgAndSrv/robotConn.h"
+#include "rb_msgAndSrv/robotError.h"
 #include <opencv2/opencv.hpp>
 #include "sensor_msgs/Image.h"
 #include <cv_bridge/cv_bridge.h>
-#include "rb_msgs/rbImageList.h"
+#include "rb_msgAndSrv/rbImageList.h"
 #include <qregion.h>
-#include "rb_msgs/SetEnableSrv.h"
+#include "rb_msgAndSrv/SetEnableSrv.h"
 #include "logmanager.h"
 //#include "messagehandler.h"
 using namespace std;
@@ -81,6 +86,8 @@ private:
     bool flag_rbConnStatus;//机器人连接状态标志
     bool flag_rbErrStatus;//机器人连接状态标志
     bool flag_sysRun;//系统运行标志
+    int index_magicStep;
+    QString photoPath;//图片路径
     //rosparam参数
     bool isRunning_solveMagic;
     bool isRunning_grab;
@@ -91,26 +98,23 @@ private:
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber camera_subscriber;//相机数据采集
     ros::ServiceClient rbConnCommand_client;//机器人连接客户端
+    ros::ServiceClient rbRunCommand_client ;
+    ros::ServiceClient rbStopCommand_client ;
     ros::ServiceClient rbSetEnable1_client;
     ros::ServiceClient rbSetEnable2_client;
     ros::ServiceClient rbErrStatus_client;
     ros::ServiceClient rbGrepSetCommand_client;
-    ros::ServiceClient rbRunCommand_client ;
-    ros::ServiceClient rbAutoSolveMagicCommand_client ;
-    ros::ServiceClient MagicGetDataCommand_client;
-    ros::ServiceClient MagicSolveCommand_client;
-    ros::ServiceClient MagicRunSolveCommand_client;
+    ros::ServiceClient MagicStepRunCommand_client ;//魔方分步完成
+
     ros::ServiceClient ImageGet_client;//从阿辉那里获得图像
     ros::Subscriber magicGetData_subscriber;//机器人连接状态
     //子线程句柄
     qthreadForRos *thread_forRbConn;//设备连接子线程
+    qthreadForRos *thread_forRviz;//设备连接子线程
     qthreadForRos *thread_forBeginRun;//开始运行子线程
-    qthreadForRos *thread_forGagicGetData;//采集魔方数据子线程
-    qthreadForRos *thread_forGagicSolve;//采集魔方数据子线程
-    qthreadForRos *thread_forGagicRunSolve;//执行魔方子线程
+    qthreadForRos *thread_MagicStepRun;//分步运行子线程
     qthreadForRos *thread_forRbGrepSet;//机器人抓取子线程
     qthreadForRos *thread_forLisionErrInfo;//监听故障子线程
-    qthreadForRos *thread_forAutoSolveMagic;//一键解魔方子线程
 private:
     //系统变量初始化
     void SysVarInit();
@@ -141,23 +145,27 @@ private:
     void callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg);
     void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
 //    void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
-    void callback_magicGetData_subscriber(rb_msgs::rbImageList rbimageList);
+    void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
     //线程处理
     void thread_rbConnCommand();
+    void thread_rbRvizCommand();
     void thread_BeginRun();
+    void thread_RbGrepSet();
+    void thread_LisionErrInfo();
+//    void thread_MagicStepRunCommand();
     void thread_GagicGetData();
     void thread_GagicSolve();
     void thread_GagicRunSolve();
-    void thread_RbGrepSet();
-    void thread_LisionErrInfo();
     void thread_AutoSolveMagic();
 
 signals:
     void emitTextControl(QString text) const;
     void emitQmessageBox(infoLevel level,QString info);
+    void emitLightColor(QLabel* label,string color);
 private slots:
     void displayTextControl(QString text);
     void showQmessageBox(infoLevel level,QString info);
+    void showLightColor(QLabel* label,string color);
 
 private:
     //qt控件
@@ -227,7 +235,7 @@ private:
     QWidget *tab_5;
     QHBoxLayout *horizontalLayout_15;
     QHBoxLayout *horizontalLayout_16;
-    QVBoxLayout *verticalLayout_13;
+    QVBoxLayout *verticalLayout_1index_magicStep3;
     QPlainTextEdit *plainTextEdit;
     QVBoxLayout *verticalLayout_12;
     QPushButton *btn_oputRecord;
@@ -240,6 +248,8 @@ private:
     QPushButton *btn_SatetyRb2Stop;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
+
+    QVBoxLayout* verticalLayout_13;
 };
 
 
