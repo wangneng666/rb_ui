@@ -198,7 +198,9 @@ void MainWindow::thread_BeginRun() {
 //        return;
 //    }
 //启动魔方解析功能
-    system("roslaunch rubik_cube_solve solve.launch");
+    system(" rosrun rb_ui runlaunch.sh");
+//    system(" roslaunch rubik_cube_solve solve.launch");
+//    system("roslaunch grasp_place grasp.launch");
 //启动抓取功能
 
 //    //开辟监听故障状态子线程
@@ -250,6 +252,7 @@ void MainWindow::thread_GagicGetData() {
     rb_msgAndSrv::rb_ArrayAndBool data_srvs;
     data_srvs.request.data.resize(1);
     data_srvs.request.data[0]=1;
+    emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         index_magicStep=1;
 //        magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/camera",1,&MainWindow::callback_magicGetData_subscriber,this);
@@ -293,6 +296,7 @@ void MainWindow::thread_GagicSolve() {
     rb_msgAndSrv::rb_ArrayAndBool data_srvs;
     data_srvs.request.data.resize(1);
     data_srvs.request.data[0]=2;
+    emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             index_magicStep=2;
@@ -319,6 +323,7 @@ void MainWindow::thread_GagicRunSolve() {
     rb_msgAndSrv::rb_ArrayAndBool data_srvs;
     data_srvs.request.data.resize(1);
     data_srvs.request.data[0]=3;
+    emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             index_magicStep=3;
@@ -351,6 +356,7 @@ void MainWindow::thread_AutoSolveMagic() {
     rb_msgAndSrv::rb_ArrayAndBool data_srvs;
     data_srvs.request.data.resize(1);
     data_srvs.request.data[0]=4;
+    emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             cout<<"一键解算魔方成功"<<endl;

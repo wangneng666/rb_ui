@@ -60,7 +60,6 @@
       <change beforePath="$PROJECT_DIR$/../logWithQt" beforeDir="false" afterPath="$PROJECT_DIR$/../logWithQt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$" beforeDir="false" afterPath="$PROJECT_DIR$" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/MainWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/MainWindow.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../rubik_cube_solve" beforeDir="false" afterPath="$PROJECT_DIR$/../rubik_cube_solve" afterDir="false" />
     </list>
@@ -106,24 +105,24 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/launch" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="configurable.group.build" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/include/rb_ui" />
-      <recent name="$PROJECT_DIR$/srv" />
-      <recent name="$PROJECT_DIR$/include" />
-      <recent name="$PROJECT_DIR$/include/msg" />
-      <recent name="$PROJECT_DIR$/include/log4cplus" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/photo" />
       <recent name="$PROJECT_DIR$/include/rb_ui" />
       <recent name="$PROJECT_DIR$/include/log4cplus" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/launch" />
+      <recent name="$PROJECT_DIR$/include/rb_ui" />
+      <recent name="$PROJECT_DIR$/srv" />
+      <recent name="$PROJECT_DIR$/include" />
+      <recent name="$PROJECT_DIR$/include/msg" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -469,7 +468,7 @@
       <workItem from="1590670770493" duration="260000" />
       <workItem from="1590712535642" duration="11887000" />
       <workItem from="1590729539750" duration="9373000" />
-      <workItem from="1590799381483" duration="2621000" />
+      <workItem from="1590799381483" duration="6165000" />
     </task>
     <servers />
   </component>
