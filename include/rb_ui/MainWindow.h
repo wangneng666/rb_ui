@@ -42,6 +42,7 @@
 #include "rb_msgAndSrv/rb_DoubleBool.h"
 #include "rb_msgAndSrv/robotConn.h"
 #include "rb_msgAndSrv/robotError.h"
+#include "cubeParse/Detection.h"
 #include <opencv2/opencv.hpp>
 #include "sensor_msgs/Image.h"
 #include <cv_bridge/cv_bridge.h>
@@ -250,6 +251,9 @@ private:
     QStatusBar *statusBar;
 
     QVBoxLayout* verticalLayout_13;
+    QLabel* showMagicStepLable;
+    QLabel* isRunning_solveMagic_Lable;
+    QLabel* isRunning_grab_Lable;
 };
 
 

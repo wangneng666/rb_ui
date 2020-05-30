@@ -3,6 +3,7 @@
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_lisp" />
       <config projectName="rb_ui" targetName="doxygen" />
       <config projectName="rb_ui" targetName="roscpp_generate_messages_cpp" />
@@ -45,43 +46,54 @@
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_nodejs" />
       <config projectName="rb_ui" targetName="roscpp_generate_messages_py" />
 =======
+=======
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_lisp" />
+>>>>>>> 155fc8c845d794b8c6ecc81d58dda28e7956cbd3
       <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_py" />
+      <config projectName="rb_ui" targetName="std_srvs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="std_srvs_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="gmock_main" />
+      <config projectName="rb_ui" targetName="gmock" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="run_tests" />
+      <config projectName="rb_ui" targetName="gtest_main" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_eus" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="std_srvs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="tests" />
+      <config projectName="rb_ui" targetName="rb_ui" />
+      <config projectName="rb_ui" targetName="download_extra_data" />
+      <config projectName="rb_ui" targetName="std_srvs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="gtest" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="doxygen" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="rb_ui_autogen" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_lisp" />
+      <config projectName="rb_ui" targetName="std_msgs_generate_messages_cpp" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_eus" />
       <config projectName="rb_ui" targetName="std_msgs_generate_messages_eus" />
       <config projectName="rb_ui" targetName="std_msgs_generate_messages_lisp" />
-      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_nodejs" />
-      <config projectName="rb_ui" targetName="std_srvs_generate_messages_py" />
-      <config projectName="rb_ui" targetName="roscpp_generate_messages_cpp" />
-      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_lisp" />
-      <config projectName="rb_ui" targetName="gtest_main" />
-      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_eus" />
-      <config projectName="rb_ui" targetName="download_extra_data" />
-      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_nodejs" />
-      <config projectName="rb_ui" targetName="std_srvs_generate_messages_nodejs" />
-      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_eus" />
-      <config projectName="rb_ui" targetName="tests" />
-      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_py" />
-      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_lisp" />
-      <config projectName="rb_ui" targetName="run_tests" />
-      <config projectName="rb_ui" targetName="roscpp_generate_messages_py" />
-      <config projectName="rb_ui" targetName="std_srvs_generate_messages_eus" />
-      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_cpp" />
-      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_py" />
-      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_py" />
+      <config projectName="rb_ui" targetName="std_msgs_generate_messages_py" />
       <config projectName="rb_ui" targetName="std_msgs_generate_messages_nodejs" />
-      <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_lisp" />
-      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_cpp" />
-      <config projectName="rb_ui" targetName="rb_ui_autogen" />
-      <config projectName="rb_ui" targetName="gmock_main" />
       <config projectName="rb_ui" targetName="clean_test_results" />
-      <config projectName="rb_ui" targetName="std_msgs_generate_messages_cpp" />
-      <config projectName="rb_ui" targetName="roscpp_generate_messages_lisp" />
-      <config projectName="rb_ui" targetName="doxygen" />
-      <config projectName="rb_ui" targetName="roscpp_generate_messages_eus" />
-      <config projectName="rb_ui" targetName="gtest" />
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_nodejs" />
-      <config projectName="rb_ui" targetName="rb_ui" />
-      <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_lisp" />
       <config projectName="rb_ui" targetName="std_srvs_generate_messages_lisp" />
+<<<<<<< HEAD
       <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_cpp" />
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_cpp" />
       <config projectName="rb_ui" targetName="roscpp_generate_messages_nodejs" />
@@ -92,6 +104,9 @@
       <config projectName="rb_ui" targetName="gmock" />
       <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_eus" />
 >>>>>>> c2aa1b4d7712d4f92e01dac8c003bd508985a10b
+=======
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_py" />
+>>>>>>> 155fc8c845d794b8c6ecc81d58dda28e7956cbd3
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -101,6 +116,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4e2e2d99-ccc6-4274-bec1-38a9f03afc38" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/q" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../logWithQt" beforeDir="false" afterPath="$PROJECT_DIR$/../logWithQt" afterDir="false" />
 <<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
@@ -108,9 +124,12 @@
 =======
       <change beforePath="$PROJECT_DIR$" beforeDir="false" afterPath="$PROJECT_DIR$" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
 >>>>>>> c2aa1b4d7712d4f92e01dac8c003bd508985a10b
       <change beforePath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" afterDir="false" />
+=======
+>>>>>>> 155fc8c845d794b8c6ecc81d58dda28e7956cbd3
       <change beforePath="$PROJECT_DIR$/src/utils/MainWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/MainWindow.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../rubik_cube_solve" beforeDir="false" afterPath="$PROJECT_DIR$/../rubik_cube_solve" afterDir="false" />
     </list>
@@ -156,24 +175,24 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/launch" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="configurable.group.build" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/include/rb_ui" />
-      <recent name="$PROJECT_DIR$/srv" />
-      <recent name="$PROJECT_DIR$/include" />
-      <recent name="$PROJECT_DIR$/include/msg" />
-      <recent name="$PROJECT_DIR$/include/log4cplus" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/photo" />
       <recent name="$PROJECT_DIR$/include/rb_ui" />
       <recent name="$PROJECT_DIR$/include/log4cplus" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/launch" />
+      <recent name="$PROJECT_DIR$/include/rb_ui" />
+      <recent name="$PROJECT_DIR$/srv" />
+      <recent name="$PROJECT_DIR$/include" />
+      <recent name="$PROJECT_DIR$/include/msg" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -555,7 +574,13 @@
       <workItem from="1590670559292" duration="109000" />
       <workItem from="1590670770493" duration="260000" />
       <workItem from="1590712535642" duration="11887000" />
+<<<<<<< HEAD
 >>>>>>> c2aa1b4d7712d4f92e01dac8c003bd508985a10b
+=======
+      <workItem from="1590729539750" duration="9373000" />
+      <workItem from="1590799381483" duration="7076000" />
+      <workItem from="1590806888501" duration="4550000" />
+>>>>>>> 155fc8c845d794b8c6ecc81d58dda28e7956cbd3
     </task>
     <servers />
   </component>
