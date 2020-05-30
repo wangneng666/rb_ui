@@ -20,11 +20,11 @@ void MainWindow::SysVarInit() {
     updateTimer = new QTimer(this);
     updateTimer->setInterval(1);
     //话题或服务对象初始化
-//    rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1000);
-    SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1000);
+    rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
+    SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1);
     rbConnCommand_client = Node->serviceClient<rb_msgAndSrv::robotConn>("/Rb_connCommand");
     rbRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_DoubleBool>("/Rb_runCommand");
-    rbStopCommand_client = Node->serviceClient<std_srvs::Empty>("/stop_move");
+//    rbStopCommand_client = Node->serviceClient<std_srvs::Empty>("/stop_move");
     rbSetEnable1_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR51/set_robot_enable");
     rbSetEnable2_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR52/set_robot_enable");
     rbErrStatus_client = Node->serviceClient<rb_msgAndSrv::robotError>("/Rb_errStatus");
@@ -110,8 +110,8 @@ void MainWindow::signalAndSlot() {
 
 //定时器回调函数，实时获取状态信息
 void MainWindow::timer_onUpdate() {
-    Node->getParam("isRunning_solveMagic",isRunning_solveMagic);
-    Node->getParam("isRunning_grab",isRunning_grab);
+    Node->getParam("isRuning_solveMagic",isRunning_solveMagic);
+    Node->getParam("isRuning_grab",isRunning_grab);
     showMagicStepLable->setText(QString("魔方完成第%1步").arg(index_magicStep));
     if(isRunning_solveMagic){
         isRunning_solveMagic_Lable->setText("魔方解算工作中");
@@ -154,7 +154,7 @@ void MainWindow::thread_rbConnCommand() {
     //2.相机连接
 
     //3.爪手连接(脚本连接)
-    system("rosrun gripper_bridge gripper.sh");
+//    system("rosrun gripper_bridge gripper.sh");
     //4.６台设备连接状态监控
 
 
@@ -198,7 +198,7 @@ void MainWindow::thread_BeginRun() {
 //        return;
 //    }
 //启动魔方解析功能
-    system(" rosrun rb_ui runlaunch.sh");
+    system("rosrun rb_ui runlaunch.sh");
 //    system(" roslaunch rubik_cube_solve solve.launch");
 //    system("roslaunch grasp_place grasp.launch");
 //启动抓取功能
@@ -231,13 +231,19 @@ void MainWindow::thread_LisionErrInfo() {
 //运行停止
 void MainWindow::run_stop() {
     cout<<"点击了运行停止按钮"<<endl;
-    std_srvs::Empty data_srvs;
-    rbStopCommand_client.call(data_srvs);
+    std_msgs::Bool msg;
+    msg.data=true;
+    rbStopCommand_publisher.publish(msg);
+//    std_srvs::Empty data_srvs;
+//    rbStopCommand_client.call(data_srvs);
 }
 
 //点击采集魔方数据按钮－－－１
 void MainWindow::magicCube_get() {
     cout<<"点击了采集魔方数据按钮"<<endl;
+    if(isRunning_grab|isRunning_solveMagic){
+        return;
+    }
     if(index_magicStep!=0){
         return;
     }
@@ -341,7 +347,7 @@ void MainWindow::magicCube_AutoRun() {
         return;
     }
     //如果机器人运行中则返回
-    if(isRunning_grab|isRunning_grab){
+    if(isRunning_grab|isRunning_solveMagic){
         return;
     }
 //    if(thread_MagicStepRun->isFinished()){
@@ -373,7 +379,7 @@ void MainWindow::thread_AutoSolveMagic() {
 
 void MainWindow::robot_grab() {
 //如果机器人运行中则返回
-    if(isRunning_grab|isRunning_grab){
+    if(isRunning_solveMagic|isRunning_grab){
         return;
     }
 //机器人没运行，则开始行动
