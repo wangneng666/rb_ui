@@ -12,8 +12,8 @@
       <config projectName="rb_ui" targetName="gtest_main" />
       <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_eus" />
       <config projectName="rb_ui" targetName="download_extra_data" />
-      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_nodejs" />
       <config projectName="rb_ui" targetName="std_srvs_generate_messages_nodejs" />
+      <config projectName="rb_ui" targetName="rb_msgAndSrv_generate_messages_nodejs" />
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_eus" />
       <config projectName="rb_ui" targetName="tests" />
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_py" />
@@ -26,13 +26,13 @@
       <config projectName="rb_ui" targetName="geometry_msgs_generate_messages_py" />
       <config projectName="rb_ui" targetName="std_msgs_generate_messages_nodejs" />
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_lisp" />
-      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_cpp" />
       <config projectName="rb_ui" targetName="rb_ui_autogen" />
+      <config projectName="rb_ui" targetName="rosgraph_msgs_generate_messages_cpp" />
       <config projectName="rb_ui" targetName="gmock_main" />
       <config projectName="rb_ui" targetName="clean_test_results" />
       <config projectName="rb_ui" targetName="std_msgs_generate_messages_cpp" />
-      <config projectName="rb_ui" targetName="roscpp_generate_messages_lisp" />
       <config projectName="rb_ui" targetName="doxygen" />
+      <config projectName="rb_ui" targetName="roscpp_generate_messages_lisp" />
       <config projectName="rb_ui" targetName="roscpp_generate_messages_eus" />
       <config projectName="rb_ui" targetName="gtest" />
       <config projectName="rb_ui" targetName="sensor_msgs_generate_messages_nodejs" />
@@ -60,7 +60,6 @@
       <change beforePath="$PROJECT_DIR$/../logWithQt" beforeDir="false" afterPath="$PROJECT_DIR$/../logWithQt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$" beforeDir="false" afterPath="$PROJECT_DIR$" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/rb_ui/MainWindow.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/MainWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/MainWindow.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../rubik_cube_solve" beforeDir="false" afterPath="$PROJECT_DIR$/../rubik_cube_solve" afterDir="false" />
@@ -469,6 +468,8 @@
       <workItem from="1590670559292" duration="109000" />
       <workItem from="1590670770493" duration="260000" />
       <workItem from="1590712535642" duration="11887000" />
+      <workItem from="1590729539750" duration="9373000" />
+      <workItem from="1590799381483" duration="2621000" />
     </task>
     <servers />
   </component>

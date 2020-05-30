@@ -112,13 +112,21 @@ void MainWindow::signalAndSlot() {
 void MainWindow::timer_onUpdate() {
     Node->getParam("isRunning_solveMagic",isRunning_solveMagic);
     Node->getParam("isRunning_grab",isRunning_grab);
+    showMagicStepLable->setText(QString("魔方完成第%1步").arg(index_magicStep));
+    if(isRunning_solveMagic){
+        isRunning_solveMagic_Lable->setText("魔方解算工作中");
+    } else{
+        isRunning_solveMagic_Lable->setText("魔方停止");
+    }
+    if(isRunning_grab){
+        isRunning_grab_Lable->setText("机器人抓盒子工作中");
+    } else{
+        isRunning_grab_Lable->setText("机器人抓盒子停止");
+    }
 }
 
 //设备连接按钮-1
 void MainWindow::dev_connect() {
-    bool isRunning;
-    Node->getParam("isRuning",isRunning);
-    //把耗时操作放在子线程中避免堵塞主线程,若按钮多次调用start,而子线程未执行完,则自动拦截之后的请求,随便多次按.
     cout<<"点击了设备连接按钮"<<endl;
     if(!flag_rbConnStatus)
     {
@@ -127,6 +135,8 @@ void MainWindow::dev_connect() {
 }
 //设备连接按钮中开辟的子线程程序-2
 void MainWindow::thread_rbConnCommand() {
+
+    //1.机器人连接
     rb_msgAndSrv::robotConn data_srvs;
     if(rbConnCommand_client.call(data_srvs)){
         if(data_srvs.response.ret){
@@ -141,6 +151,13 @@ void MainWindow::thread_rbConnCommand() {
         LOG("Warning")->logErrorMessage("rbConnCommand_client接收消息失败!");
         emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("rbConnCommand_client接收消息失败!"));
     }
+    //2.相机连接
+
+    //3.爪手连接(脚本连接)
+    system("rosrun gripper_bridge gripper.sh");
+    //4.６台设备连接状态监控
+
+
 }
 
 
@@ -180,7 +197,10 @@ void MainWindow::thread_BeginRun() {
 //        emit thread_forBeginRun->signal_SendMsgBox(infoLevel::warning,QString("rbRunCommand_client接收消息失败!"));
 //        return;
 //    }
-//    system("roslaunch rubik_cube_solve solve.launch");
+//启动魔方解析功能
+    system("roslaunch rubik_cube_solve solve.launch");
+//启动抓取功能
+
 //    //开辟监听故障状态子线程
 //    thread_forLisionErrInfo->start();//转到监听故障状态子线程-3
 }
@@ -211,25 +231,6 @@ void MainWindow::run_stop() {
     cout<<"点击了运行停止按钮"<<endl;
     std_srvs::Empty data_srvs;
     rbStopCommand_client.call(data_srvs);
-
-    rb_msgAndSrv::SetEnableSrv data_srvs1;
-    rb_msgAndSrv::SetEnableSrv data_srvs2;
-    data_srvs1.request.enable= false;
-    data_srvs2.request.enable= false;
-    if((rbSetEnable1_client.call(data_srvs1))&&(rbSetEnable2_client.call(data_srvs2))){
-        if(data_srvs1.response.finsh&&data_srvs2.response.finsh){
-        LOG("ROBOT")->logInfoMessage("机器人伺服停止成功!");
-        } else{
-        LOG("ROBOT")->logInfoMessage("机器人伺服停止错误!");
-        emit emitQmessageBox(infoLevel::warning,QString("机器人伺服停止错误!"));
-        }
-    } else{
-        LOG("ROS_NODE")->logErrorMessage("rbRunCommand_client接收消息失败!");
-        emit emitQmessageBox(infoLevel::warning,QString("rbRunCommand_client接收消息失败!"));
-        return;
-    }
-    //关掉thread_forBeginRun线程
-    thread_forBeginRun->quit();
 }
 
 //点击采集魔方数据按钮－－－１
@@ -238,11 +239,11 @@ void MainWindow::magicCube_get() {
     if(index_magicStep!=0){
         return;
     }
-    if(thread_MagicStepRun->isFinished()){
-        index_magicStep=1;
+//    if(thread_MagicStepRun->isFinished()){
+        cout<<"开始执行采集魔方数据"<<endl;
         thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicGetData);
         thread_MagicStepRun->start();
-    }
+//    }
 }
 //进入采集魔方数据子线程－－－２
 void MainWindow::thread_GagicGetData() {
@@ -250,11 +251,11 @@ void MainWindow::thread_GagicGetData() {
     data_srvs.request.data.resize(1);
     data_srvs.request.data[0]=1;
     if(MagicStepRunCommand_client.call(data_srvs)){
-            magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/camera",1,&MainWindow::callback_magicGetData_subscriber,this);
+        index_magicStep=1;
+//        magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/camera",1,&MainWindow::callback_magicGetData_subscriber,this);
     } else{
         LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
     }
-
 }
 
 //接收魔方数据－－－－－－３
@@ -282,11 +283,10 @@ void MainWindow::magicCube_solve() {
     if(index_magicStep!=1){
         return;
     }
-    if(thread_MagicStepRun->isFinished()){
-        index_magicStep=2;
+//    if(thread_MagicStepRun->isFinished()){
         thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicSolve);
         thread_MagicStepRun->start();
-    }
+//    }
 }
 //进入解魔方子线程-----2
 void MainWindow::thread_GagicSolve() {
@@ -295,6 +295,7 @@ void MainWindow::thread_GagicSolve() {
     data_srvs.request.data[0]=2;
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
+            index_magicStep=2;
             cout<<"解算魔方成功"<<endl;
         }
     } else{
@@ -308,11 +309,10 @@ void MainWindow::magicCube_execute() {
     if(index_magicStep!=2){
         return;
     }
-    if(thread_MagicStepRun->isFinished()){
-        index_magicStep=3;
+//    if(thread_MagicStepRun->isFinished()){
         thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicRunSolve);
         thread_MagicStepRun->start();
-    }
+//    }
 }
 //进入执行解算魔方子线程---２
 void MainWindow::thread_GagicRunSolve() {
@@ -321,6 +321,7 @@ void MainWindow::thread_GagicRunSolve() {
     data_srvs.request.data[0]=3;
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
+            index_magicStep=3;
             cout<<"执行解算魔方成功"<<endl;
         }
     } else{
@@ -338,11 +339,10 @@ void MainWindow::magicCube_AutoRun() {
     if(isRunning_grab|isRunning_grab){
         return;
     }
-    if(thread_MagicStepRun->isFinished()){
-        index_magicStep=4;
+//    if(thread_MagicStepRun->isFinished()){
         thread_MagicStepRun->setParm(this,&MainWindow::thread_AutoSolveMagic);
         thread_MagicStepRun->start();
-    }
+//    }
 
 }
 
@@ -354,6 +354,7 @@ void MainWindow::thread_AutoSolveMagic() {
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             cout<<"一键解算魔方成功"<<endl;
+            index_magicStep=4;
         } else{
             cout<<"一键解算魔方失败"<<endl;
         }
@@ -362,9 +363,6 @@ void MainWindow::thread_AutoSolveMagic() {
     }
     index_magicStep=0;
 }
-
-
-
 
 
 void MainWindow::robot_grab() {
@@ -379,6 +377,22 @@ void MainWindow::robot_grab() {
 }
 
 void MainWindow::safety_sysStop() {
+    rb_msgAndSrv::SetEnableSrv data_srvs1;
+    rb_msgAndSrv::SetEnableSrv data_srvs2;
+    data_srvs1.request.enable= false;
+    data_srvs2.request.enable= false;
+    if((rbSetEnable1_client.call(data_srvs1))&&(rbSetEnable2_client.call(data_srvs2))){
+        if(data_srvs1.response.finsh&&data_srvs2.response.finsh){
+            LOG("ROBOT")->logInfoMessage("机器人伺服停止成功!");
+        } else{
+            LOG("ROBOT")->logInfoMessage("机器人伺服停止错误!");
+            emit emitQmessageBox(infoLevel::warning,QString("机器人伺服停止错误!"));
+        }
+    } else{
+        LOG("ROS_NODE")->logErrorMessage("rbRunCommand_client接收消息失败!");
+        emit emitQmessageBox(infoLevel::warning,QString("rbRunCommand_client接收消息失败!"));
+        return;
+    }
     cout<<"点击了系统停止按钮"<<endl;
 }
 
@@ -956,8 +970,13 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     MainWindow->setMenuBar(menuBar);
     statusBar = new QStatusBar(MainWindow);
     statusBar->setObjectName(QString::fromUtf8("statusBar"));
+    showMagicStepLable =new QLabel();
+    isRunning_solveMagic_Lable=new QLabel();
+    isRunning_grab_Lable=new QLabel();
+    statusBar->addWidget(showMagicStepLable);
+    statusBar->addWidget(isRunning_solveMagic_Lable);
+    statusBar->addWidget(isRunning_grab_Lable);
     MainWindow->setStatusBar(statusBar);
-
     tabWidget->setCurrentIndex(0);
 //    QMetaObject::connectSlotsByName(this);
     //ui控件属性设置

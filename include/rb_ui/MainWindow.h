@@ -246,6 +246,10 @@ private:
     QPushButton *btn_SatetyRb2Stop;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
+
+    QLabel* showMagicStepLable;
+    QLabel* isRunning_solveMagic_Lable;
+    QLabel* isRunning_grab_Lable;
 };
 
 
