@@ -85,9 +85,9 @@ void MainWindow::signalAndSlot() {
     //系统停止
     connect(btn_SatetyStop,&QPushButton::clicked,this,&MainWindow::safety_sysStop);
     //机器人1停止
-    connect(btn_SatetyRb1Stop,&QPushButton::clicked,this,&MainWindow::safety_rob1Stop);
+    connect(btn_SatetyRb1Reset,&QPushButton::clicked,this,&MainWindow::safety_rob1Stop);
     //机器人2停止
-    connect(btn_SatetyRb2Stop,&QPushButton::clicked,this,&MainWindow::safety_rob2Stop);
+    connect(btn_SatetyRb2Reset,&QPushButton::clicked,this,&MainWindow::safety_rob2Stop);
     //定时器启动
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::timer_onUpdate);
     updateTimer->start();
@@ -179,6 +179,13 @@ void MainWindow::run_statup() {
 }
 //运行启动按钮开启的子线程-2
 void MainWindow::thread_BeginRun() {
+    int index=comboBox_setRunMode->currentIndex();
+    switch (index){
+        case 0:system("rosrun rb_ui RvizAndTestPoint.sh");break;
+        case 1:system("rosrun rb_ui RealRbAndReadPoint.sh");break;
+        case 2:system("rosrun rb_ui RealRbAndTestPoint.sh");break;
+
+    }
     //1.机器人上使能
     //2.启动仕忠的launch文件
     //3.开辟线程监听机器人状态(故障状态)
@@ -197,11 +204,8 @@ void MainWindow::thread_BeginRun() {
 //        emit thread_forBeginRun->signal_SendMsgBox(infoLevel::warning,QString("rbRunCommand_client接收消息失败!"));
 //        return;
 //    }
-//启动魔方解析功能
-    system("rosrun rb_ui runlaunch.sh");
-//    system(" roslaunch rubik_cube_solve solve.launch");
-//    system("roslaunch grasp_place grasp.launch");
-//启动抓取功能
+
+//    system("rosrun rb_ui runlaunch.sh");
 
 //    //开辟监听故障状态子线程
 //    thread_forLisionErrInfo->start();//转到监听故障状态子线程-3
@@ -239,9 +243,6 @@ void MainWindow::run_stop() {
 //点击采集魔方数据按钮－－－１
 void MainWindow::magicCube_get() {
     cout<<"点击了采集魔方数据按钮"<<endl;
-    cubeParse::Detection srv;
-    ImageGet_client.call(srv);
-    return;
     if(isRunning_grab|isRunning_solveMagic){
         return;
     }
@@ -645,46 +646,54 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     gridLayout = new QGridLayout();
     gridLayout->setSpacing(6);
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+    comboBox_setRunMode=new QComboBox();
+    comboBox_setRunMode->addItem(QString());
+    comboBox_setRunMode->addItem(QString());
+    comboBox_setRunMode->addItem(QString());
+    comboBox_setRunMode->setFixedHeight(50);
+    comboBox_setRunMode->setObjectName(QString::fromUtf8("comboBox_setRunMode"));
+
+    gridLayout->addWidget(comboBox_setRunMode, 0, 0, 1, 2);
 
     label_5 = new QLabel(tab);
     label_5->setObjectName(QString::fromUtf8("label_5"));
     label_5->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_5, 0, 0, 1, 1);
+    gridLayout->addWidget(label_5, 1, 0, 1, 1);
     label_rb1CoonStatus = new QLabel(tab);
     label_rb1CoonStatus->setObjectName(QString::fromUtf8("label_rb1CoonStatus"));
     label_rb1CoonStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
     label_rb1CoonStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb1CoonStatus, 0, 1, 1, 1);
+    gridLayout->addWidget(label_rb1CoonStatus, 1, 1, 1, 1);
 
     label_6 = new QLabel(tab);
     label_6->setObjectName(QString::fromUtf8("label_6"));
     label_6->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_6, 0, 2, 1, 1);
+    gridLayout->addWidget(label_6, 1, 2, 1, 1);
     label_rb2CoonStatus = new QLabel(tab);
     label_rb2CoonStatus->setObjectName(QString::fromUtf8("label_rb2CoonStatus"));
     label_rb2CoonStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
     label_rb2CoonStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb2CoonStatus, 0, 3, 1, 1);
+    gridLayout->addWidget(label_rb2CoonStatus, 1, 3, 1, 1);
 
     label_7 = new QLabel(tab);
     label_7->setObjectName(QString::fromUtf8("label_7"));
     label_7->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_7, 0, 4, 1, 1);
+    gridLayout->addWidget(label_7, 1, 4, 1, 1);
     label_rb1ErrStatus = new QLabel(tab);
     label_rb1ErrStatus->setObjectName(QString::fromUtf8("label_rb1ErrStatus"));
     label_rb1ErrStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
     label_rb1ErrStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb1ErrStatus, 0, 5, 1, 1);
+    gridLayout->addWidget(label_rb1ErrStatus, 1, 5, 1, 1);
 
     label_8 = new QLabel(tab);
     label_8->setObjectName(QString::fromUtf8("label_8"));
     label_8->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_8, 0, 6, 1, 1);
+    gridLayout->addWidget(label_8, 1, 6, 1, 1);
     label_rb2ErrStatus = new QLabel(tab);
     label_rb2ErrStatus->setObjectName(QString::fromUtf8("label_rb2ErrStatus"));
     label_rb2ErrStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
     label_rb2ErrStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb2ErrStatus, 0, 7, 1, 1);
+    gridLayout->addWidget(label_rb2ErrStatus, 1, 7, 1, 1);
 
     horizontalLayout_2->addLayout(gridLayout);
     verticalLayout_4->addLayout(horizontalLayout_2);
@@ -950,15 +959,15 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
 
     horizontalLayout_17->addWidget(btn_SatetyStop);
 
-    btn_SatetyRb1Stop = new QPushButton(tab_6);
-    btn_SatetyRb1Stop->setObjectName(QString::fromUtf8("btn_SatetyRb1Stop"));
+    btn_SatetyRb1Reset = new QPushButton(tab_6);
+    btn_SatetyRb1Reset->setObjectName(QString::fromUtf8("btn_SatetyRb1Reset"));
 
-    horizontalLayout_17->addWidget(btn_SatetyRb1Stop);
+    horizontalLayout_17->addWidget(btn_SatetyRb1Reset);
 
-    btn_SatetyRb2Stop = new QPushButton(tab_6);
-    btn_SatetyRb2Stop->setObjectName(QString::fromUtf8("btn_SatetyRb2Stop"));
+    btn_SatetyRb2Reset = new QPushButton(tab_6);
+    btn_SatetyRb2Reset->setObjectName(QString::fromUtf8("btn_SatetyRb2Reset"));
 
-    horizontalLayout_17->addWidget(btn_SatetyRb2Stop);
+    horizontalLayout_17->addWidget(btn_SatetyRb2Reset);
 
 
     horizontalLayout_18->addLayout(horizontalLayout_17);
@@ -1020,6 +1029,11 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         label_2->setText(QApplication::translate("MainWindow", "\345\233\276\345\203\217\346\230\276\347\244\272", nullptr));
         groupBox_setMod->setTitle(QApplication::translate("MainWindow", "\346\250\241\345\274\217\350\256\276\347\275\256", nullptr));
         comboBox->setItemText(0, QApplication::translate("MainWindow", "从货架抓,放桌子上", nullptr));
+        comboBox_setRunMode->setItemText(0, QApplication::translate("MainWindow", "RVIZ虚拟点位测试模式", nullptr));
+        comboBox_setRunMode->setItemText(1, QApplication::translate("MainWindow", "真机真实点位运行模式", nullptr));
+        comboBox_setRunMode->setItemText(2, QApplication::translate("MainWindow", "真机虚拟点位测试模式", nullptr));
+
+        comboBox->setItemText(0, QApplication::translate("MainWindow", "从货架抓,放桌子上", nullptr));
         comboBox->setItemText(1, QApplication::translate("MainWindow", "从桌子抓,放货架上", nullptr));
         groupBox_selectObject->setTitle(QApplication::translate("MainWindow", "\346\212\223\345\217\226\345\257\271\350\261\241", nullptr));
         comboBox_2->setItemText(0, QApplication::translate("MainWindow", "牛奶盒", nullptr));
@@ -1035,8 +1049,8 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         btn_clearRecord->setText(QApplication::translate("MainWindow", "日志清除", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_5), QApplication::translate("MainWindow", "\346\227\245\345\277\227\347\225\214\351\235\242", nullptr));
         btn_SatetyStop->setText(QApplication::translate("MainWindow", "\347\263\273\347\273\237\346\200\245\345\201\234", nullptr));
-        btn_SatetyRb1Stop->setText(QApplication::translate("MainWindow", "\346\234\272\345\231\250\344\272\2721\345\201\234\346\255\242", nullptr));
-        btn_SatetyRb2Stop->setText(QApplication::translate("MainWindow", "\346\234\272\345\231\250\344\272\2722\345\201\234\346\255\242", nullptr));
+        btn_SatetyRb1Reset->setText(QApplication::translate("MainWindow", "机器人1复位", nullptr));
+        btn_SatetyRb2Reset->setText(QApplication::translate("MainWindow", "机器人2复位", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_6), QApplication::translate("MainWindow", "\345\256\211\345\205\250\347\225\214\351\235\242", nullptr));
     }
 }

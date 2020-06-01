@@ -184,6 +184,7 @@ private:
     QVBoxLayout *verticalLayout_4;
     QHBoxLayout *horizontalLayout_2;
     QGridLayout *gridLayout;
+    QComboBox *comboBox_setRunMode;
     QLabel *label_5;
     QLabel *label_6;
     QLabel *label_7;
@@ -245,8 +246,8 @@ private:
     QHBoxLayout *horizontalLayout_18;
     QHBoxLayout *horizontalLayout_17;
     QPushButton *btn_SatetyStop;
-    QPushButton *btn_SatetyRb1Stop;
-    QPushButton *btn_SatetyRb2Stop;
+    QPushButton *btn_SatetyRb1Reset;
+    QPushButton *btn_SatetyRb2Reset;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
 

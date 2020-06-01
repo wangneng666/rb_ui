@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/wangneng/catkin_ws/src/HsDualAppBridge/rb_ui/cmake-build-debug/devel/setup.sh
