@@ -145,7 +145,7 @@ private:
     //ros节点回调函数
     void callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg);
     void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
-//    void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
+    void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
     //线程处理
     void thread_rbConnCommand();
