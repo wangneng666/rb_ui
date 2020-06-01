@@ -98,17 +98,17 @@ include_directories(
 # /home/wangneng/catkin_ws/devel
 )
 
-# link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
-# add_executable(rb_ui src/rb_ui.cpp
-#         include/rb_ui/MainWindow.h
-#         src/utils/MainWindow.cpp
-#         )
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+add_executable(rb_ui src/rb_ui.cpp
+        include/rb_ui/MainWindow.h
+        src/utils/MainWindow.cpp
+        )
 
-# target_link_libraries(
-#         rb_ui
-#         log4cplus
-#         logTest
-#         ${catkin_LIBRARIES}
-#         ${QT_LIBRARIES}
-#         ${OpenCV_LIBS}
-# )
+target_link_libraries(
+        rb_ui
+        log4cplus
+        logTest
+        ${catkin_LIBRARIES}
+        ${QT_LIBRARIES}
+        ${OpenCV_LIBS}
+)

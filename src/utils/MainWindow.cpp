@@ -21,16 +21,15 @@ void MainWindow::SysVarInit() {
     updateTimer->setInterval(1);
     //话题或服务对象初始化
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
+    ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
     SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1);
     rbConnCommand_client = Node->serviceClient<rb_msgAndSrv::robotConn>("/Rb_connCommand");
     rbRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_DoubleBool>("/Rb_runCommand");
-//    rbStopCommand_client = Node->serviceClient<std_srvs::Empty>("/stop_move");
     rbSetEnable1_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR51/set_robot_enable");
     rbSetEnable2_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR52/set_robot_enable");
     rbErrStatus_client = Node->serviceClient<rb_msgAndSrv::robotError>("/Rb_errStatus");
-   ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
-//    camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1000,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
+    camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1000,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
     rbGrepSetCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/Rb_grepSetCommand");
     MagicStepRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/MagicStepRunCommand");
 
@@ -235,13 +234,14 @@ void MainWindow::run_stop() {
     std_msgs::Bool msg;
     msg.data=true;
     rbStopCommand_publisher.publish(msg);
-//    std_srvs::Empty data_srvs;
-//    rbStopCommand_client.call(data_srvs);
 }
 
 //点击采集魔方数据按钮－－－１
 void MainWindow::magicCube_get() {
     cout<<"点击了采集魔方数据按钮"<<endl;
+    cubeParse::Detection srv;
+    ImageGet_client.call(srv);
+    return;
     if(isRunning_grab|isRunning_solveMagic){
         return;
     }
@@ -262,8 +262,8 @@ void MainWindow::thread_GagicGetData() {
     emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         index_magicStep=1;
-        cubeParse::Detection srv
-        ImageGet_client.call();
+        cubeParse::Detection srv;
+        ImageGet_client.call(srv);
     } else{
         LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
     }
@@ -272,17 +272,14 @@ void MainWindow::thread_GagicGetData() {
 //接收魔方数据－－－－－－３
 void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList) {
     rb_msgAndSrv::rbImageList data_msg;
-    cout<<"size"<<data_msg.imagelist.size()<<endl;
     for (int i = 0; i < 6; ++i) {
-        sensor_msgs::Image image = data_msg.imagelist[0];
-        const cv_bridge::CvImagePtr &ptr = cv_bridge::toCvCopy(image, "bgr8");
+        const cv_bridge::CvImagePtr &ptr = cv_bridge::toCvCopy(rbimageList.imagelist[i], "bgr8");
         cv::Mat mat = ptr->image;
         QImage qimage = cvMat2QImage(mat);
         QPixmap pixmap = QPixmap::fromImage(qimage);
         QPixmap fitpixmap = pixmap.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
         list_label_picture[i]->setPixmap(fitpixmap);
     }
-    magicGetData_subscriber.shutdown();
 }
 
 
@@ -333,7 +330,7 @@ void MainWindow::thread_GagicRunSolve() {
     emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
-            index_magicStep=3;
+            index_magicStep=0;
             cout<<"执行解算魔方成功"<<endl;
         }
     } else{
@@ -344,7 +341,6 @@ void MainWindow::thread_GagicRunSolve() {
 //一键解魔方－－－－1
 void MainWindow::magicCube_AutoRun() {
     cout<<"点击了一键解算魔方按钮"<<endl;
-
     if(index_magicStep!=0){
         return;
     }
@@ -441,20 +437,23 @@ void MainWindow::callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data
     }
 }
 
-//void MainWindow::callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg) {
-//    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
-//    cv::Mat mat = ptr->image;
-//    QImage image = cvMat2QImage(mat);
-//    QPixmap pixmap1 = QPixmap::fromImage(image);
-//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
-////    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
+void MainWindow::callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg) {
+
+    cout<<"实时："<<msg->data.size()<<endl;
+    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
+    cv::Mat mat = ptr->image;
+    QImage image = cvMat2QImage(mat);
+    QPixmap pixmap1 = QPixmap::fromImage(image);
+    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
 //    label_picture1->setPixmap(fitpixmap1);
 //    label_picture2->setPixmap(fitpixmap1);
 //    label_picture3->setPixmap(fitpixmap1);
 //    label_picture4->setPixmap(fitpixmap1);
 //    label_picture5->setPixmap(fitpixmap1);
 //    label_picture6->setPixmap(fitpixmap1);
-//}
+
+}
 
 void MainWindow::oputRecord() {
     QString displayString;
