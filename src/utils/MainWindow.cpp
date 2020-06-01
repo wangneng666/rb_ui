@@ -20,6 +20,7 @@ void MainWindow::SysVarInit() {
     updateTimer = new QTimer(this);
     updateTimer->setInterval(1);
     //话题或服务对象初始化
+    magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
     SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1);
     rbConnCommand_client = Node->serviceClient<rb_msgAndSrv::robotConn>("/Rb_connCommand");
@@ -263,7 +264,6 @@ void MainWindow::thread_GagicGetData() {
         index_magicStep=1;
         cubeParse::Detection srv
         ImageGet_client.call();
-       magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     } else{
         LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
     }
@@ -273,7 +273,6 @@ void MainWindow::thread_GagicGetData() {
 void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList) {
     rb_msgAndSrv::rbImageList data_msg;
     cout<<"size"<<data_msg.imagelist.size()<<endl;
-    data_msg.imagelist.reserve(6);
     for (int i = 0; i < 6; ++i) {
         sensor_msgs::Image image = data_msg.imagelist[0];
         const cv_bridge::CvImagePtr &ptr = cv_bridge::toCvCopy(image, "bgr8");
