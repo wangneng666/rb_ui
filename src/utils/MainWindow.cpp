@@ -20,6 +20,7 @@ void MainWindow::SysVarInit() {
     updateTimer = new QTimer(this);
     updateTimer->setInterval(1);
     //话题或服务对象初始化
+    ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
     SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1);
     rbConnCommand_client = Node->serviceClient<rb_msgAndSrv::robotConn>("/Rb_connCommand");
@@ -28,7 +29,6 @@ void MainWindow::SysVarInit() {
     rbSetEnable1_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR51/set_robot_enable");
     rbSetEnable2_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR52/set_robot_enable");
     rbErrStatus_client = Node->serviceClient<rb_msgAndSrv::robotError>("/Rb_errStatus");
-//    ImageGet_client = Node->serviceClient<rb_msgAndSrv::rbImageList>("/MagicCubeImage");
 //    camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1000,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
     rbGrepSetCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/Rb_grepSetCommand");
     MagicStepRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/MagicStepRunCommand");
@@ -261,7 +261,9 @@ void MainWindow::thread_GagicGetData() {
     emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         index_magicStep=1;
-//        magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/camera",1,&MainWindow::callback_magicGetData_subscriber,this);
+        cubeParse::Detection srv;
+        ImageGet_client.call(srv);
+       magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     } else{
         LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
     }
@@ -338,6 +340,7 @@ void MainWindow::thread_GagicRunSolve() {
     } else{
         LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
     }
+    
 }
 //一键解魔方－－－－1
 void MainWindow::magicCube_AutoRun() {
@@ -480,7 +483,6 @@ void MainWindow::clearRecord() {
 void MainWindow::displayTextControl(QString text) {
     plainTextEdit->appendPlainText(text);
 }
-
 
 
 void MainWindow::thread_RbGrepSet() {

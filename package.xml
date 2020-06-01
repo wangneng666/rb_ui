@@ -67,9 +67,9 @@
   <exec_depend>sensor_msgs</exec_depend>
 
 
-  <build_depend>rb_msg</build_depend>
+  <!-- <build_depend>rb_msg</build_depend>
   <build_export_depend>rb_msg</build_export_depend>
-  <exec_depend>rb_msg</exec_depend>
+  <exec_depend>rb_msg</exec_depend> -->
 
   <build_depend>cv_bridge</build_depend>
   <build_export_depend>cv_bridge</build_export_depend>

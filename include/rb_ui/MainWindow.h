@@ -20,6 +20,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QDialog>
+
 #include <QDir>
 #include <QMessageBox>
 #include <QProcess>
@@ -29,6 +30,7 @@
 #include <iostream>
 #include <fstream>
 #include "QDebug"
+
 #include "qdebug.h"
 #include "ros/ros.h"
 #include "std_srvs/Empty.h"
@@ -40,6 +42,7 @@
 #include "rb_msgAndSrv/rb_DoubleBool.h"
 #include "rb_msgAndSrv/robotConn.h"
 #include "rb_msgAndSrv/robotError.h"
+#include "cubeParse/Detection.h"
 #include <opencv2/opencv.hpp>
 #include "sensor_msgs/Image.h"
 #include <cv_bridge/cv_bridge.h>
@@ -233,7 +236,7 @@ private:
     QWidget *tab_5;
     QHBoxLayout *horizontalLayout_15;
     QHBoxLayout *horizontalLayout_16;
-    QVBoxLayout *verticalLayout_13;
+    QVBoxLayout *verticalLayout_1index_magicStep3;
     QPlainTextEdit *plainTextEdit;
     QVBoxLayout *verticalLayout_12;
     QPushButton *btn_oputRecord;
@@ -247,6 +250,7 @@ private:
     QMenuBar *menuBar;
     QStatusBar *statusBar;
 
+    QVBoxLayout* verticalLayout_13;
     QLabel* showMagicStepLable;
     QLabel* isRunning_solveMagic_Lable;
     QLabel* isRunning_grab_Lable;

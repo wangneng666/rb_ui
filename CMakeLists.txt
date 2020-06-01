@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   rosmsg
   rospy
   std_msgs
+  cubeParse
 std_srvs
 rb_msgAndSrv
   message_generation
@@ -17,7 +18,7 @@ rb_msgAndSrv
   cv_bridge
   image_transport
 )
-  #rb_msgs
+
 
 # 自动调用moc，uic，rcc处理qt的扩展部分
 set(CMAKE_AUTOMOC ON)
