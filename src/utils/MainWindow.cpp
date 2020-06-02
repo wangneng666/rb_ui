@@ -177,6 +177,10 @@ void MainWindow::thread_rbConnCommand() {
 
 //启动rviz－－－１
 void MainWindow::rviz_statup() {
+    int index=comboBox_setRunMode->currentIndex();
+    if(index!=0){
+        return;
+    }
     thread_forRviz->start();
 }
 
@@ -191,6 +195,7 @@ void MainWindow::run_statup() {
     cout<<"点击了运行启动按钮"<<endl;
     thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
 }
+
 //运行启动按钮开启的子线程-2
 void MainWindow::thread_BeginRun() {
     int index=comboBox_setRunMode->currentIndex();
