@@ -89,15 +89,24 @@ private:
     bool flag_sysRun;//系统运行标志
     int index_magicStep;
     QString photoPath;//图片路径
+    bool connFlag_LeftCamera; //左边相机连接状态
+    bool connFlag_RightCamera;//右边相机连接状态
+    bool connFlag_LeftRobot;//左机器人连接状态
+    bool connFlag_RightRobot;//右机器人连接状态
+    bool connFlag_LeftGripper;//左夹爪连接状态
+    bool connFlag_RightGripper;//右夹爪连接状态
     //rosparam参数
     bool isRunning_solveMagic;
     bool isRunning_grab;
     //ros节点
     ros::NodeHandle* Node;
     QTimer* updateTimer;
+    QTimer* updateTimer2;
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber camera_subscriber;//相机数据采集
+    ros::Subscriber Leftcamera_subscriber;//相机数据采集
+    ros::Subscriber Rightcamera_subscriber;//相机数据采集
     ros::ServiceClient rbConnCommand_client;//机器人连接客户端
     ros::ServiceClient rbRunCommand_client ;
     ros::ServiceClient rbStopCommand_client ;
@@ -143,6 +152,8 @@ private:
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
+    void callback_LeftCamera_subscriber(const sensor_msgs::Image::ConstPtr image);
+    void callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image);
     void callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg);
     void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
     void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
