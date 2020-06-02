@@ -14,5 +14,8 @@ sleep 0.1
 roslaunch grasp_place grasp.launch &
 sleep 0.1
 rosrun gripper_bridge gripper.sh &
+sleep 8
+rosrun rubik_cube_solve set_robot_enable_true.sh
+
 wait
 exit 0
