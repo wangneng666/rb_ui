@@ -16,10 +16,21 @@ void MainWindow::SysVarInit() {
     isRunning_solveMagic= false;
     isRunning_grab= false;
     index_magicStep=0;
+    //连接状态
+    connFlag_LeftCamera= false;
+    connFlag_RightCamera= false;
+    connFlag_LeftRobot= false;
+    connFlag_RightRobot= false;
+    connFlag_LeftGripper= false;
+    connFlag_RightGripper= false;
     //定时器实体化
     updateTimer = new QTimer(this);
     updateTimer->setInterval(1);
+    updateTimer2 = new QTimer(this);
+    updateTimer2->setInterval(300);
     //话题或服务对象初始化
+    Leftcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base/color/image_raw",1000,boost::bind(&MainWindow::callback_LeftCamera_subscriber,this,_1));
+    Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
@@ -29,7 +40,7 @@ void MainWindow::SysVarInit() {
     rbSetEnable1_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR51/set_robot_enable");
     rbSetEnable2_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR52/set_robot_enable");
     rbErrStatus_client = Node->serviceClient<rb_msgAndSrv::robotError>("/Rb_errStatus");
-    camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1000,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
+//    camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1000,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
     rbGrepSetCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/Rb_grepSetCommand");
     MagicStepRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/MagicStepRunCommand");
 
@@ -98,9 +109,6 @@ void MainWindow::signalAndSlot() {
     connect(this, &MainWindow::emitLightColor,this, &MainWindow::showLightColor);
     connect(thread_forRbConn, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(thread_forBeginRun, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
-//    connect(thread_forGagicGetData, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
-//    connect(thread_forGagicSolve, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
-//    connect(thread_forGagicRunSolve, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(thread_forRbGrepSet, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(thread_MagicStepRun, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitQmessageBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
@@ -135,22 +143,27 @@ void MainWindow::dev_connect() {
 }
 //设备连接按钮中开辟的子线程程序-2
 void MainWindow::thread_rbConnCommand() {
+    int index=comboBox_setRunMode->currentIndex();
+    switch (index){
+        case 1:system("rosrun rb_ui decConnect.sh");break;
+        case 2:system("rosrun rb_ui decConnect.sh");break;
 
-    //1.机器人连接
-    rb_msgAndSrv::robotConn data_srvs;
-    if(rbConnCommand_client.call(data_srvs)){
-        if(data_srvs.response.ret){
-            flag_rbConnStatus= true;
-            emit emitLightColor(label_rb1CoonStatus,"green");
-            emit emitLightColor(label_rb2CoonStatus,"green");
-        } else{
-            LOG("Warning")->logErrorMessage("机器人连接失败!");
-            emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("机器人连接失败!"));
-        }
-    } else{
-        LOG("Warning")->logErrorMessage("rbConnCommand_client接收消息失败!");
-        emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("rbConnCommand_client接收消息失败!"));
     }
+    //1.机器人连接
+//    rb_msgAndSrv::robotConn data_srvs;
+//    if(rbConnCommand_client.call(data_srvs)){
+//        if(data_srvs.response.ret){
+//            flag_rbConnStatus= true;
+//            emit emitLightColor(label_rb1CoonStatus,"green");
+//            emit emitLightColor(label_rb2CoonStatus,"green");
+//        } else{
+//            LOG("Warning")->logErrorMessage("机器人连接失败!");
+//            emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("机器人连接失败!"));
+//        }
+//    } else{
+//        LOG("Warning")->logErrorMessage("rbConnCommand_client接收消息失败!");
+//        emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("rbConnCommand_client接收消息失败!"));
+//    }
     //2.相机连接
 
     //3.爪手连接(脚本连接)
@@ -439,8 +452,6 @@ void MainWindow::callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data
 }
 
 void MainWindow::callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg) {
-
-    cout<<"实时："<<msg->data.size()<<endl;
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
     cv::Mat mat = ptr->image;
     QImage image = cvMat2QImage(mat);
@@ -1063,9 +1074,23 @@ if(color=="red"){
 }
 }
 
-//void MainWindow::thread_MagicStepRunCommand() {
-//
-//}
+void MainWindow::callback_LeftCamera_subscriber(sensor_msgs::Image::ConstPtr image) {
+    connFlag_LeftCamera= true;
+}
+
+void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image) {
+    connFlag_RightCamera= true;
+//    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
+//    cv::Mat mat = ptr->image;
+//    QImage image = cvMat2QImage(mat);
+//    QPixmap pixmap1 = QPixmap::fromImage(image);
+//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
+//    label_picture1->setPixmap(fitpixmap1);
+
+}
+
+
 
 
 
