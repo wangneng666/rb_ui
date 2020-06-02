@@ -128,29 +128,36 @@ void MainWindow::timer_onUpdate() {
 //设备连接按钮-1
 void MainWindow::dev_connect() {
     cout<<"点击了设备连接按钮"<<endl;
-    if(!flag_rbConnStatus)
-    {
+
+    // if(!flag_rbConnStatus)
+    // {
         thread_forRbConn->start();//运行子线程代码:设备连接按钮中开辟的子线程程序-2
-    }
+    // }
 }
 //设备连接按钮中开辟的子线程程序-2
 void MainWindow::thread_rbConnCommand() {
 
-    //1.机器人连接
-    rb_msgAndSrv::robotConn data_srvs;
-    if(rbConnCommand_client.call(data_srvs)){
-        if(data_srvs.response.ret){
-            flag_rbConnStatus= true;
-            emit emitLightColor(label_rb1CoonStatus,"green");
-            emit emitLightColor(label_rb2CoonStatus,"green");
-        } else{
-            LOG("Warning")->logErrorMessage("机器人连接失败!");
-            emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("机器人连接失败!"));
-        }
-    } else{
-        LOG("Warning")->logErrorMessage("rbConnCommand_client接收消息失败!");
-        emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("rbConnCommand_client接收消息失败!"));
-    }
+
+
+
+
+       system("rosrun rb_ui runLaunch.sh");
+
+    // //1.机器人连接
+    // rb_msgAndSrv::robotConn data_srvs;
+    // if(rbConnCommand_client.call(data_srvs)){
+    //     if(data_srvs.response.ret){
+    //         flag_rbConnStatus= true;
+    //         emit emitLightColor(label_rb1CoonStatus,"green");
+    //         emit emitLightColor(label_rb2CoonStatus,"green");
+    //     } else{
+    //         LOG("Warning")->logErrorMessage("机器人连接失败!");
+    //         emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("机器人连接失败!"));
+    //     }
+    // } else{
+    //     LOG("Warning")->logErrorMessage("rbConnCommand_client接收消息失败!");
+    //     emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("rbConnCommand_client接收消息失败!"));
+    // }
     //2.相机连接
 
     //3.爪手连接(脚本连接)
