@@ -88,6 +88,7 @@ private:
     bool flag_rbErrStatus;//机器人连接状态标志
     bool flag_sysRun;//系统运行标志
     int index_magicStep;
+    uint index_RvizCount;
     QString photoPath;//图片路径
     bool connFlag_LeftCamera; //左边相机连接状态
     bool connFlag_RightCamera;//右边相机连接状态
@@ -121,6 +122,7 @@ private:
     //子线程句柄
     qthreadForRos *thread_forRbConn;//设备连接子线程
     qthreadForRos *thread_forRviz;//设备连接子线程
+    qthreadForRos *thread_forCloseRviz;//设备连接子线程
     qthreadForRos *thread_forBeginRun;//开始运行子线程
     qthreadForRos *thread_MagicStepRun;//分步运行子线程
     qthreadForRos *thread_forRbGrepSet;//机器人抓取子线程
@@ -138,6 +140,7 @@ private:
     void rviz_statup();//按钮槽函数_rviz启动
     void run_statup();//按钮槽函数_运行启动
     void run_stop();//按钮槽函数_运行停止
+    void SysReset();//按钮槽函数_系统复位
     void magicCube_AutoRun();//按钮槽函数_一键解魔方
     void magicCube_get();//按钮槽函数_采集魔方数据
     void magicCube_solve();//按钮槽函数_解算魔方数据
@@ -161,6 +164,7 @@ private:
     //线程处理
     void thread_rbConnCommand();
     void thread_rbRvizCommand();
+    void thread_rbCloseRvizCommand();
     void thread_BeginRun();
     void thread_RbGrepSet();
     void thread_LisionErrInfo();
@@ -190,6 +194,7 @@ private:
     QLabel *label_3;
     QHBoxLayout *horizontalLayout_3;
     QTabWidget *tabWidget;
+
     QWidget *tab;
     QHBoxLayout *horizontalLayout_4;
     QVBoxLayout *verticalLayout_4;
@@ -204,13 +209,24 @@ private:
     QLabel *label_rb2CoonStatus;
     QLabel *label_rb1ErrStatus;
     QLabel *label_rb2ErrStatus;
-
     QHBoxLayout *horizontalLayout_5;
     QPushButton *btn_rbConn;
     QPushButton *btn_rvizRun;
     QPushButton *btn_beginRun;
     QPushButton *btn_normalStop;
+    QPushButton *btn_SysReset;
+
     QWidget *tab_2;
+    QVBoxLayout *verticalLayout_3;
+    QGridLayout* gridLayout3;
+    QLabel* label_tab2_row1;
+    QLabel* label_tab2_row3;
+    QLabel* label_tab2_row5;
+    QPushButton btn_tab2_row21;
+    QPushButton btn_tab2_row22;
+    QPushButton btn_tab2_row3;
+
+
     QWidget *tab_3;
     QHBoxLayout *horizontalLayout_8;
     QHBoxLayout *horizontalLayout_7;

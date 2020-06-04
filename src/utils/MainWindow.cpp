@@ -16,6 +16,7 @@ void MainWindow::SysVarInit() {
     isRunning_solveMagic= false;
     isRunning_grab= false;
     index_magicStep=0;
+    index_RvizCount=0;
     //连接状态
     connFlag_LeftCamera= false;
     connFlag_RightCamera= false;
@@ -52,6 +53,9 @@ void MainWindow::SysVarInit() {
     //给启动rviz开辟子线程
     thread_forRviz = new qthreadForRos();
     thread_forRviz->setParm(this,&MainWindow::thread_rbRvizCommand);
+    //给关闭rviz开辟子线程
+    thread_forCloseRviz = new qthreadForRos();
+    thread_forCloseRviz->setParm(this,&MainWindow::thread_rbCloseRvizCommand);
     //开始运行子线程
     thread_forBeginRun= new qthreadForRos();
     thread_forBeginRun->setParm(this,&MainWindow::thread_BeginRun);
@@ -79,6 +83,8 @@ void MainWindow::signalAndSlot() {
     connect(btn_beginRun,&QPushButton::clicked,this,&MainWindow::run_statup);
     //运行停止
     connect(btn_normalStop,&QPushButton::clicked,this,&MainWindow::run_stop);
+    //系统复位
+    connect(btn_SysReset,&QPushButton::clicked,this,&MainWindow::SysReset);
     //采集魔方数据
     connect(btn_magicGetdata,&QPushButton::clicked,this,&MainWindow::magicCube_get);
     //解算魔方数据
@@ -170,24 +176,43 @@ void MainWindow::thread_rbConnCommand() {
     //3.爪手连接(脚本连接)
 //    system("rosrun gripper_bridge gripper.sh");
     //4.６台设备连接状态监控
-
-
 }
-
-
 //启动rviz－－－１
 void MainWindow::rviz_statup() {
     int index=comboBox_setRunMode->currentIndex();
+    //如果不是rviz仿真模式，则返回
     if(index!=0){
         return;
     }
-    thread_forRviz->start();
+    index_RvizCount++;
+    cout<<index_RvizCount<<endl;
+    if(index_RvizCount%2==1){
+        //启动rviz
+        thread_forCloseRviz->quit();
+        thread_forCloseRviz->wait();
+        thread_forRviz->start();
+        btn_rvizRun->setText( "关闭rviz");
+        cout<<"关闭rviz"<<endl;
+    } else{
+        //关闭rviz
+        thread_forRviz->terminate();
+        thread_forRviz->wait();
+        thread_forCloseRviz->start();
+        btn_rvizRun->setText( "启动Rviz");
+        cout<<"启动Rviz"<<endl;
+    }
 }
 
 //进入子线程－－－２
 void MainWindow::thread_rbRvizCommand() {
+    emit emitQmessageBox(infoLevel::information,"启动rviz");
     //启动urdf模型
     system("roslaunch co605_dual_arm_gripper_moveit_config demo.launch ");
+}
+
+void MainWindow::thread_rbCloseRvizCommand() {
+    emit emitQmessageBox(infoLevel::information,"关闭rviz");
+    system("rosrun rb_ui killRviz.sh");
 }
 
 //运行启动按钮-1
@@ -257,6 +282,11 @@ void MainWindow::run_stop() {
     std_msgs::Bool msg;
     msg.data=true;
     rbStopCommand_publisher.publish(msg);
+}
+
+//系统复位
+void MainWindow::SysReset() {
+    system("rosnode kill $(rosnode list | grep -v /robot_UI)");
 }
 
 //点击采集魔方数据按钮－－－１
@@ -427,11 +457,11 @@ void MainWindow::safety_sysStop() {
 }
 
 void MainWindow::safety_rob1Stop() {
-    cout<<"点击了机器人1停止按钮"<<endl;
+    cout<<"点击了机器人1复位按钮"<<endl;
 }
 
 void MainWindow::safety_rob2Stop() {
-    cout<<"点击了机器人2停止按钮"<<endl;
+    cout<<"点击了机器人2复位按钮"<<endl;
 }
 
 void MainWindow::callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg) {
@@ -670,7 +700,7 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     comboBox_setRunMode->setFixedHeight(50);
     comboBox_setRunMode->setObjectName(QString::fromUtf8("comboBox_setRunMode"));
 
-    gridLayout->addWidget(comboBox_setRunMode, 0, 0, 1, 2);
+    gridLayout->addWidget(comboBox_setRunMode, 2, 0, 1, 2);
 
     label_5 = new QLabel(tab);
     label_5->setObjectName(QString::fromUtf8("label_5"));
@@ -738,6 +768,10 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
 
     horizontalLayout_5->addWidget(btn_normalStop);
 
+    btn_SysReset= new QPushButton(tab);
+    btn_SysReset->setObjectName(QString::fromUtf8("btn_SysReset"));
+    horizontalLayout_5->addWidget(btn_SysReset);
+
 
     verticalLayout_4->addLayout(horizontalLayout_5);
 
@@ -749,7 +783,16 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     tabWidget->addTab(tab, QString());
     tab_2 = new QWidget();
     tab_2->setObjectName(QString::fromUtf8("tab_2"));
+//    QVBoxLayout *verticalLayout_3=new QVBoxLayout(tab_2);
+//    QGridLayout* gridLayout3=new QGridLayout();
+//    gridLayout3->setSpacing(6);
+//    gridLayout3->setObjectName(QString::fromUtf8("gridLayout3"));
+
+
     tabWidget->addTab(tab_2, QString());
+
+
+
     tab_3 = new QWidget();
     tab_3->setObjectName(QString::fromUtf8("tab_3"));
     horizontalLayout_8 = new QHBoxLayout(tab_3);
@@ -833,7 +876,6 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
 
 
     horizontalLayout_7->addLayout(verticalLayout_8);
-
 
     horizontalLayout_8->addLayout(horizontalLayout_7);
 
@@ -1036,8 +1078,10 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         btn_rvizRun->setText(QApplication::translate("MainWindow", "\345\220\257\345\212\250rviz", nullptr));
         btn_beginRun->setText(QApplication::translate("MainWindow", "\345\274\200\345\247\213\350\277\220\350\241\214", nullptr));
         btn_normalStop->setText(QApplication::translate("MainWindow", "运行停止", nullptr));
+        btn_SysReset->setText(QApplication::translate("MainWindow", "系统复位", nullptr));
+
         tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("MainWindow", "\344\270\273\347\225\214\351\235\242", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "\344\273\277\347\234\237\347\225\214\351\235\242", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "魔方调试界面", nullptr));
         btn_magicGetdata->setText(QApplication::translate("MainWindow", "\351\207\207\351\233\206\351\255\224\346\226\271\346\225\260\346\215\256", nullptr));
         btn_magicSolve->setText(QApplication::translate("MainWindow", "\350\247\243\347\256\227", nullptr));
         btn_magicRunSolve->setText(QApplication::translate("MainWindow", "\346\211\247\350\241\214\350\247\243\347\256\227", nullptr));
@@ -1095,6 +1139,10 @@ void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::Const
 //    label_picture1->setPixmap(fitpixmap1);
 
 }
+
+
+
+
 
 
 
