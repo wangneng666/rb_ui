@@ -5,8 +5,6 @@ rosrun grasp_place test.py &
 sleep 0.5
 roslaunch grasp_place grasp.launch &
 sleep 0.5
-roslaunch rubik_cube_solve solve.launch &
-sleep 0.5
 rosrun cubeParse cube &
 wait
 exit 0

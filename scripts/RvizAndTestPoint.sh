@@ -1,5 +1,5 @@
 #!/bin/bash
-roslaunch rubik_cube_solve solve.launch speed:=1 &
+roslaunch rubik_cube_solve solve.launch &
 sleep 0.5
 roslaunch grasp_place grasp.launch &
 sleep 0.5
