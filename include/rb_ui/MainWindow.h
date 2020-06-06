@@ -204,10 +204,12 @@ signals:
     void emitTextControl(QString text) const;
     void emitQmessageBox(infoLevel level,QString info);
     void emitLightColor(QLabel* label,string color);
+    void emitStartTimer(QTimer* timer);
 private slots:
     void displayTextControl(QString text);
     void showQmessageBox(infoLevel level,QString info);
     void showLightColor(QLabel* label,string color);
+    void runTimer(QTimer* timer);
 
 private:
     //qt控件

@@ -31,10 +31,10 @@ void MainWindow::SysVarInit() {
     //定时器实体化
     updateTimer = new QTimer(this);
     updateTimer->setInterval(1);
-    updateTimer_LeftCamera = new QTimer(this);
-    updateTimer_LeftCamera->setInterval(3000);
-    updateTimer_RightCamera = new QTimer(this);
-    updateTimer_RightCamera->setInterval(3000);
+    updateTimer_LeftCamera = new QTimer();
+    updateTimer_LeftCamera->setInterval(1000);
+    updateTimer_RightCamera = new QTimer();
+    updateTimer_RightCamera->setInterval(1000);
     updateTimer_com = new QTimer(this);
     updateTimer_com->setInterval(1000);
 
@@ -140,6 +140,7 @@ void MainWindow::signalAndSlot() {
     connect(thread_forRbGrepSet, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(thread_MagicStepRun, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitQmessageBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
+    connect(this, SIGNAL(emitStartTimer(QTimer*)), this,SLOT(runTimer(QTimer*)));  //将自定义槽连接到自定义信号
 
 /****************************************************************************************************/
 }
@@ -274,6 +275,8 @@ void MainWindow::thread_rbCloseRvizCommand() {
 
 //运行启动按钮-1
 void MainWindow::run_statup() {
+    updateTimer_rob1status->start();
+    return;
     cout<<"点击了运行启动按钮"<<endl;
     thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
 }
@@ -286,30 +289,8 @@ void MainWindow::thread_BeginRun() {
         case 1:system("rosrun rb_ui RealRbAndReadPoint.sh");break;
         case 2:system("rosrun rb_ui RealRbAndTestPoint.sh");break;
     }
-    //1.机器人上使能
-    //2.启动仕忠的launch文件
-    //3.开辟线程监听机器人状态(故障状态)
-//    rb_msgAndSrv::SetEnableSrv data_srvs1;
-//    rb_msgAndSrv::SetEnableSrv data_srvs2;
-//    data_srvs1.request.enable= true;
-//    data_srvs2.request.enable= true;
-//    if((rbSetEnable1_client.call(data_srvs1))&&(rbSetEnable2_client.call(data_srvs2))){
-//        if(data_srvs1.response.finsh&&data_srvs2.response.finsh){
-//            cout<<"机器人上使能成功"<<endl;
-//        } else{
-//            emit thread_forBeginRun->signal_SendMsgBox(infoLevel::warning,QString("rbConnCommand_client接收消息失败!"));
-//        }
-//    } else{
-//        LOG("Warning")->logErrorMessage("rbRunCommand_client接收消息失败!");
-//        emit thread_forBeginRun->signal_SendMsgBox(infoLevel::warning,QString("rbRunCommand_client接收消息失败!"));
-//        return;
-//    }
-
-//    system("rosrun rb_ui runlaunch.sh");
-
-//    //开辟监听故障状态子线程
-//    thread_forLisionErrInfo->start();//转到监听故障状态子线程-3
 }
+
 //监听故障状态子线程-3
 void MainWindow::thread_LisionErrInfo() {
     //每隔一秒监听一次报警信息,并在机器人报警状态显示上刷新
@@ -334,6 +315,7 @@ void MainWindow::thread_LisionErrInfo() {
 
 //运行停止
 void MainWindow::run_stop() {
+    updateTimer_LeftCamera->start();
     cout<<"点击了运行停止按钮"<<endl;
     std_msgs::Bool msg;
     msg.data=true;
@@ -530,7 +512,7 @@ void MainWindow::callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &
     cv::Mat mat = ptr->image;
     QImage image = cvMat2QImage(mat);
     QPixmap pixmap1 = QPixmap::fromImage(image);
-    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
 //    label_picture1->setPixmap(fitpixmap1);
 }
@@ -1245,12 +1227,12 @@ if(color=="red"){
 
 void MainWindow::callback_LeftCamera_subscriber(sensor_msgs::Image::ConstPtr image) {
     connFlag_LeftCamera= true;
-    updateTimer_LeftCamera->start();
+    emit emitStartTimer(updateTimer_LeftCamera);
 }
 
 void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image) {
     connFlag_RightCamera= true;
-    updateTimer_RightCamera->start();
+    emit emitStartTimer(updateTimer_RightCamera);
 //    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
 //    cv::Mat mat = ptr->image;
 //    QImage image = cvMat2QImage(mat);
@@ -1261,7 +1243,8 @@ void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::Const
 }
 
 void MainWindow::callback_rob1Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
-    updateTimer_rob1status->start();
+    connFlag_LeftRobot= true;
+    emit emitStartTimer(updateTimer_rob1status);
     if(robot_status->in_error.val==0){
         errFlag_LeftRobot= false;
     } else{
@@ -1276,7 +1259,8 @@ void MainWindow::callback_rob1Status_subscriber(const industrial_msgs::RobotStat
 }
 
 void MainWindow::callback_rob2Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
-    updateTimer_rob2status->start();
+    connFlag_RightRobot= true;
+    emit emitStartTimer(updateTimer_rob2status);
     if(robot_status->in_error.val==0){
         errFlag_RightRobot= false;
     } else{
@@ -1289,6 +1273,12 @@ void MainWindow::callback_rob2Status_subscriber(const industrial_msgs::RobotStat
         enableFlag_RightRobot= false;
     }
 }
+
+void MainWindow::runTimer(QTimer* timer) {
+    timer->start();
+}
+
+
 
 
 
