@@ -175,6 +175,15 @@ private:
     void timer_robot1Status();//公共刷新连接状态
     void timer_robot2Status();//公共刷新连接状态
 
+    //单步调试页面按钮槽函数
+    void slot_btn_rb1SetEnable();
+    void slot_btn_rb2SetEnable();
+    void slot_btn_rb1Reset();
+    void slot_btn_rb2Reset();
+    void slot_gripper1_open();
+    void slot_gripper1_close();
+    void slot_gripper2_open();
+    void slot_gripper2_close();
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
@@ -254,14 +263,21 @@ private:
     QPushButton *btn_SysReset;
 
     QWidget *tab_2;
-    QVBoxLayout *verticalLayout_3;
-    QGridLayout* gridLayout3;
-    QLabel* label_tab2_row1;
-    QLabel* label_tab2_row3;
-    QLabel* label_tab2_row5;
-    QPushButton btn_tab2_row21;
-    QPushButton btn_tab2_row22;
-    QPushButton btn_tab2_row3;
+    QHBoxLayout *horizontalLayout_6;
+    QVBoxLayout *verticalLayout_5;
+    QGroupBox *groupBox_tab2_1;
+    QHBoxLayout *horizontalLayout_14;
+    QPushButton *btn_rb1SetEnable;
+    QPushButton *btn_rb2SetEnable;
+    QPushButton *btn_rb1Reset;
+    QPushButton *btn_rb2Reset;
+    QGroupBox *groupBox_tab2_2;
+    QHBoxLayout *horizontalLayout_19;
+    QPushButton *gripper1_open;
+    QPushButton *gripper1_close;
+    QPushButton *gripper2_open;
+    QPushButton *gripper2_close;
+    QGroupBox *groupBox_tab3_3;
 
 
     QWidget *tab_3;

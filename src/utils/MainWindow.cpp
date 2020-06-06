@@ -121,6 +121,16 @@ void MainWindow::signalAndSlot() {
     connect(btn_SatetyRb1Reset,&QPushButton::clicked,this,&MainWindow::safety_rob1Stop);
     //机器人2停止
     connect(btn_SatetyRb2Reset,&QPushButton::clicked,this,&MainWindow::safety_rob2Stop);
+    //单步调试页面信号与槽连接
+    connect(btn_rb1SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1SetEnable);
+    connect(btn_rb2SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2SetEnable);
+    connect(btn_rb1Reset,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1Reset);
+    connect(btn_rb2Reset,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2Reset);
+    connect(gripper1_open,&QPushButton::clicked,this,&MainWindow::slot_gripper1_open);
+    connect(gripper1_close,&QPushButton::clicked,this,&MainWindow::slot_gripper1_close);
+    connect(gripper2_open,&QPushButton::clicked,this,&MainWindow::slot_gripper2_open);
+    connect(gripper2_close,&QPushButton::clicked,this,&MainWindow::slot_gripper2_close);
+
     //定时器启动
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::timer_onUpdate);
     updateTimer->start();
@@ -870,10 +880,78 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     tabWidget->addTab(tab, QString());
     tab_2 = new QWidget();
     tab_2->setObjectName(QString::fromUtf8("tab_2"));
-//    QVBoxLayout *verticalLayout_3=new QVBoxLayout(tab_2);
-//    QGridLayout* gridLayout3=new QGridLayout();
-//    gridLayout3->setSpacing(6);
-//    gridLayout3->setObjectName(QString::fromUtf8("gridLayout3"));
+    horizontalLayout_6 = new QHBoxLayout(tab_2);
+    horizontalLayout_6->setSpacing(6);
+    horizontalLayout_6->setContentsMargins(11, 11, 11, 11);
+    horizontalLayout_6->setObjectName(QString::fromUtf8("horizontalLayout_6"));
+    verticalLayout_5 = new QVBoxLayout();
+    verticalLayout_5->setSpacing(6);
+    verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
+    groupBox_tab2_1 = new QGroupBox(tab_2);
+    groupBox_tab2_1->setObjectName(QString::fromUtf8("groupBox_tab2_1"));
+    horizontalLayout_14 = new QHBoxLayout(groupBox_tab2_1);
+    horizontalLayout_14->setSpacing(6);
+    horizontalLayout_14->setContentsMargins(11, 11, 11, 11);
+    horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
+    btn_rb1SetEnable = new QPushButton(groupBox_tab2_1);
+    btn_rb1SetEnable->setObjectName(QString::fromUtf8("btn_rb1SetEnable"));
+
+    horizontalLayout_14->addWidget(btn_rb1SetEnable);
+
+    btn_rb2SetEnable = new QPushButton(groupBox_tab2_1);
+    btn_rb2SetEnable->setObjectName(QString::fromUtf8("btn_rb2SetEnable"));
+
+    horizontalLayout_14->addWidget(btn_rb2SetEnable);
+
+    btn_rb1Reset = new QPushButton(groupBox_tab2_1);
+    btn_rb1Reset->setObjectName(QString::fromUtf8("btn_rb1Reset"));
+
+    horizontalLayout_14->addWidget(btn_rb1Reset);
+
+    btn_rb2Reset = new QPushButton(groupBox_tab2_1);
+    btn_rb2Reset->setObjectName(QString::fromUtf8("btn_rb2Reset"));
+
+    horizontalLayout_14->addWidget(btn_rb2Reset);
+
+
+    verticalLayout_5->addWidget(groupBox_tab2_1);
+
+    groupBox_tab2_2 = new QGroupBox(tab_2);
+    groupBox_tab2_2->setObjectName(QString::fromUtf8("groupBox_tab2_2"));
+    horizontalLayout_19 = new QHBoxLayout(groupBox_tab2_2);
+    horizontalLayout_19->setSpacing(6);
+    horizontalLayout_19->setContentsMargins(11, 11, 11, 11);
+    horizontalLayout_19->setObjectName(QString::fromUtf8("horizontalLayout_19"));
+    gripper1_open = new QPushButton(groupBox_tab2_2);
+    gripper1_open->setObjectName(QString::fromUtf8("gripper1_open"));
+
+    horizontalLayout_19->addWidget(gripper1_open);
+
+    gripper1_close = new QPushButton(groupBox_tab2_2);
+    gripper1_close->setObjectName(QString::fromUtf8("gripper1_close"));
+
+    horizontalLayout_19->addWidget(gripper1_close);
+
+    gripper2_open = new QPushButton(groupBox_tab2_2);
+    gripper2_open->setObjectName(QString::fromUtf8("gripper2_open"));
+
+    horizontalLayout_19->addWidget(gripper2_open);
+
+    gripper2_close = new QPushButton(groupBox_tab2_2);
+    gripper2_close->setObjectName(QString::fromUtf8("gripper2_close"));
+
+    horizontalLayout_19->addWidget(gripper2_close);
+
+
+    verticalLayout_5->addWidget(groupBox_tab2_2);
+
+    groupBox_tab3_3 = new QGroupBox(tab_2);
+    groupBox_tab3_3->setObjectName(QString::fromUtf8("groupBox_tab3_3"));
+
+    verticalLayout_5->addWidget(groupBox_tab3_3);
+
+
+    horizontalLayout_6->addLayout(verticalLayout_5);
 
 
     tabWidget->addTab(tab_2, QString());
@@ -1182,7 +1260,20 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         btn_SysReset->setText(QApplication::translate("MainWindow", "系统复位", nullptr));
 
         tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("MainWindow", "\344\270\273\347\225\214\351\235\242", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "魔方调试界面", nullptr));
+
+        groupBox_tab2_1->setTitle(QApplication::translate("MainWindow", "\346\234\272\345\231\250\344\272\272\350\260\203\350\257\225", nullptr));
+        btn_rb1SetEnable->setText(QApplication::translate("MainWindow", "\345\267\246\346\234\272\345\231\250\344\272\272\344\270\212\344\275\277\350\203\275", nullptr));
+        btn_rb2SetEnable->setText(QApplication::translate("MainWindow", "\345\217\263\346\234\272\345\231\250\344\272\272\344\270\212\344\275\277\350\203\275", nullptr));
+        btn_rb1Reset->setText(QApplication::translate("MainWindow", "\345\267\246\346\234\272\345\231\250\344\272\272\345\244\215\344\275\215", nullptr));
+        btn_rb2Reset->setText(QApplication::translate("MainWindow", "\345\217\263\346\234\272\345\231\250\344\272\272\345\244\215\344\275\215", nullptr));
+        groupBox_tab2_2->setTitle(QApplication::translate("MainWindow", "\345\244\271\345\205\267\350\260\203\350\257\225", nullptr));
+        gripper1_open->setText(QApplication::translate("MainWindow", "\345\267\246\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
+        gripper1_close->setText(QApplication::translate("MainWindow", "\345\267\246\345\244\271\345\205\267\345\205\263\351\227\255", nullptr));
+        gripper2_open->setText(QApplication::translate("MainWindow", "\345\217\263\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
+        gripper2_close->setText(QApplication::translate("MainWindow", "\345\217\263\345\244\271\345\205\267\345\205\263\351\227\255", nullptr));
+        groupBox_tab3_3->setTitle(QApplication::translate("MainWindow", "\345\205\266\344\273\226\350\260\203\350\257\225", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "单步调试界面", nullptr));
+
         btn_magicGetdata->setText(QApplication::translate("MainWindow", "\351\207\207\351\233\206\351\255\224\346\226\271\346\225\260\346\215\256", nullptr));
         btn_magicSolve->setText(QApplication::translate("MainWindow", "\350\247\243\347\256\227", nullptr));
         btn_magicRunSolve->setText(QApplication::translate("MainWindow", "\346\211\247\350\241\214\350\247\243\347\256\227", nullptr));
@@ -1277,6 +1368,40 @@ void MainWindow::callback_rob2Status_subscriber(const industrial_msgs::RobotStat
 void MainWindow::runTimer(QTimer* timer) {
     timer->start();
 }
+
+void MainWindow::slot_btn_rb1SetEnable() {
+    system("rosservice call /UR51/set_robot_enable \"enable: true\"");
+}
+
+void MainWindow::slot_btn_rb2SetEnable() {
+    system("rosservice call /UR52/set_robot_enable \"enable: true\"");
+}
+
+void MainWindow::slot_btn_rb1Reset() {
+    system("rosservice call /UR51/clear_robot_fault \"{}\"");
+}
+
+void MainWindow::slot_btn_rb2Reset() {
+    system("rosservice call /UR52/clear_robot_fault \"{}\"");
+}
+
+void MainWindow::slot_gripper1_open() {
+    system("rosservice call /UR51/openGripper \"{}\"");
+}
+
+void MainWindow::slot_gripper1_close() {
+    system("rosservice call /UR51/closeGripper \"{}\"");
+}
+
+void MainWindow::slot_gripper2_open() {
+    system("rosservice call /UR51/openGripper \"{}\"");
+
+}
+
+void MainWindow::slot_gripper2_close() {
+    system("rosservice call /UR52/closeGripper \"{}\"");
+}
+
 
 
 
