@@ -39,9 +39,9 @@ void MainWindow::SysVarInit() {
     updateTimer_com->setInterval(1000);
 
     updateTimer_rob1status = new QTimer(this);
-    updateTimer_rob1status->setInterval(3000);
+    updateTimer_rob1status->setInterval(1000);
     updateTimer_rob2status = new QTimer(this);
-    updateTimer_rob2status->setInterval(3000);
+    updateTimer_rob2status->setInterval(1000);
     //话题或服务对象初始化
     rob1Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR51/robot_status",1000,boost::bind(&MainWindow::callback_rob1Status_subscriber,this,_1));
     rob2Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR52/robot_status",1000,boost::bind(&MainWindow::callback_rob2Status_subscriber,this,_1));
@@ -158,12 +158,12 @@ void MainWindow::timer_comUpdate() {
     } else{
         emit emitLightColor(label_rb2CoonStatus,"red");
     }
-    if(errFlag_LeftRobot){
+    if(errFlag_LeftRobot||(!connFlag_LeftRobot)){
         emit emitLightColor(label_rb1ErrStatus,"red");
     } else{
         emit emitLightColor(label_rb1ErrStatus,"green");
     }
-    if(errFlag_RightRobot){
+    if(errFlag_RightRobot||(!connFlag_RightRobot)){
         emit emitLightColor(label_rb2ErrStatus,"red");
     } else{
         emit emitLightColor(label_rb2ErrStatus,"green");
@@ -330,7 +330,7 @@ void MainWindow::SysReset() {
 //点击采集魔方数据按钮－－－１
 void MainWindow::magicCube_get() {
     cout<<"点击了采集魔方数据按钮"<<endl;
-    if(isRunning_grab|isRunning_solveMagic){
+    if(isRunning_grab){
         return;
     }
         thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicGetData);
@@ -343,12 +343,12 @@ void MainWindow::thread_GagicGetData() {
     data_srvs.request.data[0]=1;
     emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
-        index_magicStep=1;
         cubeParse::Detection srv;
         ImageGet_client.call(srv);
     } else{
         LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
     }
+    index_magicStep=1;
 }
 
 //接收魔方图像数据－－－－－－３
@@ -419,7 +419,7 @@ void MainWindow::thread_GagicRunSolve() {
 void MainWindow::magicCube_AutoRun() {
     cout<<"点击了一键解算魔方按钮"<<endl;
     //如果机器人运行中则返回
-    if(isRunning_grab|isRunning_solveMagic){
+    if(isRunning_grab){
         return;
     }
         thread_MagicStepRun->setParm(this,&MainWindow::thread_AutoSolveMagic);
@@ -1171,8 +1171,8 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         label->setText(QApplication::translate("MainWindow", "\345\217\214\346\234\272\345\231\250\344\272\272\344\272\222\345\212\250\344\270\216\345\215\217\344\275\234\345\271\263\345\217\260", nullptr));
         label_5->setText(QApplication::translate("MainWindow", "机器人1连接状态", nullptr));
         label_6->setText(QApplication::translate("MainWindow", "机器人2连接状态", nullptr));
-        label_7->setText(QApplication::translate("MainWindow", "机器人1正常状态", nullptr));
-        label_8->setText(QApplication::translate("MainWindow", "机器人2正常状态", nullptr));
+        label_7->setText(QApplication::translate("MainWindow", "机器人1故障状态", nullptr));
+        label_8->setText(QApplication::translate("MainWindow", "机器人2故障状态", nullptr));
 //        label_picture1->setText(QApplication::translate("MainWindow", "图片", nullptr));
         label_rb1CoonStatus->setText(QString());
         btn_rbConn->setText(QApplication::translate("MainWindow", "\350\256\276\345\244\207\350\277\236\346\216\245", nullptr));
