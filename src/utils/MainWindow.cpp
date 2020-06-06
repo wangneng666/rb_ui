@@ -22,21 +22,38 @@ void MainWindow::SysVarInit() {
     connFlag_RightCamera= false;
     connFlag_LeftRobot= false;
     connFlag_RightRobot= false;
+    errFlag_LeftRobot= false;
+    errFlag_RightRobot= false;
+    enableFlag_LeftRobot= false;
+    enableFlag_RightRobot= false;
     connFlag_LeftGripper= false;
     connFlag_RightGripper= false;
     //定时器实体化
     updateTimer = new QTimer(this);
     updateTimer->setInterval(1);
-    updateTimer2 = new QTimer(this);
-    updateTimer2->setInterval(300);
+    updateTimer_LeftCamera = new QTimer(this);
+    updateTimer_LeftCamera->setInterval(3000);
+    updateTimer_RightCamera = new QTimer(this);
+    updateTimer_RightCamera->setInterval(3000);
+    updateTimer_com = new QTimer(this);
+    updateTimer_com->setInterval(1000);
+
+    updateTimer_rob1status = new QTimer(this);
+    updateTimer_rob1status->setInterval(3000);
+    updateTimer_rob2status = new QTimer(this);
+    updateTimer_rob2status->setInterval(3000);
     //话题或服务对象初始化
+    rob1Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR51/robot_status",1000,boost::bind(&MainWindow::callback_rob1Status_subscriber,this,_1));
+    rob2Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR52/robot_status",1000,boost::bind(&MainWindow::callback_rob2Status_subscriber,this,_1));
     Leftcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base/color/image_raw",1000,boost::bind(&MainWindow::callback_LeftCamera_subscriber,this,_1));
     Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
+    MagicSolve_subscriber=Node->subscribe<std_msgs::UInt8MultiArray>("/cube_solution",1000,&MainWindow::callback_magicSolve_subscriber,this);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
+
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
     SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1);
-    rbConnCommand_client = Node->serviceClient<rb_msgAndSrv::robotConn>("/Rb_connCommand");
+    rbConnCommand_client = Node->serviceClient<hirop_msgs::robotConn>("getRobotConnStatus");
     rbRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_DoubleBool>("/Rb_runCommand");
     rbSetEnable1_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR51/set_robot_enable");
     rbSetEnable2_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR52/set_robot_enable");
@@ -69,8 +86,7 @@ void MainWindow::SysVarInit() {
     thread_forLisionErrInfo->setParm(this,&MainWindow::thread_LisionErrInfo);
     //获取工程文件路径
     photoPath= QDir::currentPath() +QString("/src/HsDualAppBridge/rb_ui/photo/");
-//    qDebug()<<photoPath<<endl;
-
+    logPath= QDir::currentPath();
 }
 
 void MainWindow::signalAndSlot() {
@@ -108,6 +124,12 @@ void MainWindow::signalAndSlot() {
     //定时器启动
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::timer_onUpdate);
     updateTimer->start();
+    connect(updateTimer_com, &QTimer::timeout, this, &MainWindow::timer_comUpdate);
+    updateTimer_com->start();
+    connect(updateTimer_rob1status, &QTimer::timeout, this, &MainWindow::timer_robot1Status);
+    connect(updateTimer_rob2status, &QTimer::timeout, this, &MainWindow::timer_robot2Status);
+    connect(updateTimer_LeftCamera, &QTimer::timeout, this, &MainWindow::timer_LeftCamera);
+    connect(updateTimer_RightCamera, &QTimer::timeout, this, &MainWindow::timer_RightCamera);
 /****************************************************************************************************/
 
 /*********************************自定义信号与槽函数绑定*************************************************/
@@ -122,8 +144,51 @@ void MainWindow::signalAndSlot() {
 /****************************************************************************************************/
 }
 
-//定时器回调函数，实时获取状态信息
-void MainWindow::timer_onUpdate() {
+void MainWindow::timer_comUpdate() {
+    // 1s更新一次标签状态
+    //更新机器人状态
+    if(connFlag_LeftRobot){
+        emit emitLightColor(label_rb1CoonStatus,"green");
+    } else{
+        emit emitLightColor(label_rb1CoonStatus,"red");
+    }
+    if(connFlag_RightRobot){
+        emit emitLightColor(label_rb2CoonStatus,"green");
+    } else{
+        emit emitLightColor(label_rb2CoonStatus,"red");
+    }
+    if(errFlag_LeftRobot){
+        emit emitLightColor(label_rb1ErrStatus,"red");
+    } else{
+        emit emitLightColor(label_rb1ErrStatus,"green");
+    }
+    if(errFlag_RightRobot){
+        emit emitLightColor(label_rb2ErrStatus,"red");
+    } else{
+        emit emitLightColor(label_rb2ErrStatus,"green");
+    }
+    if(enableFlag_LeftRobot){
+        emit emitLightColor(label_rob1EnableStatus,"green");
+    } else{
+        emit emitLightColor(label_rob1EnableStatus,"red");
+    }
+    if(enableFlag_RightRobot){
+        emit emitLightColor(label_rob2EnableStatus,"green");
+    } else{
+        emit emitLightColor(label_rob2EnableStatus,"red");
+    }
+    //1.更新相机连接状态
+    if(connFlag_LeftCamera){
+        emit emitLightColor(label_LeftCameraConnStatus,"green");
+    } else{
+        emit emitLightColor(label_LeftCameraConnStatus,"red");
+    }
+    if(connFlag_RightCamera){
+        emit emitLightColor(label_RightCameraConnStatus,"green");
+    } else{
+        emit emitLightColor(label_RightCameraConnStatus,"red");
+    }
+    //2.更新状态栏目信息
     Node->getParam("isRuning_solveMagic",isRunning_solveMagic);
     Node->getParam("isRuning_grab",isRunning_grab);
     showMagicStepLable->setText(QString("魔方完成第%1步").arg(index_magicStep));
@@ -137,16 +202,32 @@ void MainWindow::timer_onUpdate() {
     } else{
         isRunning_grab_Lable->setText("机器人抓盒子停止");
     }
+
+
+}
+
+//定时器回调函数，实时更新状态信息
+void MainWindow::timer_onUpdate() {
+
+}
+
+void MainWindow::timer_robot1Status() {
+    connFlag_LeftRobot= false;
+}
+void MainWindow::timer_robot2Status() {
+    connFlag_RightRobot= false;
+}
+//定时器1,定时查看连接状态情况
+void MainWindow::timer_LeftCamera() {
+    connFlag_LeftCamera= false;
+}
+void MainWindow::timer_RightCamera() {
+    connFlag_RightCamera= false;
 }
 
 //设备连接按钮-1
 void MainWindow::dev_connect() {
-    cout<<"点击了设备连接按钮"<<endl;
-
-    // if(!flag_rbConnStatus)
-    // {
         thread_forRbConn->start();//运行子线程代码:设备连接按钮中开辟的子线程程序-2
-    // }
 }
 //设备连接按钮中开辟的子线程程序-2
 void MainWindow::thread_rbConnCommand() {
@@ -154,28 +235,8 @@ void MainWindow::thread_rbConnCommand() {
     switch (index){
         case 1:system("rosrun rb_ui decConnect.sh");break;
         case 2:system("rosrun rb_ui decConnect.sh");break;
-
     }
-    //1.机器人连接
-//    rb_msgAndSrv::robotConn data_srvs;
-//    if(rbConnCommand_client.call(data_srvs)){
-//        if(data_srvs.response.ret){
-//            flag_rbConnStatus= true;
-//            emit emitLightColor(label_rb1CoonStatus,"green");
-//            emit emitLightColor(label_rb2CoonStatus,"green");
-//        } else{
-//            LOG("Warning")->logErrorMessage("机器人连接失败!");
-//            emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("机器人连接失败!"));
-//        }
-//    } else{
-//        LOG("Warning")->logErrorMessage("rbConnCommand_client接收消息失败!");
-//        emit thread_forRbConn->signal_SendMsgBox(infoLevel::warning,QString("rbConnCommand_client接收消息失败!"));
-//    }
-    //2.相机连接
-
-    //3.爪手连接(脚本连接)
-//    system("rosrun gripper_bridge gripper.sh");
-    //4.６台设备连接状态监控
+    updateTimer_RightCamera->start();
 }
 //启动rviz－－－１
 void MainWindow::rviz_statup() {
@@ -192,26 +253,22 @@ void MainWindow::rviz_statup() {
         thread_forCloseRviz->wait();
         thread_forRviz->start();
         btn_rvizRun->setText( "关闭rviz");
-        cout<<"关闭rviz"<<endl;
     } else{
         //关闭rviz
         thread_forRviz->terminate();
         thread_forRviz->wait();
         thread_forCloseRviz->start();
         btn_rvizRun->setText( "启动Rviz");
-        cout<<"启动Rviz"<<endl;
     }
 }
 
 //进入子线程－－－２
 void MainWindow::thread_rbRvizCommand() {
-    emit emitQmessageBox(infoLevel::information,"启动rviz");
     //启动urdf模型
     system("roslaunch co605_dual_arm_gripper_moveit_config demo.launch ");
 }
 
 void MainWindow::thread_rbCloseRvizCommand() {
-    emit emitQmessageBox(infoLevel::information,"关闭rviz");
     system("rosrun rb_ui killRviz.sh");
 }
 
@@ -228,7 +285,6 @@ void MainWindow::thread_BeginRun() {
         case 0:system("rosrun rb_ui RvizAndTestPoint.sh");break;
         case 1:system("rosrun rb_ui RealRbAndReadPoint.sh");break;
         case 2:system("rosrun rb_ui RealRbAndTestPoint.sh");break;
-
     }
     //1.机器人上使能
     //2.启动仕忠的launch文件
@@ -295,14 +351,8 @@ void MainWindow::magicCube_get() {
     if(isRunning_grab|isRunning_solveMagic){
         return;
     }
-    if(index_magicStep!=0){
-        return;
-    }
-//    if(thread_MagicStepRun->isFinished()){
-        cout<<"开始执行采集魔方数据"<<endl;
         thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicGetData);
         thread_MagicStepRun->start();
-//    }
 }
 //进入采集魔方数据子线程－－－２
 void MainWindow::thread_GagicGetData() {
@@ -319,7 +369,7 @@ void MainWindow::thread_GagicGetData() {
     }
 }
 
-//接收魔方数据－－－－－－３
+//接收魔方图像数据－－－－－－３
 void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList) {
     rb_msgAndSrv::rbImageList data_msg;
     for (int i = 0; i < 6; ++i) {
@@ -332,18 +382,20 @@ void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbim
     }
 }
 
-
+//接受魔方解析数据
+void MainWindow::callback_magicSolve_subscriber(std_msgs::UInt8MultiArray data_msg) {
+    QString sumString ;
+//    for (int i = 0; i < data_msg.data.size(); ++i) {
+//        sumString+=QString("%1").arg(data_msg.data[i]);
+            ;
+//    }
+    label_magicSolveData->setText(sumString);
+}
 
 //点击解算魔方数据---1
 void MainWindow::magicCube_solve() {
-    cout<<"点击了解算魔方数据按钮"<<endl;
-    if(index_magicStep!=1){
-        return;
-    }
-//    if(thread_MagicStepRun->isFinished()){
         thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicSolve);
         thread_MagicStepRun->start();
-//    }
 }
 //进入解魔方子线程-----2
 void MainWindow::thread_GagicSolve() {
@@ -354,7 +406,6 @@ void MainWindow::thread_GagicSolve() {
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             index_magicStep=2;
-            cout<<"解算魔方成功"<<endl;
         }
     } else{
         LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
@@ -363,14 +414,8 @@ void MainWindow::thread_GagicSolve() {
 }
 //点击执行解算魔方动作---1
 void MainWindow::magicCube_execute() {
-    cout<<"点击了执行解算魔方数据按钮"<<endl;
-    if(index_magicStep!=2){
-        return;
-    }
-//    if(thread_MagicStepRun->isFinished()){
         thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicRunSolve);
         thread_MagicStepRun->start();
-//    }
 }
 //进入执行解算魔方子线程---２
 void MainWindow::thread_GagicRunSolve() {
@@ -391,18 +436,12 @@ void MainWindow::thread_GagicRunSolve() {
 //一键解魔方－－－－1
 void MainWindow::magicCube_AutoRun() {
     cout<<"点击了一键解算魔方按钮"<<endl;
-    if(index_magicStep!=0){
-        return;
-    }
     //如果机器人运行中则返回
     if(isRunning_grab|isRunning_solveMagic){
         return;
     }
-//    if(thread_MagicStepRun->isFinished()){
         thread_MagicStepRun->setParm(this,&MainWindow::thread_AutoSolveMagic);
         thread_MagicStepRun->start();
-//    }
-
 }
 
 //进入一键解魔方线程－－－－２
@@ -414,7 +453,6 @@ void MainWindow::thread_AutoSolveMagic() {
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             cout<<"一键解算魔方成功"<<endl;
-            index_magicStep=4;
         } else{
             cout<<"一键解算魔方失败"<<endl;
         }
@@ -495,17 +533,12 @@ void MainWindow::callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &
     QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
 //    label_picture1->setPixmap(fitpixmap1);
-//    label_picture2->setPixmap(fitpixmap1);
-//    label_picture3->setPixmap(fitpixmap1);
-//    label_picture4->setPixmap(fitpixmap1);
-//    label_picture5->setPixmap(fitpixmap1);
-//    label_picture6->setPixmap(fitpixmap1);
-
 }
 
 void MainWindow::oputRecord() {
+    QString file_path = QFileDialog::getOpenFileName(this,"选择文件",logPath, "Files(*.log)");
     QString displayString;
-    QFile file("./robotLog.log");
+    QFile file(file_path);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return;
@@ -693,54 +726,126 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     gridLayout = new QGridLayout();
     gridLayout->setSpacing(6);
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+    //tab1页面字体
+    QFont ft("Microsoft YaHei", 15);
+    QPixmap tmp_pixmap=QPixmap(photoPath+"light_red.png");
+    QPixmap tmp_pixmap1=QPixmap(photoPath+"light_green.png");
+    fitpixmap_redLight = tmp_pixmap.scaled(30,30, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+    fitpixmap_greenLight = tmp_pixmap1.scaled(30,30, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+
+    label_5 = new QLabel(tab);
+    label_5->setObjectName(QString::fromUtf8("label_5"));
+    label_5->setFixedSize(160,50);
+    label_5->setFont(ft);
+    label_5->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    gridLayout->addWidget(label_5, 1, 0, 1, 1);
+
+    label_rb1CoonStatus = new QLabel(tab);
+    label_rb1CoonStatus->setObjectName(QString::fromUtf8("label_rb1CoonStatus"));
+    label_rb1CoonStatus->setPixmap(fitpixmap_redLight);
+    label_rb1CoonStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_rb1CoonStatus, 1, 1, 1, 1);
+
+    label_6 = new QLabel(tab);
+    label_6->setObjectName(QString::fromUtf8("label_6"));
+    label_6->setFixedSize(160,50);
+    label_6->setFont(ft);
+    label_6->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    gridLayout->addWidget(label_6, 1, 2, 1, 1);
+    label_rb2CoonStatus = new QLabel(tab);
+    label_rb2CoonStatus->setObjectName(QString::fromUtf8("label_rb2CoonStatus"));
+    label_rb2CoonStatus->setPixmap(fitpixmap_redLight);
+    label_rb2CoonStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_rb2CoonStatus, 1, 3, 1, 1);
+
+    label_7 = new QLabel(tab);
+    label_7->setObjectName(QString::fromUtf8("label_7"));
+    label_7->setFixedSize(160,50);
+    label_7->setFont(ft);
+    label_7->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    gridLayout->addWidget(label_7, 1, 4, 1, 1);
+    label_rb1ErrStatus = new QLabel(tab);
+    label_rb1ErrStatus->setObjectName(QString::fromUtf8("label_rb1ErrStatus"));
+    label_rb1ErrStatus->setPixmap(fitpixmap_redLight);
+    label_rb1ErrStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_rb1ErrStatus, 1, 5, 1, 1);
+
+    label_8 = new QLabel(tab);
+    label_8->setObjectName(QString::fromUtf8("label_8"));
+    label_8->setFixedSize(160,50);
+    label_8->setFont(ft);
+    label_8->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    gridLayout->addWidget(label_8, 1, 6, 1, 1);
+    label_rb2ErrStatus = new QLabel(tab);
+    label_rb2ErrStatus->setObjectName(QString::fromUtf8("label_rb2ErrStatus"));
+    label_rb2ErrStatus->setPixmap(fitpixmap_redLight);
+    label_rb2ErrStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_rb2ErrStatus, 1, 7, 1, 1);
+
+    label_123 = new QLabel(tab);
+    label_123->setObjectName(QString::fromUtf8("label_123"));
+    label_123->setFixedSize(160,50);
+    label_123->setFont(ft);
+    label_123->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    label_123->setText(QApplication::translate("MainWindow", "机器人1伺服状态", nullptr));
+    gridLayout->addWidget(label_123, 2, 0, 1, 1);
+
+    label_rob1EnableStatus = new QLabel(tab);
+    label_rob1EnableStatus->setFixedSize(50,50);
+    label_rob1EnableStatus->setObjectName(QString::fromUtf8("label_rob1EnableStatus"));
+    label_rob1EnableStatus->setPixmap(fitpixmap_redLight);
+    label_rob1EnableStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_rob1EnableStatus, 2, 1, 1, 1);
+
+    label_124 = new QLabel(tab);
+    label_124->setObjectName(QString::fromUtf8("label_124"));
+    label_124->setFixedSize(160,50);
+    label_124->setFont(ft);
+    label_124->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    label_124->setText(QApplication::translate("MainWindow", "机器人2伺服状态", nullptr));
+    gridLayout->addWidget(label_124, 2, 2, 1, 1);
+
+    label_rob2EnableStatus = new QLabel(tab);
+    label_rob2EnableStatus->setFixedSize(50,50);
+    label_rob2EnableStatus->setObjectName(QString::fromUtf8("label_rob2EnableStatus"));
+    label_rob2EnableStatus->setPixmap(fitpixmap_redLight);
+    label_rob2EnableStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_rob2EnableStatus, 2, 3, 1, 1);
+
+    label_121 = new QLabel(tab);
+    label_121->setObjectName(QString::fromUtf8("label_121"));
+    label_121->setFixedSize(160,50);
+    label_121->setFont(ft);
+    label_121->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    label_121->setText(QApplication::translate("MainWindow", "左相机连接状态", nullptr));
+    gridLayout->addWidget(label_121, 2, 4, 1, 1);
+
+    label_LeftCameraConnStatus = new QLabel(tab);
+    label_LeftCameraConnStatus->setFixedSize(50,50);
+    label_LeftCameraConnStatus->setObjectName(QString::fromUtf8("label_LeftCameraConnStatus"));
+    label_LeftCameraConnStatus->setPixmap(fitpixmap_redLight);
+    label_LeftCameraConnStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_LeftCameraConnStatus, 2, 5, 1, 1);
+    label_122 = new QLabel(tab);
+    label_122->setObjectName(QString::fromUtf8("label_122"));
+    label_122->setFixedSize(160,50);
+    label_122->setFont(ft);
+    label_122->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
+    label_122->setText(QApplication::translate("MainWindow", "右相机连接状态", nullptr));
+    gridLayout->addWidget(label_122, 2, 6, 1, 1);
+    label_RightCameraConnStatus = new QLabel(tab);
+    label_RightCameraConnStatus->setObjectName(QString::fromUtf8("label_RightCameraConnStatus"));
+    label_RightCameraConnStatus->setPixmap(fitpixmap_redLight);
+    label_RightCameraConnStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout->addWidget(label_RightCameraConnStatus, 2, 7, 1, 1);
+
     comboBox_setRunMode=new QComboBox();
     comboBox_setRunMode->addItem(QString());
     comboBox_setRunMode->addItem(QString());
     comboBox_setRunMode->addItem(QString());
     comboBox_setRunMode->setFixedHeight(50);
     comboBox_setRunMode->setObjectName(QString::fromUtf8("comboBox_setRunMode"));
-
-    gridLayout->addWidget(comboBox_setRunMode, 2, 0, 1, 2);
-
-    label_5 = new QLabel(tab);
-    label_5->setObjectName(QString::fromUtf8("label_5"));
-    label_5->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_5, 1, 0, 1, 1);
-    label_rb1CoonStatus = new QLabel(tab);
-    label_rb1CoonStatus->setObjectName(QString::fromUtf8("label_rb1CoonStatus"));
-    label_rb1CoonStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
-    label_rb1CoonStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb1CoonStatus, 1, 1, 1, 1);
-
-    label_6 = new QLabel(tab);
-    label_6->setObjectName(QString::fromUtf8("label_6"));
-    label_6->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_6, 1, 2, 1, 1);
-    label_rb2CoonStatus = new QLabel(tab);
-    label_rb2CoonStatus->setObjectName(QString::fromUtf8("label_rb2CoonStatus"));
-    label_rb2CoonStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
-    label_rb2CoonStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb2CoonStatus, 1, 3, 1, 1);
-
-    label_7 = new QLabel(tab);
-    label_7->setObjectName(QString::fromUtf8("label_7"));
-    label_7->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_7, 1, 4, 1, 1);
-    label_rb1ErrStatus = new QLabel(tab);
-    label_rb1ErrStatus->setObjectName(QString::fromUtf8("label_rb1ErrStatus"));
-    label_rb1ErrStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
-    label_rb1ErrStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb1ErrStatus, 1, 5, 1, 1);
-
-    label_8 = new QLabel(tab);
-    label_8->setObjectName(QString::fromUtf8("label_8"));
-    label_8->setAlignment(Qt::AlignVCenter|Qt::AlignRight);
-    gridLayout->addWidget(label_8, 1, 6, 1, 1);
-    label_rb2ErrStatus = new QLabel(tab);
-    label_rb2ErrStatus->setObjectName(QString::fromUtf8("label_rb2ErrStatus"));
-    label_rb2ErrStatus->setPixmap(QPixmap(photoPath+"light_red.png"));
-    label_rb2ErrStatus->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout->addWidget(label_rb2ErrStatus, 1, 7, 1, 1);
+    gridLayout->addWidget(comboBox_setRunMode, 3, 0, 1, 2);
 
     horizontalLayout_2->addLayout(gridLayout);
     verticalLayout_4->addLayout(horizontalLayout_2);
@@ -819,18 +924,19 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     label_picture4=new QLabel(tab_3);
     label_picture5=new QLabel(tab_3);
     label_picture6=new QLabel(tab_3);
+
     label_picture1->setObjectName(QString::fromUtf8("label_picture1"));
     label_picture2->setObjectName(QString::fromUtf8("label_picture2"));
     label_picture3->setObjectName(QString::fromUtf8("label_picture3"));
     label_picture4->setObjectName(QString::fromUtf8("label_picture4"));
     label_picture5->setObjectName(QString::fromUtf8("label_picture5"));
     label_picture6->setObjectName(QString::fromUtf8("label_picture6"));
-    label_picture1->setFixedSize(300,200);
-    label_picture2->setFixedSize(300,200);
-    label_picture3->setFixedSize(300,200);
-    label_picture4->setFixedSize(300,200);
-    label_picture5->setFixedSize(300,200);
-    label_picture6->setFixedSize(300,200);
+    label_picture1->setFixedSize(400,200);
+    label_picture2->setFixedSize(400,200);
+    label_picture3->setFixedSize(400,200);
+    label_picture4->setFixedSize(400,200);
+    label_picture5->setFixedSize(400,200);
+    label_picture6->setFixedSize(400,200);
     label_picture1->setAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
     label_picture2->setAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
     label_picture3->setAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
@@ -843,12 +949,25 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     list_label_picture.push_back(label_picture4);
     list_label_picture.push_back(label_picture5);
     list_label_picture.push_back(label_picture6);
+    QPixmap tmp_pixmap2=QPixmap(photoPath+"question1.png");
+    QPixmap tmp_fixmap2 = tmp_pixmap2.scaled(list_label_picture[0]->width(),list_label_picture[0]->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+    for (int i = 0; i < 6; ++i) {
+        list_label_picture[i]->setPixmap(tmp_fixmap2);
+    }
     gridLayout1->addWidget(label_picture1, 0, 0, 1, 1);
     gridLayout1->addWidget(label_picture2, 0, 1, 1, 1);
     gridLayout1->addWidget(label_picture3, 1, 0, 1, 1);
     gridLayout1->addWidget(label_picture4, 1, 1, 1, 1);
     gridLayout1->addWidget(label_picture5, 2, 0, 1, 1);
     gridLayout1->addWidget(label_picture6, 2, 1, 1, 1);
+
+    label_magicSolveData=new QLabel(tab_3);
+    label_magicSolveData->setObjectName(QString::fromUtf8("label_magicSolveData"));
+//    label_magicSolveData->setFixedSize(400,200);
+    label_magicSolveData->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    gridLayout1->addWidget(label_magicSolveData, 3, 0, 1, 2);
+    label_magicSolveData->setFont(ft);
+    label_magicSolveData->setText(QApplication::translate("MainWindow", "魔方解析数据:", nullptr));
     verticalLayout_6->addLayout(gridLayout1);
 
 
@@ -1070,9 +1189,9 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         label->setText(QApplication::translate("MainWindow", "\345\217\214\346\234\272\345\231\250\344\272\272\344\272\222\345\212\250\344\270\216\345\215\217\344\275\234\345\271\263\345\217\260", nullptr));
         label_5->setText(QApplication::translate("MainWindow", "机器人1连接状态", nullptr));
         label_6->setText(QApplication::translate("MainWindow", "机器人2连接状态", nullptr));
-        label_7->setText(QApplication::translate("MainWindow", "机器人1报警状态", nullptr));
-        label_8->setText(QApplication::translate("MainWindow", "机器人2报警状态", nullptr));
-        label_picture1->setText(QApplication::translate("MainWindow", "图片", nullptr));
+        label_7->setText(QApplication::translate("MainWindow", "机器人1正常状态", nullptr));
+        label_8->setText(QApplication::translate("MainWindow", "机器人2正常状态", nullptr));
+//        label_picture1->setText(QApplication::translate("MainWindow", "图片", nullptr));
         label_rb1CoonStatus->setText(QString());
         btn_rbConn->setText(QApplication::translate("MainWindow", "\350\256\276\345\244\207\350\277\236\346\216\245", nullptr));
         btn_rvizRun->setText(QApplication::translate("MainWindow", "\345\220\257\345\212\250rviz", nullptr));
@@ -1118,18 +1237,20 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
 
 void MainWindow::showLightColor(QLabel* label,string color) {
 if(color=="red"){
-    label->setPixmap(QPixmap(photoPath+"light_red.png"));
+    label->setPixmap(fitpixmap_redLight);
 } else if(color=="green"){
-    label->setPixmap(QPixmap(photoPath+"light_green.png"));
+    label->setPixmap(fitpixmap_greenLight);
 }
 }
 
 void MainWindow::callback_LeftCamera_subscriber(sensor_msgs::Image::ConstPtr image) {
     connFlag_LeftCamera= true;
+    updateTimer_LeftCamera->start();
 }
 
 void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image) {
     connFlag_RightCamera= true;
+    updateTimer_RightCamera->start();
 //    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
 //    cv::Mat mat = ptr->image;
 //    QImage image = cvMat2QImage(mat);
@@ -1137,8 +1258,50 @@ void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::Const
 //    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
 //    label_picture1->setPixmap(fitpixmap1);
-
 }
+
+void MainWindow::callback_rob1Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
+    updateTimer_rob1status->start();
+    if(robot_status->in_error.val==0){
+        errFlag_LeftRobot= false;
+    } else{
+        errFlag_LeftRobot=true;
+    }
+
+    if(robot_status->drives_powered.val==1){
+        enableFlag_LeftRobot= true;
+    } else{
+        enableFlag_LeftRobot= false;
+    }
+}
+
+void MainWindow::callback_rob2Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
+    updateTimer_rob2status->start();
+    if(robot_status->in_error.val==0){
+        errFlag_RightRobot= false;
+    } else{
+        errFlag_RightRobot=true;
+    }
+
+    if(robot_status->drives_powered.val==1){
+        enableFlag_RightRobot= true;
+    } else{
+        enableFlag_RightRobot= false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
