@@ -53,6 +53,7 @@
 #include "logmanager.h"
 #include "hirop_msgs/robotConn.h"
 #include "hirop_msgs/robotError.h"
+#include "industrial_msgs/RobotStatus.h"
 //#include "messagehandler.h"
 using namespace std;
 
@@ -96,10 +97,14 @@ private:
     QString logPath;//图片路径
     QPixmap fitpixmap_redLight;
     QPixmap fitpixmap_greenLight;
-    bool connFlag_LeftCamera; //左边相机连接状态
-    bool connFlag_RightCamera;//右边相机连接状态
     bool connFlag_LeftRobot;//左机器人连接状态
     bool connFlag_RightRobot;//右机器人连接状态
+    bool errFlag_LeftRobot;//左机器人报警状态
+    bool errFlag_RightRobot;//右机器人报警状态
+    bool enableFlag_LeftRobot;//左机器人伺服状态
+    bool enableFlag_RightRobot;//右机器人伺服状态
+    bool connFlag_LeftCamera; //左边相机连接状态
+    bool connFlag_RightCamera;//右边相机连接状态
     bool connFlag_LeftGripper;//左夹爪连接状态
     bool connFlag_RightGripper;//右夹爪连接状态
     //rosparam参数
@@ -109,11 +114,15 @@ private:
     ros::NodeHandle* Node;
     QTimer* updateTimer;
     QTimer* updateTimer_com;
+    QTimer* updateTimer_rob1status;
+    QTimer* updateTimer_rob2status;
     QTimer* updateTimer_LeftCamera;
     QTimer* updateTimer_RightCamera;
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber camera_subscriber;//相机数据采集
+    ros::Subscriber rob1Status_subscriber;//机器人1状态数据采集
+    ros::Subscriber rob2Status_subscriber;//机器人2状态数据采集
     ros::Subscriber Leftcamera_subscriber;//相机数据采集
     ros::Subscriber Rightcamera_subscriber;//相机数据采集
     ros::Subscriber MagicSolve_subscriber;//魔方解析数据采集
@@ -162,9 +171,15 @@ private:
     void timer_onUpdate();
     void timer_LeftCamera();
     void timer_RightCamera();
+    void timer_comUpdate();//公共刷新连接状态
+    void timer_robot1Status();//公共刷新连接状态
+    void timer_robot2Status();//公共刷新连接状态
+
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
+    void callback_rob1Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status);
+    void callback_rob2Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status);
     void callback_LeftCamera_subscriber(const sensor_msgs::Image::ConstPtr image);
     void callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image);
     void callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg);
@@ -218,14 +233,17 @@ private:
     QLabel *label_8;
     QLabel *label_rb1CoonStatus;
     QLabel *label_rb2CoonStatus;
+    QLabel *label_rb1ErrStatus;
+    QLabel *label_rb2ErrStatus;
     QLabel *label_121;
     QLabel *label_122;
     QLabel *label_123;
     QLabel *label_124;
+    QLabel *label_rob1EnableStatus;
+    QLabel *label_rob2EnableStatus;
     QLabel *label_LeftCameraConnStatus;
     QLabel *label_RightCameraConnStatus;
-    QLabel *label_rb1ErrStatus;
-    QLabel *label_rb2ErrStatus;
+
     QHBoxLayout *horizontalLayout_5;
     QPushButton *btn_rbConn;
     QPushButton *btn_rvizRun;
