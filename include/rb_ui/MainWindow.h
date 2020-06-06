@@ -18,6 +18,7 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableView>
 #include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QFileDialog>
 #include <QtWidgets/QWidget>
 #include <QDialog>
 
@@ -50,6 +51,8 @@
 #include <qregion.h>
 #include "rb_msgAndSrv/SetEnableSrv.h"
 #include "logmanager.h"
+#include "hirop_msgs/robotConn.h"
+#include "hirop_msgs/robotError.h"
 //#include "messagehandler.h"
 using namespace std;
 
@@ -90,6 +93,9 @@ private:
     int index_magicStep;
     uint index_RvizCount;
     QString photoPath;//图片路径
+    QString logPath;//图片路径
+    QPixmap fitpixmap_redLight;
+    QPixmap fitpixmap_greenLight;
     bool connFlag_LeftCamera; //左边相机连接状态
     bool connFlag_RightCamera;//右边相机连接状态
     bool connFlag_LeftRobot;//左机器人连接状态
@@ -102,12 +108,15 @@ private:
     //ros节点
     ros::NodeHandle* Node;
     QTimer* updateTimer;
-    QTimer* updateTimer2;
+    QTimer* updateTimer_com;
+    QTimer* updateTimer_LeftCamera;
+    QTimer* updateTimer_RightCamera;
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber camera_subscriber;//相机数据采集
     ros::Subscriber Leftcamera_subscriber;//相机数据采集
     ros::Subscriber Rightcamera_subscriber;//相机数据采集
+    ros::Subscriber MagicSolve_subscriber;//魔方解析数据采集
     ros::ServiceClient rbConnCommand_client;//机器人连接客户端
     ros::ServiceClient rbRunCommand_client ;
     ros::ServiceClient rbStopCommand_client ;
@@ -116,8 +125,7 @@ private:
     ros::ServiceClient rbErrStatus_client;
     ros::ServiceClient rbGrepSetCommand_client;
     ros::ServiceClient MagicStepRunCommand_client ;//魔方分步完成
-
-    ros::ServiceClient ImageGet_client;//从阿辉那里获得图像
+    ros::ServiceClient ImageGet_client;//获得图像数据
     ros::Subscriber magicGetData_subscriber;//机器人连接状态
     //子线程句柄
     qthreadForRos *thread_forRbConn;//设备连接子线程
@@ -152,6 +160,8 @@ private:
     void oputRecord();
     void clearRecord();
     void timer_onUpdate();
+    void timer_LeftCamera();
+    void timer_RightCamera();
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
@@ -161,6 +171,7 @@ private:
     void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
     void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
+    void callback_magicSolve_subscriber(std_msgs::UInt8MultiArray data_msg);
     //线程处理
     void thread_rbConnCommand();
     void thread_rbRvizCommand();
@@ -207,6 +218,12 @@ private:
     QLabel *label_8;
     QLabel *label_rb1CoonStatus;
     QLabel *label_rb2CoonStatus;
+    QLabel *label_121;
+    QLabel *label_122;
+    QLabel *label_123;
+    QLabel *label_124;
+    QLabel *label_LeftCameraConnStatus;
+    QLabel *label_RightCameraConnStatus;
     QLabel *label_rb1ErrStatus;
     QLabel *label_rb2ErrStatus;
     QHBoxLayout *horizontalLayout_5;
@@ -240,6 +257,7 @@ private:
     QLabel* label_picture4;
     QLabel* label_picture5;
     QLabel* label_picture6;
+    QLabel* label_magicSolveData;
     QVBoxLayout *verticalLayout_8;
     QPushButton *btn_magicGetdata;
     QPushButton *btn_magicSolve;
