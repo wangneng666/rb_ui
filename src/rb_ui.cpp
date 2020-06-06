@@ -21,5 +21,7 @@ int main(int args,char** argv){
     mainwindow.show();
     gloalMain = &mainwindow;
     qInstallMessageHandler(customMessageHandler);
+    // ros::waitForShutdown();
     return app.exec();
+    // return 0;
 }
