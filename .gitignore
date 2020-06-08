@@ -1,4 +1,5 @@
 .idea/
 build/
 srv/
-
+src/.idea/
+*.md

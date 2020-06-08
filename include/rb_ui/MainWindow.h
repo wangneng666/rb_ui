@@ -58,6 +58,12 @@
 //#include "messagehandler.h"
 using namespace std;
 
+#define  BTN_W 150
+#define  BTN_H 50
+#define  COMBOX_W 200
+#define  COMBOX_H 50
+
+
 class  MainWindow;
 
 //给信号与槽函数使用的枚举类型
@@ -111,6 +117,8 @@ private:
     //rosparam参数
     bool isRunning_solveMagic;
     bool isRunning_grab;
+    //qt参数
+    QString groupBox_qss;
     //ros节点
     ros::NodeHandle* Node;
     QTimer* updateTimer;
@@ -220,6 +228,7 @@ private slots:
     void showQmessageBox(infoLevel level,QString info);
     void showLightColor(QLabel* label,string color);
     void runTimer(QTimer* timer);
+    void slot_cBox_setRunMode(const QString& text);
 
 private:
     //qt控件
@@ -238,6 +247,7 @@ private:
     QVBoxLayout *verticalLayout_4;
     QHBoxLayout *horizontalLayout_2;
     QGridLayout *gridLayout;
+    QHBoxLayout *horizontalLayout_21;
     QComboBox *comboBox_setRunMode;
     QLabel *label_5;
     QLabel *label_6;
