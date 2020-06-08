@@ -128,10 +128,8 @@ void MainWindow::signalAndSlot() {
     connect(btn_rb2SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2SetEnable);
     connect(btn_rb1Reset,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1Reset);
     connect(btn_rb2Reset,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2Reset);
-    connect(gripper1_open,&QPushButton::clicked,this,&MainWindow::slot_gripper1_open);
-    connect(gripper1_close,&QPushButton::clicked,this,&MainWindow::slot_gripper1_close);
-    connect(gripper2_open,&QPushButton::clicked,this,&MainWindow::slot_gripper2_open);
-    connect(gripper2_close,&QPushButton::clicked,this,&MainWindow::slot_gripper2_close);
+    connect(gripper1,&QPushButton::clicked,this,&MainWindow::slot_gripper1);
+    connect(gripper2,&QPushButton::clicked,this,&MainWindow::slot_gripper2);
 
     //定时器启动
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::timer_onUpdate);
@@ -960,29 +958,17 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_19->setSpacing(6);
     horizontalLayout_19->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_19->setObjectName(QString::fromUtf8("horizontalLayout_19"));
-    gripper1_open = new QPushButton(groupBox_tab2_2);
-    gripper1_open->setObjectName(QString::fromUtf8("gripper1_open"));
-    gripper1_open->setFixedSize(BTN_W,BTN_H);
-    horizontalLayout_19->addWidget(gripper1_open);
+    gripper1 = new QPushButton(groupBox_tab2_2);
+    gripper1->setObjectName(QString::fromUtf8("gripper1"));
+    gripper1->setFixedSize(BTN_W,BTN_H);
+    horizontalLayout_19->addWidget(gripper1);
 
-    gripper1_close = new QPushButton(groupBox_tab2_2);
-    gripper1_close->setObjectName(QString::fromUtf8("gripper1_close"));
-    gripper1_close->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_19->addWidget(gripper1_close);
+    gripper2 = new QPushButton(groupBox_tab2_2);
+    gripper2->setObjectName(QString::fromUtf8("gripper2"));
+    gripper2->setFixedSize(BTN_W,BTN_H);
 
-    gripper2_open = new QPushButton(groupBox_tab2_2);
-    gripper2_open->setObjectName(QString::fromUtf8("gripper2_open"));
-    gripper2_open->setFixedSize(BTN_W,BTN_H);
-
-    horizontalLayout_19->addWidget(gripper2_open);
-
-    gripper2_close = new QPushButton(groupBox_tab2_2);
-    gripper2_close->setObjectName(QString::fromUtf8("gripper2_close"));
-    gripper2_close->setFixedSize(BTN_W,BTN_H);
-
-    horizontalLayout_19->addWidget(gripper2_close);
-
+    horizontalLayout_19->addWidget(gripper2);
 
     verticalLayout_5->addWidget(groupBox_tab2_2);
 
@@ -1328,10 +1314,8 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         btn_rb1Reset->setText(QApplication::translate("MainWindow", "\345\267\246\346\234\272\345\231\250\344\272\272\345\244\215\344\275\215", nullptr));
         btn_rb2Reset->setText(QApplication::translate("MainWindow", "\345\217\263\346\234\272\345\231\250\344\272\272\345\244\215\344\275\215", nullptr));
         groupBox_tab2_2->setTitle(QApplication::translate("MainWindow", "\345\244\271\345\205\267\350\260\203\350\257\225", nullptr));
-        gripper1_open->setText(QApplication::translate("MainWindow", "\345\267\246\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
-        gripper1_close->setText(QApplication::translate("MainWindow", "\345\267\246\345\244\271\345\205\267\345\205\263\351\227\255", nullptr));
-        gripper2_open->setText(QApplication::translate("MainWindow", "\345\217\263\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
-        gripper2_close->setText(QApplication::translate("MainWindow", "\345\217\263\345\244\271\345\205\267\345\205\263\351\227\255", nullptr));
+        gripper1->setText(QApplication::translate("MainWindow", "\345\267\246\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
+        gripper2->setText(QApplication::translate("MainWindow", "\345\217\263\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
         groupBox_tab3_3->setTitle(QApplication::translate("MainWindow", "\345\205\266\344\273\226\350\260\203\350\257\225", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "单步调试界面", nullptr));
 
@@ -1432,11 +1416,24 @@ void MainWindow::runTimer(QTimer* timer) {
 }
 
 void MainWindow::slot_btn_rb1SetEnable() {
-    system("rosservice call /UR51/set_robot_enable \"enable: true\"");
+    flag_rb1Enable=!flag_rb1Enable;
+    if(flag_rb1Enable){
+        btn_rb1SetEnable->setText("左机器人下使能");
+        system("rosservice call /UR51/set_robot_enable \"enable: true\"");
+    } else{
+        btn_rb1SetEnable->setText("左机器人上使能");
+        system("rosservice call /UR51/set_robot_enable \"enable: false\"");
+    }
 }
-
 void MainWindow::slot_btn_rb2SetEnable() {
-    system("rosservice call /UR52/set_robot_enable \"enable: true\"");
+    flag_rb2Enable=!flag_rb2Enable;
+    if(flag_rb2Enable){
+        btn_rb2SetEnable->setText("右机器人下使能");
+        system("rosservice call /UR52/set_robot_enable \"enable: true\"");
+    } else{
+        btn_rb2SetEnable->setText("右机器人上使能");
+        system("rosservice call /UR52/set_robot_enable \"enable: false\"");
+    }
 }
 
 void MainWindow::slot_btn_rb1Reset() {
@@ -1447,22 +1444,30 @@ void MainWindow::slot_btn_rb2Reset() {
     system("rosservice call /UR52/clear_robot_fault \"{}\"");
 }
 
-void MainWindow::slot_gripper1_open() {
-    system("rosservice call /UR51/openGripper \"{}\"");
+void MainWindow::slot_gripper1() {
+    flag_gripper1=!flag_gripper1;
+    if(flag_gripper1){
+        gripper1->setText("左夹具关闭");
+        system("rosservice call /UR51/openGripper \"{}\"");
+    } else{
+        gripper1->setText("左夹具张开");
+        system("rosservice call /UR51/closeGripper \"{}\"");
+    }
 }
 
-void MainWindow::slot_gripper1_close() {
-    system("rosservice call /UR51/closeGripper \"{}\"");
+
+void MainWindow::slot_gripper2() {
+    flag_gripper2=!flag_gripper2;
+    if(flag_gripper2){
+        gripper2->setText("右夹具关闭");
+        system("rosservice call /UR52/openGripper \"{}\"");
+    } else{
+        gripper2->setText("右夹具张开");
+        system("rosservice call /UR52/closeGripper \"{}\"");
+    }
+
 }
 
-void MainWindow::slot_gripper2_open() {
-    system("rosservice call /UR52/openGripper \"{}\"");
-
-}
-
-void MainWindow::slot_gripper2_close() {
-    system("rosservice call /UR52/closeGripper \"{}\"");
-}
 
 void MainWindow::slot_cBox_setRunMode(const QString& text) {
     //设置模式按钮显示更新
