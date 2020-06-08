@@ -48,7 +48,7 @@ void MainWindow::SysVarInit() {
     Leftcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base/color/image_raw",1000,boost::bind(&MainWindow::callback_LeftCamera_subscriber,this,_1));
     Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
-    MagicSolve_subscriber=Node->subscribe<std_msgs::UInt8MultiArray>("/cube_solution",1000,&MainWindow::callback_magicSolve_subscriber,this);
+    MagicSolve_subscriber=Node->subscribe<std_msgs::Int8MultiArray>("/cube_solution",1000,&MainWindow::callback_magicSolve_subscriber,this);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
@@ -375,7 +375,7 @@ void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbim
 }
 
 //接受魔方解析数据
-void MainWindow::callback_magicSolve_subscriber(std_msgs::UInt8MultiArray data_msg) {
+void MainWindow::callback_magicSolve_subscriber(std_msgs::Int8MultiArray data_msg) {
     QString sumString ;
 //    for (int i = 0; i < data_msg.data.size(); ++i) {
 //        sumString+=QString("%1").arg(data_msg.data[i]);
@@ -1394,7 +1394,7 @@ void MainWindow::slot_gripper1_close() {
 }
 
 void MainWindow::slot_gripper2_open() {
-    system("rosservice call /UR51/openGripper \"{}\"");
+    system("rosservice call /UR52/openGripper \"{}\"");
 
 }
 

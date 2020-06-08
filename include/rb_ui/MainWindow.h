@@ -37,6 +37,7 @@
 #include "std_srvs/Empty.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt8MultiArray.h"
+#include "std_msgs/Int8MultiArray.h"
 #include "std_msgs/UInt16MultiArray.h"
 #include "roscpp_tutorials/TwoInts.h"
 #include "rb_msgAndSrv/rb_ArrayAndBool.h"
@@ -195,7 +196,7 @@ private:
     void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
     void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
-    void callback_magicSolve_subscriber(std_msgs::UInt8MultiArray data_msg);
+    void callback_magicSolve_subscriber(std_msgs::Int8MultiArray data_msg);
     //线程处理
     void thread_rbConnCommand();
     void thread_rbRvizCommand();
