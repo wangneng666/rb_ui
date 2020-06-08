@@ -114,6 +114,11 @@ private:
     bool connFlag_RightCamera;//右边相机连接状态
     bool connFlag_LeftGripper;//左夹爪连接状态
     bool connFlag_RightGripper;//右夹爪连接状态
+
+    bool flag_rb1Enable= false;
+    bool flag_rb2Enable= false;
+    bool flag_gripper1= false;
+    bool flag_gripper2= false;
     //rosparam参数
     bool isRunning_solveMagic;
     bool isRunning_grab;
@@ -189,10 +194,8 @@ private:
     void slot_btn_rb2SetEnable();
     void slot_btn_rb1Reset();
     void slot_btn_rb2Reset();
-    void slot_gripper1_open();
-    void slot_gripper1_close();
-    void slot_gripper2_open();
-    void slot_gripper2_close();
+    void slot_gripper1();
+    void slot_gripper2();
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
@@ -284,10 +287,8 @@ private:
     QPushButton *btn_rb2Reset;
     QGroupBox *groupBox_tab2_2;
     QHBoxLayout *horizontalLayout_19;
-    QPushButton *gripper1_open;
-    QPushButton *gripper1_close;
-    QPushButton *gripper2_open;
-    QPushButton *gripper2_close;
+    QPushButton *gripper1;
+    QPushButton *gripper2;
     QGroupBox *groupBox_tab3_3;
 
 
