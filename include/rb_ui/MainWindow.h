@@ -20,6 +20,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QLineEdit>
 #include <QDialog>
 
 #include <QDir>
@@ -59,8 +60,12 @@
 #include "hsr_rosi_device/ClearFaultSrv.h"
 #include "hsr_rosi_device/SetEnableSrv.h"
 #include "industrial_msgs/RobotStatus.h"
+#include "rb_msgAndSrv/rb_StringArray.h"
+#include "rb_msgAndSrv/rb_string.h"
 //#include "messagehandler.h"
 using namespace std;
+
+
 
 #define  BTN_W 150
 #define  BTN_H 50
@@ -184,6 +189,7 @@ private:
     ros::Subscriber Leftcamera_subscriber;//相机数据采集
     ros::Subscriber Rightcamera_subscriber;//相机数据采集
     ros::Subscriber MagicSolve_subscriber;//魔方解析数据采集
+    ros::ServiceClient MagicDataUpdate_client;//魔方数据修改客户端
     ros::ServiceClient rbConnCommand_client;//机器人连接客户端
 
     ros::ServiceClient LeftGripperSet_client;//左夹爪连接客户端
@@ -232,6 +238,7 @@ private:
     void magicCube_get();//按钮槽函数_采集魔方数据
     void magicCube_solve();//按钮槽函数_解算魔方数据
     void magicCube_execute();//按钮槽函数_执行解算魔方数据
+    void magicUpdateData();//魔方数据修改
     void robot_grab();//按钮槽函数_机器人抓取
     void safety_sysStop();//按钮槽函数_系统停止
     void safety_rob1Stop();//按钮槽函数_机器人1停止
@@ -263,7 +270,7 @@ private:
     void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
     void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
-    void callback_magicSolve_subscriber(std_msgs::Int8MultiArray data_msg);
+    void callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg);
     //线程处理
     void thread_SysCheck();
     void thread_rbConnCommand();
@@ -353,8 +360,8 @@ private:
     QWidget *tab_3;
     QHBoxLayout *horizontalLayout_8;
     QHBoxLayout *horizontalLayout_7;
+    QHBoxLayout *horizontalLayout_tab3_1;
     QVBoxLayout *verticalLayout_6;
-//    QTableView *tableView;
     QGridLayout* gridLayout1;
     vector<QLabel*> list_label_picture;
     QLabel* label_picture1;
@@ -363,12 +370,14 @@ private:
     QLabel* label_picture4;
     QLabel* label_picture5;
     QLabel* label_picture6;
-    QLabel* label_magicSolveData;
     QVBoxLayout *verticalLayout_8;
     QPushButton *btn_magicGetdata;
     QPushButton *btn_magicSolve;
     QPushButton *btn_magicRunSolve;
     QPushButton *btn_magicAutoSolve;
+    QPushButton *btn_updateData;
+    QLineEdit* line_updataData;
+
     QWidget *tab_4;
     QHBoxLayout *horizontalLayout_10;
     QHBoxLayout *horizontalLayout_9;

@@ -51,9 +51,10 @@ void MainWindow::SysVarInit() {
     Leftcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base/color/image_raw",1000,boost::bind(&MainWindow::callback_LeftCamera_subscriber,this,_1));
     Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
-    MagicSolve_subscriber=Node->subscribe<std_msgs::Int8MultiArray>("/cube_solution",1000,&MainWindow::callback_magicSolve_subscriber,this);
+    MagicSolve_subscriber=Node->subscribe<rb_msgAndSrv::rb_StringArray>("changeColor",1000,&MainWindow::callback_magicSolve_subscriber,this);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
+    MagicDataUpdate_client = Node->serviceClient<rb_msgAndSrv::rb_string>("cube_correct");
     LeftGripperSet_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR51/setGripper");
     RightGripperSet_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR52/setGripper");
     LeftGripperConn_client = Node->serviceClient<hirop_msgs::connectGripper>("/UR51/connectGripper");
@@ -125,6 +126,8 @@ void MainWindow::signalAndSlot() {
     connect(btn_magicRunSolve,&QPushButton::clicked,this,&MainWindow::magicCube_execute);
     //一键解算魔方
     connect(btn_magicAutoSolve,&QPushButton::clicked,this,&MainWindow::magicCube_AutoRun);
+    //更新模仿识别错误数据
+    connect(btn_updateData,&QPushButton::clicked,this,&MainWindow::magicUpdateData);
     //机器人抓取
     connect(btn_rbGrep,&QPushButton::clicked,this,&MainWindow::robot_grab);
     //导出日志
@@ -579,13 +582,13 @@ void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbim
 }
 
 //接受魔方解析数据
-void MainWindow::callback_magicSolve_subscriber(std_msgs::Int8MultiArray data_msg) {
+void MainWindow::callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg) {
     QString sumString ;
-//    for (int i = 0; i < data_msg.data.size(); ++i) {
-//        sumString+=QString("%1").arg(data_msg.data[i]);
-            ;
-//    }
-    label_magicSolveData->setText(sumString);
+    for (int i = 0; i < data_msg.data.size(); ++i) {
+        char c_str = data_msg.data[i].data.at(0);
+        sumString +=QString(QLatin1String(&c_str));
+    }
+    line_updataData->setText(sumString);
 }
 
 //点击解算魔方数据---1
@@ -1256,15 +1259,18 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     gridLayout1->addWidget(label_picture5, 2, 0, 1, 1);
     gridLayout1->addWidget(label_picture6, 2, 1, 1, 1);
 
-    label_magicSolveData=new QLabel(tab_3);
-    label_magicSolveData->setObjectName(QString::fromUtf8("label_magicSolveData"));
-//    label_magicSolveData->setFixedSize(400,200);
-    label_magicSolveData->setAlignment(Qt::AlignVCenter|Qt::AlignLeft);
-    gridLayout1->addWidget(label_magicSolveData, 3, 0, 1, 2);
-    label_magicSolveData->setFont(ft);
-    label_magicSolveData->setText(QApplication::translate("MainWindow", "魔方解析数据:", nullptr));
-    verticalLayout_6->addLayout(gridLayout1);
+    horizontalLayout_tab3_1=new QHBoxLayout();
 
+    line_updataData =new QLineEdit();
+    line_updataData->setObjectName(QString::fromUtf8("line_updataData"));
+    btn_updateData=new QPushButton(tab_3);
+    btn_updateData->setObjectName(QString::fromUtf8("btn_updateData"));
+    btn_updateData->setFixedSize(BTN_W,BTN_H);
+    btn_updateData->setText("修改魔方采集数据");
+    horizontalLayout_tab3_1->addWidget(line_updataData);
+    horizontalLayout_tab3_1->addWidget(btn_updateData);
+    verticalLayout_6->addLayout(gridLayout1);
+    verticalLayout_6->addLayout(horizontalLayout_tab3_1);
 
     horizontalLayout_7->addLayout(verticalLayout_6);
 
@@ -1713,7 +1719,17 @@ void MainWindow::slot_cBox_setRunMode(const QString& text) {
     }
 }
 
-
+void MainWindow::magicUpdateData() {
+    cout<<"按下按钮"<<endl;
+    QString qString = line_updataData->text();
+    if(qString.toStdString().size()==6*9){
+        rb_msgAndSrv::rb_string msg_data;
+        msg_data.request.data.data=qString.toStdString();
+        MagicDataUpdate_client.call(msg_data);
+    } else{
+        emit emitQmessageBox(infoLevel::warning,"不是54个字母");
+    }
+}
 
 CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)
 {
