@@ -54,6 +54,16 @@ void MainWindow::SysVarInit() {
     MagicSolve_subscriber=Node->subscribe<std_msgs::Int8MultiArray>("/cube_solution",1000,&MainWindow::callback_magicSolve_subscriber,this);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
+    LeftGripperSet_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR51/setGripper");
+    RightGripperSet_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR52/setGripper");
+    LeftGripperConn_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR51/connectGripper");
+    RightGripperConn_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR52/connectGripper");
+
+    LeftRobReset_client = Node->serviceClient<hsr_rosi_device::ClearFaultSrv>("/UR51/clear_robot_fault");
+    RightRobReset_client = Node->serviceClient<hsr_rosi_device::ClearFaultSrv>("/UR52/clear_robot_fault");
+    LeftRobEnable_client = Node->serviceClient<hsr_rosi_device::SetEnableSrv>("/UR51/set_robot_enable");
+    RightRobEnable_client = Node->serviceClient<hsr_rosi_device::SetEnableSrv>("/UR52/set_robot_enable");
+
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
     SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1);
     rbConnCommand_client = Node->serviceClient<hirop_msgs::robotConn>("getRobotConnStatus");
@@ -249,12 +259,15 @@ void MainWindow::timer_RightCamera() {
 
 //设备连接按钮-1
 void MainWindow::dev_connect() {
-    cbox=new CMsgBox();
-    connect(this, SIGNAL(emitSwapDataWithCMsgBox(int*)), cbox,SLOT(slot_SwapDataWithMainwin(int*)),Qt::DirectConnection);  //将自定义槽连接到自定义信号
+    if(cbox==nullptr){
+        cbox=new CMsgBox();
+        connect(this, SIGNAL(emitSwapDataWithCMsgBox(int*)), cbox,SLOT(slot_SwapDataWithMainwin(int*)),Qt::DirectConnection);  //将自定义槽连接到自定义信号
+    }
     thread_forRbConn->start();//运行子线程代码:设备连接按钮中开辟的子线程程序-2
 }
 //设备连接按钮中开辟的子线程程序-2
 void MainWindow::thread_rbConnCommand() {
+    cout<<"进入rbConn子线程"<<endl;
     switch (comboBox_setRunMode->currentIndex()){
         case 2:
             cbox->show();
@@ -282,7 +295,7 @@ void MainWindow::thread_SysCheck() {
     //7.grasp_place grasp.launch            抓取参数
     //8.rubik_cube_solve solve.launch       解析参数
     //9.rosrun cubeParse cube       魔方解析参数
-    cout<<"进入子线程"<<endl;
+    cout<<"进入SysCheck子线程"<<endl;
     while ((!flag_syscheckOk)&&(!flag_sysckCancel)) {
         sleep(2);
         checkArray[0]=connFlag_RightRobot?1:0;
@@ -300,6 +313,7 @@ void MainWindow::thread_SysCheck() {
     }
     flag_syscheckOk= false;
     flag_sysckCancel= false;
+    cout<<"退出SysCheck子线程"<<endl;
 }
 
 
@@ -328,8 +342,7 @@ void MainWindow::rviz_statup() {
 
 //进入子线程－－－２
 void MainWindow::thread_rbRvizCommand() {
-    //启动urdf模型
-    system("roslaunch co605_dual_arm_gripper_moveit_config demo.launch ");
+    system("rosrun rb_ui RvizAndTestPoint.sh");
 }
 
 void MainWindow::thread_rbCloseRvizCommand() {
@@ -345,10 +358,145 @@ void MainWindow::run_statup() {
 //运行启动按钮开启的子线程-2
 void MainWindow::thread_BeginRun() {
     int index=comboBox_setRunMode->currentIndex();
-    switch (index){
-        case 1:system("rosrun rb_ui RvizAndTestPoint.sh");break;
-        case 2:system("rosrun rb_ui RealRbAndReadPoint.sh");break;
-        case 3:system("rosrun rb_ui RealRbAndTestPoint.sh");break;
+    if((index==1)||(index==0)){
+        return;
+    }
+    //左右夹具设置服务
+    hirop_msgs::SetGripper data_setgripper;
+    data_setgripper.request.gripperName="SerialGripper";
+    if(LeftGripperSet_client.call(data_setgripper))
+    {
+        if(data_setgripper.response.isSucceeful)
+        {
+            LOG("ROS_NODE")->logWarnMessage("左夹具设置成功!");
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("左夹具设置失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("左夹具设置服务连接失败"));
+    }
+
+    if(RightGripperSet_client.call(data_setgripper))
+    {
+        if(data_setgripper.response.isSucceeful)
+        {
+            LOG("ROS_NODE")->logWarnMessage("右夹具设置成功!");
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("右夹具设置失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("右夹具设置服务连接失败"));
+    }
+    //左右夹具连接服务
+    hirop_msgs::connectGripper data_conngripper;
+    if(LeftGripperConn_client.call(data_conngripper))
+    {
+        if(data_conngripper.response.isConnected)
+        {
+            LOG("ROS_NODE")->logWarnMessage("左夹具连接成功!");
+            connFlag_LeftGripper= true;
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("左夹具连接失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("左夹具连接服务连接失败"));
+    }
+
+    if(RightGripperConn_client.call(data_conngripper))
+    {
+        if(data_conngripper.response.isConnected)
+        {
+            LOG("ROS_NODE")->logWarnMessage("右夹具连接成功!");
+            connFlag_RightGripper= true;
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("右夹具连接失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("右夹具连接服务连接失败"));
+    }
+
+    //左右机器人复位报警服务
+    hsr_rosi_device::ClearFaultSrv data_robotClear;
+    if(LeftRobReset_client.call(data_robotClear))
+    {
+        if(data_robotClear.response.finsh)
+        {
+            LOG("ROS_NODE")->logWarnMessage("左机器人清除错误成功!");
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("左机器人清除错误失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("左机器人清除错误服务连接失败"));
+    }
+
+    if(RightRobReset_client.call(data_robotClear))
+    {
+        if(data_robotClear.response.finsh)
+        {
+            LOG("ROS_NODE")->logWarnMessage("右机器人清除错误成功!");
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("右机器人清除错误失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("右机器人清除错误服务连接失败"));
+    }
+    //左右机器人上使能服务
+    hsr_rosi_device::SetEnableSrv data_robotEnable;
+    data_robotEnable.request.enable= true;
+    if(LeftRobEnable_client.call(data_robotEnable))
+    {
+        if(data_robotEnable.response.finsh)
+        {
+            LOG("ROS_NODE")->logWarnMessage("左机器人上使能成功!");
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("左机器人上使能失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("左机器人上使能服务连接失败"));
+    }
+
+    if(RightRobEnable_client.call(data_robotEnable))
+    {
+        if(data_robotEnable.response.finsh)
+        {
+            LOG("ROS_NODE")->logWarnMessage("右机器人上使能成功!");
+        }
+        else
+        {
+            LOG("ROS_NODE")->logWarnMessage("右机器人上使能失败!");
+        }
+    }
+    else
+    {
+        emit emitQmessageBox(infoLevel::warning,QString("右机器人上使能服务连接失败"));
     }
 }
 
@@ -384,6 +532,12 @@ void MainWindow::run_stop() {
 
 //系统复位
 void MainWindow::SysReset() {
+    try {
+        thread_forRbConn->terminate();
+    }
+    catch(int e1){
+        cout<<"抛异常了"<<endl;
+    }
     system("rosnode kill $(rosnode list | grep -v /robot_UI)");
 }
 

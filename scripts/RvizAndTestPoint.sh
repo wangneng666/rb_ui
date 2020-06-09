@@ -1,12 +1,9 @@
 #!/bin/bash
+roslaunch co605_dual_arm_gripper_moveit_config demo.launch &
 roslaunch rubik_cube_solve solve.launch &
-sleep 0.5
 roslaunch grasp_place grasp.launch &
-sleep 0.5
 rosrun grasp_place test.py &
-sleep 0.5
 roslaunch hsr_bringup publish_d435i_calibration_dual.launch &
-sleep 0.5
 rosrun cubeParse cube &
 wait
 exit 0

@@ -54,6 +54,10 @@
 #include "logmanager.h"
 #include "hirop_msgs/robotConn.h"
 #include "hirop_msgs/robotError.h"
+#include "hirop_msgs/SetGripper.h"
+#include "hirop_msgs/connectGripper.h"
+#include "hsr_rosi_device/ClearFaultSrv.h"
+#include "hsr_rosi_device/SetEnableSrv.h"
 #include "industrial_msgs/RobotStatus.h"
 //#include "messagehandler.h"
 using namespace std;
@@ -137,11 +141,12 @@ private:
     int index_magicStep;
     int* checkArray;
     bool flag_RvizRun= false;
-    CMsgBox* cbox;
+    CMsgBox* cbox=nullptr;
     QString photoPath;//图片路径
     QString logPath;//图片路径
     QPixmap fitpixmap_redLight;
     QPixmap fitpixmap_greenLight;
+    bool Flag_connOk= false;//连接状态
     bool connFlag_LeftRobot;//左机器人连接状态
     bool connFlag_RightRobot;//右机器人连接状态
     bool errFlag_LeftRobot;//左机器人报警状态
@@ -180,6 +185,17 @@ private:
     ros::Subscriber Rightcamera_subscriber;//相机数据采集
     ros::Subscriber MagicSolve_subscriber;//魔方解析数据采集
     ros::ServiceClient rbConnCommand_client;//机器人连接客户端
+
+    ros::ServiceClient LeftGripperSet_client;//左夹爪连接客户端
+    ros::ServiceClient RightGripperSet_client;//右夹爪连接客户端
+    ros::ServiceClient LeftGripperConn_client;//左夹爪连接客户端
+    ros::ServiceClient RightGripperConn_client;//右夹爪连接客户端
+
+    ros::ServiceClient LeftRobReset_client;//左机器人复位
+    ros::ServiceClient RightRobReset_client;//右机器人复位
+    ros::ServiceClient LeftRobEnable_client;//左机器人使能
+    ros::ServiceClient RightRobEnable_client;//右机器人使能
+
     ros::ServiceClient rbRunCommand_client ;
     ros::ServiceClient rbStopCommand_client ;
     ros::ServiceClient rbSetEnable1_client;
