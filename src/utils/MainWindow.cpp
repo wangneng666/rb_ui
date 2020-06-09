@@ -56,8 +56,8 @@ void MainWindow::SysVarInit() {
 
     LeftGripperSet_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR51/setGripper");
     RightGripperSet_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR52/setGripper");
-    LeftGripperConn_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR51/connectGripper");
-    RightGripperConn_client = Node->serviceClient<hirop_msgs::SetGripper>("/UR52/connectGripper");
+    LeftGripperConn_client = Node->serviceClient<hirop_msgs::connectGripper>("/UR51/connectGripper");
+    RightGripperConn_client = Node->serviceClient<hirop_msgs::connectGripper>("/UR52/connectGripper");
 
     LeftRobReset_client = Node->serviceClient<hsr_rosi_device::ClearFaultSrv>("/UR51/clear_robot_fault");
     RightRobReset_client = Node->serviceClient<hsr_rosi_device::ClearFaultSrv>("/UR52/clear_robot_fault");
