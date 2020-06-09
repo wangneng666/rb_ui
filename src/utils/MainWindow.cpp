@@ -1,5 +1,10 @@
 #include "MainWindow.h"
 
+bool flag_syscheckOk= false;//系统自检通过标志
+bool flag_sysckCancel= false;//系统自检取消
+bool flag_delCbox= false;//释放自检弹框
+
+
 MainWindow::MainWindow(ros::NodeHandle *node, QWidget *parent):QMainWindow(parent),Node(node){
     //系统变量初始化
     SysVarInit();
@@ -10,13 +15,11 @@ MainWindow::MainWindow(ros::NodeHandle *node, QWidget *parent):QMainWindow(paren
 }
 
 void MainWindow::SysVarInit() {
-    flag_sysRun= true; //设备启动允许标志
-    flag_rbConnStatus= false;//机器人连接标志
+    checkArray = new int[9]{0};
     flag_rbErrStatus= false;//机器人故障标志
     isRunning_solveMagic= false;
     isRunning_grab= false;
     index_magicStep=0;
-    index_RvizCount=0;
     //连接状态
     connFlag_LeftCamera= false;
     connFlag_RightCamera= false;
@@ -67,6 +70,9 @@ void MainWindow::SysVarInit() {
     //给设备连接按钮事件开辟子线程
     thread_forRbConn = new qthreadForRos();
     thread_forRbConn->setParm(this,&MainWindow::thread_rbConnCommand);
+    //启动前自检
+    thread_forSysCheck = new qthreadForRos();
+    thread_forSysCheck->setParm(this,&MainWindow::thread_SysCheck);
     //给启动rviz开辟子线程
     thread_forRviz = new qthreadForRos();
     thread_forRviz->setParm(this,&MainWindow::thread_rbRvizCommand);
@@ -151,7 +157,6 @@ void MainWindow::signalAndSlot() {
     connect(thread_MagicStepRun, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitQmessageBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitStartTimer(QTimer*)), this,SLOT(runTimer(QTimer*)));  //将自定义槽连接到自定义信号
-
 /****************************************************************************************************/
 }
 
@@ -202,6 +207,7 @@ void MainWindow::timer_comUpdate() {
     //2.更新状态栏目信息
     Node->getParam("isRuning_solveMagic",isRunning_solveMagic);
     Node->getParam("isRuning_grab",isRunning_grab);
+    Node->getParam("is_publish_d435i_calibration_dual",isRunning_d435i);
     showMagicStepLable->setText(QString("魔方完成第%1步").arg(index_magicStep));
     if(isRunning_solveMagic){
         isRunning_solveMagic_Lable->setText("魔方解算工作中");
@@ -213,11 +219,18 @@ void MainWindow::timer_comUpdate() {
     } else{
         isRunning_grab_Lable->setText("机器人抓盒子停止");
     }
+
 }
 
 //定时器回调函数，实时更新状态信息
 void MainWindow::timer_onUpdate() {
-
+if(flag_delCbox){
+    if(cbox!= nullptr){
+        delete cbox;
+        cbox= nullptr;
+        flag_delCbox= false;
+    }
+}
 }
 
 void MainWindow::timer_robot1Status() {
@@ -236,27 +249,69 @@ void MainWindow::timer_RightCamera() {
 
 //设备连接按钮-1
 void MainWindow::dev_connect() {
-        thread_forRbConn->start();//运行子线程代码:设备连接按钮中开辟的子线程程序-2
+    cbox=new CMsgBox();
+    connect(this, SIGNAL(emitSwapDataWithCMsgBox(int*)), cbox,SLOT(slot_SwapDataWithMainwin(int*)),Qt::DirectConnection);  //将自定义槽连接到自定义信号
+    thread_forRbConn->start();//运行子线程代码:设备连接按钮中开辟的子线程程序-2
 }
 //设备连接按钮中开辟的子线程程序-2
 void MainWindow::thread_rbConnCommand() {
-    int index=comboBox_setRunMode->currentIndex();
-    switch (index){
-        case 1:system("rosrun rb_ui decConnect.sh");break;
-        case 2:system("rosrun rb_ui decConnect.sh");break;
+    switch (comboBox_setRunMode->currentIndex()){
+        case 2:
+            cbox->show();
+            thread_forSysCheck->start();
+           system("rosrun rb_ui decConnect.sh");
+            break;
+        case 3:
+            cbox->show();
+            thread_forSysCheck->start();
+            system("rosrun rb_ui decConnect.sh");
+            break;
     }
-    updateTimer_RightCamera->start();
+
 }
+
+//启动前自检子线程
+void MainWindow::thread_SysCheck() {
+    //自检顺序:
+    //1.co605_dual_arm_real.launch 机器人连接
+    //2.gripper_bridge_dual.launch 夹爪桥连接
+    //3.rs_camera_right.launch     右边相机连接
+    //4.s_camera.launch             左边相机连接
+    //5.publish_d435i_calibration_dual.launch  发布标定参数
+    //6.vision_bridge_yolo6d_dual            视觉桥
+    //7.grasp_place grasp.launch            抓取参数
+    //8.rubik_cube_solve solve.launch       解析参数
+    //9.rosrun cubeParse cube       魔方解析参数
+    cout<<"进入子线程"<<endl;
+    while ((!flag_syscheckOk)&&(!flag_sysckCancel)) {
+        sleep(2);
+        checkArray[0]=connFlag_RightRobot?1:0;
+        checkArray[1]=1;
+        checkArray[2]=connFlag_LeftCamera?1:0;
+        checkArray[3]=connFlag_RightCamera?1:0;
+        checkArray[4]=isRunning_d435i?1:0;
+        checkArray[5]=1;
+        checkArray[6]=1;
+        checkArray[7]=1;
+        checkArray[8]=1;
+        cout<<"发送"<<endl;
+        emit emitSwapDataWithCMsgBox(checkArray);
+
+    }
+    flag_syscheckOk= false;
+    flag_sysckCancel= false;
+}
+
+
 //启动rviz－－－１
 void MainWindow::rviz_statup() {
     int index=comboBox_setRunMode->currentIndex();
     //如果不是rviz仿真模式，则返回
-    if(index!=0){
+    if(index!=1){
         return;
     }
-    index_RvizCount++;
-    cout<<index_RvizCount<<endl;
-    if(index_RvizCount%2==1){
+    flag_RvizRun=!flag_RvizRun;
+    if(flag_RvizRun){
         //启动rviz
         thread_forCloseRviz->quit();
         thread_forCloseRviz->wait();
@@ -283,8 +338,6 @@ void MainWindow::thread_rbCloseRvizCommand() {
 
 //运行启动按钮-1
 void MainWindow::run_statup() {
-    updateTimer_rob1status->start();
-    return;
     cout<<"点击了运行启动按钮"<<endl;
     thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
 }
@@ -293,9 +346,9 @@ void MainWindow::run_statup() {
 void MainWindow::thread_BeginRun() {
     int index=comboBox_setRunMode->currentIndex();
     switch (index){
-        case 0:system("rosrun rb_ui RvizAndTestPoint.sh");break;
-        case 1:system("rosrun rb_ui RealRbAndReadPoint.sh");break;
-        case 2:system("rosrun rb_ui RealRbAndTestPoint.sh");break;
+        case 1:system("rosrun rb_ui RvizAndTestPoint.sh");break;
+        case 2:system("rosrun rb_ui RealRbAndReadPoint.sh");break;
+        case 3:system("rosrun rb_ui RealRbAndTestPoint.sh");break;
     }
 }
 
@@ -323,7 +376,6 @@ void MainWindow::thread_LisionErrInfo() {
 
 //运行停止
 void MainWindow::run_stop() {
-    updateTimer_LeftCamera->start();
     cout<<"点击了运行停止按钮"<<endl;
     std_msgs::Bool msg;
     msg.data=true;
@@ -495,12 +547,10 @@ void MainWindow::safety_rob2Stop() {
 void MainWindow::callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg) {
     //两台机器人均连上了才表示连接标志成功
     sleep(1);
-    if(data_msg.data[0]==1&&data_msg.data[1]==1){
-        flag_rbConnStatus= true;
-        cout<<"接收到连接成功数据"<<endl;
-    } else{
-        flag_rbConnStatus= false;
-    }
+//    if(data_msg.data[0]==1&&data_msg.data[1]==1){
+//        cout<<"接收到连接成功数据"<<endl;
+//    } else{
+//    }
 }
 
 void MainWindow::callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg) {
@@ -883,7 +933,6 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     btn_beginRun->setObjectName(QString::fromUtf8("btn_beginRun"));
     btn_beginRun->setFixedSize(BTN_W,BTN_H);
 
-
     horizontalLayout_5->addWidget(btn_beginRun);
 
     btn_normalStop = new QPushButton(tab);
@@ -897,7 +946,11 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     btn_SysReset->setFixedSize(BTN_W,BTN_H);
 
     horizontalLayout_5->addWidget(btn_SysReset);
-
+    btn_rbConn->setEnabled(false);
+    btn_rvizRun->setEnabled(false);
+    btn_beginRun->setEnabled(false);
+    btn_normalStop->setEnabled(false);
+    btn_SysReset->setEnabled(false);
 
     verticalLayout_4->addLayout(horizontalLayout_5);
 
@@ -1261,7 +1314,6 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
 
     horizontalLayout_3->addWidget(tabWidget);
 
-
     verticalLayout->addLayout(horizontalLayout_3);
 
     verticalLayout->setStretch(0, 1);
@@ -1472,20 +1524,162 @@ void MainWindow::slot_gripper2() {
 void MainWindow::slot_cBox_setRunMode(const QString& text) {
     //设置模式按钮显示更新
     switch (comboBox_setRunMode->currentIndex()){
+        case 0:
+            btn_rbConn->setEnabled(false);
+            btn_rvizRun->setEnabled(false);
+            btn_beginRun->setEnabled(false);
+            btn_normalStop->setEnabled(false);
+            btn_SysReset->setEnabled(false);
+            break;
         case 1:
+            btn_rbConn->setEnabled(true);
+            btn_rvizRun->setEnabled(true);
+            btn_beginRun->setEnabled(true);
+            btn_normalStop->setEnabled(true);
+            btn_SysReset->setEnabled(true);
             btn_rbConn->setVisible(false);
             btn_rvizRun->setVisible(true);
             break;
         case 2:
+            btn_rbConn->setEnabled(true);
+            btn_rvizRun->setEnabled(true);
+            btn_beginRun->setEnabled(true);
+            btn_normalStop->setEnabled(true);
+            btn_SysReset->setEnabled(true);
             btn_rbConn->setVisible(true);
             btn_rvizRun->setVisible(false);
         case 3:
+            btn_rbConn->setEnabled(true);
+            btn_rvizRun->setEnabled(true);
+            btn_beginRun->setEnabled(true);
+            btn_normalStop->setEnabled(true);
+            btn_SysReset->setEnabled(true);
             btn_rbConn->setVisible(true);
             btn_rvizRun->setVisible(false);
     }
 }
 
 
+
+CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)
+{
+    init();
+}
+
+int CMsgBox::showMsgBox(QWidget *parent)
+{
+    CMsgBox msgBox(parent);
+    return msgBox.exec();
+}
+
+void CMsgBox::init()
+{
+    this->setFixedSize(533,400);
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog); //隐藏标题栏
+    this->setWindowModality(Qt::ApplicationModal); //窗口模态
+
+    QWidget *pWidget = new QWidget(this);
+    pWidget->resize(this->size());
+    QVBoxLayout *pVLayout=new QVBoxLayout;
+    QHBoxLayout *pHLayout1=new QHBoxLayout;
+    QHBoxLayout *pHLayout2=new QHBoxLayout;
+    QHBoxLayout *pHLayout3=new QHBoxLayout;
+
+    m_lableTitle=new QLabel("系统自检中,请等待完成...");
+    QFont font;
+    font.setPointSize(16);
+    font.setBold(true);
+    font.setItalic(false);
+    font.setWeight(75);
+    m_lableTitle->setFont(font);
+    pHLayout1->addWidget(m_lableTitle,0,Qt::AlignHCenter);
+
+    m_plaintext=new QPlainTextEdit();
+    pHLayout2->addWidget(m_plaintext);
+
+    pBtn_checkCancel = new QPushButton(this);
+    pBtn_checkCancel->setFixedSize(111,46);
+    pBtn_checkCancel->setText("取消自检");
+    connect(pBtn_checkCancel,&QPushButton::clicked,[=]{
+        done(ENM_OK_BTN);
+        flag_sysckCancel= true;
+        flag_delCbox= true;
+    });
+
+    pBtn_checkOk = new QPushButton(this);
+    pBtn_checkOk->setFixedSize(111,46);
+    pBtn_checkOk->setText("自检通过");
+    connect(pBtn_checkOk,&QPushButton::clicked,[=]{
+        done(ENM_CANCEL_BTN);
+        flag_delCbox= true;
+    });
+    pBtn_checkOk->setVisible(false);
+    pHLayout3->addWidget(pBtn_checkCancel);
+    pHLayout3->addWidget(pBtn_checkOk);
+    pVLayout->addLayout(pHLayout1);
+    pVLayout->addLayout(pHLayout2);
+    pVLayout->addLayout(pHLayout3);
+    this->setLayout(pVLayout);
+
+    cTimer1 = new QTimer(this);
+    cTimer1->setInterval(1000);
+    //定时器启动
+    QObject::connect(cTimer1, &QTimer::timeout, this, &CMsgBox::slot_timerUpdate);
+    cTimer1->start();
+}
+
+//定时检测有自检过程无完成
+void CMsgBox::slot_timerUpdate() {
+    cout<<"定时"<<endl;
+    if(!checkOk){
+        return;
+    }
+    m_plaintext->clear();
+    //1.co605_dual_arm_real.launch 机器人连接
+    //2.gripper_bridge_dual.launch 夹爪桥连接
+    //3.rs_camera_right.launch     右边相机连接
+    //4.s_camera.launch             左边相机连接
+    //5.publish_d435i_calibration_dual.launch  发布标定参数启动
+    //6.vision_bridge_yolo6d_dual            视觉桥启动
+    //7.grasp_place grasp.launch            抓取程序启动
+    //8.rubik_cube_solve solve.launch       机器人解算魔方程序启动
+    //9.rosrun cubeParse cube       魔方解析程序启动
+    QString arrayString[]{"机器人连接:",
+                          "夹爪桥连接:",
+                          "右边相机连接:",
+                          "左边相机连接:",
+                          "发布标定参数启动:",
+                          "视觉桥启动:",
+                          "抓取程序启动:",
+                          "机器人解算魔方程序启动:",
+                          "魔方解析程序启动:"
+    };
+    int sum=0;
+    for (int i = 0; i <9; ++i) {
+        if(c_array[i]==1){
+            arrayString[i]+="成功";
+        } else{
+            arrayString[i]+="失败";
+        }
+        sum+=c_array[i];
+        m_plaintext->appendPlainText(arrayString[i]);
+    }
+
+    if(sum==9){
+        pBtn_checkCancel->setVisible(false);
+        pBtn_checkOk->setVisible(true);
+        flag_syscheckOk= true;
+    }
+}
+
+CMsgBox::~CMsgBox(){
+    cout<<"析构了"<<endl;
+}
+
+void CMsgBox::slot_SwapDataWithMainwin(int* array) {
+    checkOk= true;
+    c_array=array;
+}
 
 
 

@@ -65,6 +65,43 @@ using namespace std;
 
 
 class  MainWindow;
+extern bool flag_syscheckOk;
+extern bool flag_sysckCancel;
+extern bool flag_delCbox;
+
+
+class CMsgBox : public QDialog
+{
+Q_OBJECT
+public:
+    explicit CMsgBox(QWidget *parent = nullptr);
+    ~CMsgBox();
+    static int showMsgBox(QWidget *parent = nullptr);
+
+private:
+    void init();
+    void slot_timerUpdate();
+
+private slots:
+    void slot_SwapDataWithMainwin(int* array);
+public:
+    enum EnmButton{
+        ENM_OK_BTN = 0,
+        ENM_CANCEL_BTN,
+    };
+
+private:
+    QLabel* m_lableTitle;
+    QPlainTextEdit* m_plaintext;
+    QTimer* cTimer1;
+    QPushButton *pBtn_checkCancel;
+    QPushButton *pBtn_checkOk;
+    int* c_array;
+    bool checkOk= false;
+
+};
+
+
 
 //给信号与槽函数使用的枚举类型
 enum  infoLevel{information,warning};
@@ -93,13 +130,14 @@ class MainWindow: public QMainWindow {
 public:
     MainWindow(ros::NodeHandle* node,QWidget* parent = Q_NULLPTR);
     ~MainWindow();
+
 private:
     //全局状态标志
-    bool flag_rbConnStatus;//机器人连接状态标志
     bool flag_rbErrStatus;//机器人连接状态标志
-    bool flag_sysRun;//系统运行标志
     int index_magicStep;
-    uint index_RvizCount;
+    int* checkArray;
+    bool flag_RvizRun= false;
+    CMsgBox* cbox;
     QString photoPath;//图片路径
     QString logPath;//图片路径
     QPixmap fitpixmap_redLight;
@@ -122,6 +160,7 @@ private:
     //rosparam参数
     bool isRunning_solveMagic;
     bool isRunning_grab;
+    bool isRunning_d435i;
     //qt参数
     QString groupBox_qss;
     //ros节点
@@ -151,6 +190,7 @@ private:
     ros::ServiceClient ImageGet_client;//获得图像数据
     ros::Subscriber magicGetData_subscriber;//机器人连接状态
     //子线程句柄
+    qthreadForRos *thread_forSysCheck;//设备启动自检子线程
     qthreadForRos *thread_forRbConn;//设备连接子线程
     qthreadForRos *thread_forRviz;//设备连接子线程
     qthreadForRos *thread_forCloseRviz;//设备连接子线程
@@ -209,6 +249,7 @@ private:
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
     void callback_magicSolve_subscriber(std_msgs::Int8MultiArray data_msg);
     //线程处理
+    void thread_SysCheck();
     void thread_rbConnCommand();
     void thread_rbRvizCommand();
     void thread_rbCloseRvizCommand();
@@ -226,6 +267,7 @@ signals:
     void emitQmessageBox(infoLevel level,QString info);
     void emitLightColor(QLabel* label,string color);
     void emitStartTimer(QTimer* timer);
+    void emitSwapDataWithCMsgBox(int* array);
 private slots:
     void displayTextControl(QString text);
     void showQmessageBox(infoLevel level,QString info);
@@ -348,8 +390,8 @@ private:
     QLabel* showMagicStepLable;
     QLabel* isRunning_solveMagic_Lable;
     QLabel* isRunning_grab_Lable;
-};
 
+};
 
 
 #endif //rb_msgs_MAINWINDOW_H
