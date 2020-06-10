@@ -588,6 +588,10 @@ void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbim
 void MainWindow::callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg) {
     QString sumString ;
     int length=data_msg.data.size();
+    if(length!=54){
+        emit emitQmessageBox(infoLevel::warning,QString("接收到数据不等于54个!"));
+        return;
+    }
     char tmpChar[length];
     for (int i = 0; i < length; ++i) {
         char c_str = data_msg.data[i].data.at(0);
@@ -595,7 +599,10 @@ void MainWindow::callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray dat
         tmpChar[i]=c_str;
     }
     sumString=QString(QLatin1String(tmpChar,length));
-    line_updataData->setText(sumString);
+    for (int j = 0; j < 6; ++j) {
+        line_updataDataList[j]->setText(sumString.mid(j*9,9));
+    }
+
 }
 
 //点击解算魔方数据---1
@@ -1286,15 +1293,32 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     gridLayout1->addWidget(label_picture6, 2, 1, 1, 1);
 
     horizontalLayout_tab3_1=new QHBoxLayout();
+    for (int k = 0; k < 6; ++k) {
+        line_updataDataList.push_back(new QLineEdit());
+    }
+    vector<QString> stringlist{QString("右面颜色序列"),
+                               QString("上面颜色序列"),
+                               QString("下面颜色序列"),
+                               QString("左面颜色序列"),
+                               QString("前面颜色序列"),
+                               QString("后面颜色序列")
+                               };
+    for (int h = 0; h < 6; ++h) {
+        line_updataDataList[h]->setPlaceholderText(stringlist[h]);
+    }
 
-    line_updataData =new QLineEdit();
-    line_updataData->setObjectName(QString::fromUtf8("line_updataData"));
     btn_updateData=new QPushButton(tab_3);
     btn_updateData->setObjectName(QString::fromUtf8("btn_updateData"));
     btn_updateData->setFixedSize(BTN_W,BTN_H);
     btn_updateData->setText("修改魔方采集数据");
-    horizontalLayout_tab3_1->addWidget(line_updataData);
+//    horizontalLayout_tab3_1->addWidget(line_updataData);
+    for (int j = 0; j < 6; ++j) {
+        horizontalLayout_tab3_1->addWidget(line_updataDataList[j]);
+    }
+
     horizontalLayout_tab3_1->addWidget(btn_updateData);
+
+
     verticalLayout_6->addLayout(gridLayout1);
     verticalLayout_6->addLayout(horizontalLayout_tab3_1);
 
@@ -1747,16 +1771,15 @@ void MainWindow::slot_cBox_setRunMode(const QString& text) {
 
 void MainWindow::magicUpdateData() {
     cout<<"按下按钮"<<endl;
-    QString qString = line_updataData->text();
-    int num_E=qString.toStdString().size();
+    QString newString;
+    vector<int> v{1,0,4,2,3,5};
+    foreach(int a,v)
+    {
+        newString+=line_updataDataList[a]->text();
+    }
+    int num_E=newString.toStdString().size();
     if(num_E==6*9)
     {
-        QString newString;
-        vector<int> v{1,0,4,2,3,5};
-        foreach(int a,v)
-        {
-            newString+=qString.mid(a*9,9);
-        }
         rb_msgAndSrv::rb_string msg_data;
         msg_data.request.data.data=newString.toStdString();
         emit emitQmessageBox(infoLevel::information,QString(newString));

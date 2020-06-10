@@ -381,7 +381,7 @@ private:
     QPushButton *btn_magicRunSolve;
     QPushButton *btn_magicAutoSolve;
     QPushButton *btn_updateData;
-    QLineEdit* line_updataData;
+    vector<QLineEdit*> line_updataDataList;
 
     QWidget *tab_4;
     QHBoxLayout *horizontalLayout_10;
