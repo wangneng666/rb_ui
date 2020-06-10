@@ -1749,11 +1749,20 @@ void MainWindow::magicUpdateData() {
     cout<<"按下按钮"<<endl;
     QString qString = line_updataData->text();
     int num_E=qString.toStdString().size();
-    if(num_E==6*9){
+    if(num_E==6*9)
+    {
+        QString newString;
+        vector<int> v{1,0,4,2,3,5};
+        foreach(int a,v)
+        {
+            newString+=qString.mid(a*9,9);
+        }
         rb_msgAndSrv::rb_string msg_data;
-        msg_data.request.data.data=qString.toStdString();
+        msg_data.request.data.data=newString.toStdString();
+        emit emitQmessageBox(infoLevel::information,QString(newString));
         MagicDataUpdate_client.call(msg_data);
-    } else{
+    } else
+    {
         emit emitQmessageBox(infoLevel::warning,QString("当前字符数:%1,不是54个字母").arg(num_E));
     }
 }
