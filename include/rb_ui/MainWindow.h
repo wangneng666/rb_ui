@@ -181,7 +181,6 @@ private:
     QTimer* updateTimer_rob2status;
     QTimer* updateTimer_LeftCamera;
     QTimer* updateTimer_RightCamera;
-    ros::Publisher test_publisher;//机器人停止命令
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber camera_subscriber;//相机数据采集
@@ -260,6 +259,8 @@ private:
     void slot_btn_rb2Reset();
     void slot_gripper1();
     void slot_gripper2();
+    void slot_rb1putBack();
+    void slot_rb2putBack();
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
@@ -356,6 +357,9 @@ private:
     QPushButton *gripper1;
     QPushButton *gripper2;
     QGroupBox *groupBox_tab3_3;
+    QHBoxLayout *horizontalLayout_20;
+    QPushButton *btn_rb1putBack;
+    QPushButton *btn_rb2putBack;
 
 
     QWidget *tab_3;

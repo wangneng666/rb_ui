@@ -52,7 +52,6 @@ void MainWindow::SysVarInit() {
     Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     MagicSolve_subscriber=Node->subscribe<rb_msgAndSrv::rb_StringArray>("changeColor",1000,&MainWindow::callback_magicSolve_subscriber,this);
-    test_publisher= Node->advertise<rb_msgAndSrv::rb_StringArray>("changeColor", 1);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
     MagicDataUpdate_client = Node->serviceClient<rb_msgAndSrv::rb_string>("cube_correct");
@@ -150,6 +149,8 @@ void MainWindow::signalAndSlot() {
     connect(btn_rb2Reset,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2Reset);
     connect(gripper1,&QPushButton::clicked,this,&MainWindow::slot_gripper1);
     connect(gripper2,&QPushButton::clicked,this,&MainWindow::slot_gripper2);
+    connect(btn_rb1putBack,&QPushButton::clicked,this,&MainWindow::slot_rb1putBack);
+    connect(btn_rb2putBack,&QPushButton::clicked,this,&MainWindow::slot_rb2putBack);
 
     //定时器启动
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::timer_onUpdate);
@@ -233,7 +234,6 @@ void MainWindow::timer_comUpdate() {
     } else{
         isRunning_grab_Lable->setText("机器人抓盒子停止");
     }
-
 }
 
 //定时器回调函数，实时更新状态信息
@@ -641,16 +641,6 @@ void MainWindow::thread_GagicRunSolve() {
 }
 //一键解魔方－－－－1
 void MainWindow::magicCube_AutoRun() {
-    rb_msgAndSrv::rb_StringArray msg;
-    msg.data.resize(5);
-    msg.data[0].data="aaa";
-    msg.data[1].data="bbb";
-    msg.data[2].data="ccc";
-    msg.data[3].data="ddd";
-    msg.data[4].data="eee";
-    test_publisher.publish(msg);
-    cout<<"发送完了"<<endl;
-    return;
     cout<<"点击了一键解算魔方按钮"<<endl;
     //如果机器人运行中则返回
     if(isRunning_grab){
@@ -1202,6 +1192,25 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     groupBox_tab3_3 = new QGroupBox(tab_2);
     groupBox_tab3_3->setObjectName(QString::fromUtf8("groupBox_tab3_3"));
     groupBox_tab3_3->setStyleSheet(groupBox_qss);
+    horizontalLayout_20 = new QHBoxLayout(groupBox_tab3_3);
+    horizontalLayout_20->setSpacing(6);
+    horizontalLayout_20->setContentsMargins(11, 11, 11, 11);
+    horizontalLayout_20->setObjectName(QString::fromUtf8("horizontalLayout_20"));
+    btn_rb1putBack = new QPushButton(groupBox_tab3_3);
+    btn_rb1putBack->setText("左机器人放回魔方");
+    btn_rb1putBack->setObjectName(QString::fromUtf8("btn_rb1putBack"));
+    btn_rb1putBack->setFixedSize(BTN_W,BTN_H);
+    horizontalLayout_20->addWidget(btn_rb1putBack);
+
+    btn_rb2putBack = new QPushButton(groupBox_tab3_3);
+    btn_rb2putBack->setObjectName(QString::fromUtf8("btn_rb2putBack"));
+    btn_rb2putBack->setText("右边机器人放回魔方");
+    btn_rb2putBack->setFixedSize(BTN_W,BTN_H);
+
+    horizontalLayout_20->addWidget(btn_rb2putBack);
+
+
+
 
     verticalLayout_5->addWidget(groupBox_tab3_3);
 
@@ -1747,6 +1756,14 @@ void MainWindow::magicUpdateData() {
     } else{
         emit emitQmessageBox(infoLevel::warning,QString("当前字符数:%1,不是54个字母").arg(num_E));
     }
+}
+
+void MainWindow::slot_rb1putBack() {
+    system("rosservice call /placeMagicCube \"data:0\"");
+}
+
+void MainWindow::slot_rb2putBack() {
+    system("rosservice call /placeMagicCube \"data:1\"");
 }
 
 CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)
