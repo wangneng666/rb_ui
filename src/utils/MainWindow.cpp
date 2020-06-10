@@ -542,6 +542,8 @@ void MainWindow::SysReset() {
     catch(int e1){
         cout<<"抛异常了"<<endl;
     }
+    flag_syscheckOk= false;
+    flag_sysckCancel= false;
     system("rosnode kill $(rosnode list | grep -v /robot_UI)");
 }
 
@@ -586,14 +588,13 @@ void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbim
 void MainWindow::callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg) {
     QString sumString ;
     int length=data_msg.data.size();
-    char tmpChar[length+1];
+    char tmpChar[length];
     for (int i = 0; i < length; ++i) {
         char c_str = data_msg.data[i].data.at(0);
         c_str = (c_str>='a'&& c_str<='z') ?(c_str-32):c_str;
         tmpChar[i]=c_str;
     }
-    tmpChar[data_msg.data.size()]='\n';
-    sumString +=QString(QLatin1String(tmpChar));
+    sumString=QString(QLatin1String(tmpChar,length));
     line_updataData->setText(sumString);
 }
 
@@ -1738,12 +1739,13 @@ void MainWindow::slot_cBox_setRunMode(const QString& text) {
 void MainWindow::magicUpdateData() {
     cout<<"按下按钮"<<endl;
     QString qString = line_updataData->text();
-    if(qString.toStdString().size()==6*9){
+    int num_E=qString.toStdString().size();
+    if(num_E==6*9){
         rb_msgAndSrv::rb_string msg_data;
         msg_data.request.data.data=qString.toStdString();
         MagicDataUpdate_client.call(msg_data);
     } else{
-        emit emitQmessageBox(infoLevel::warning,"不是54个字母");
+        emit emitQmessageBox(infoLevel::warning,QString("当前字符数:%1,不是54个字母").arg(num_E));
     }
 }
 
