@@ -33,7 +33,7 @@ void MainWindow::SysVarInit() {
     connFlag_RightGripper= false;
     //定时器实体化
     updateTimer = new QTimer(this);
-    updateTimer->setInterval(1);
+    updateTimer->setInterval(1000);
     updateTimer_LeftCamera = new QTimer();
     updateTimer_LeftCamera->setInterval(1000);
     updateTimer_RightCamera = new QTimer();
@@ -52,6 +52,8 @@ void MainWindow::SysVarInit() {
     Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     MagicSolve_subscriber=Node->subscribe<rb_msgAndSrv::rb_StringArray>("changeColor",1000,&MainWindow::callback_magicSolve_subscriber,this);
+    Progress_rbSolve=Node->subscribe<std_msgs::Int8MultiArray>("/progress_rbSolveMagic",1000,&MainWindow::callback_ProgressRbSolve_subscriber,this);
+
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
     MagicDataUpdate_client = Node->serviceClient<rb_msgAndSrv::rb_string>("cube_correct");
@@ -238,7 +240,8 @@ void MainWindow::timer_comUpdate() {
 
 //定时器回调函数，实时更新状态信息
 void MainWindow::timer_onUpdate() {
-if(flag_delCbox){
+
+    if(flag_delCbox){
     if(cbox!= nullptr){
         delete cbox;
         cbox= nullptr;
@@ -1544,6 +1547,15 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     statusBar->addWidget(showMagicStepLable);
     statusBar->addWidget(isRunning_solveMagic_Lable);
     statusBar->addWidget(isRunning_grab_Lable);
+
+    pProgressBar = new QProgressBar(this);
+//    pProgressBar->move(100,60);
+    pProgressBar->setOrientation(Qt::Horizontal);  // 水平方向
+    pProgressBar->setMinimum(0);  // 最小值
+    pProgressBar->setMaximum(100);  // 最大值
+    pProgressBar->setValue(0);  // 当前进度
+    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：%1%").arg(QString::number(0, 'f', 1)));
+    statusBar->addWidget(pProgressBar);
     MainWindow->setStatusBar(statusBar);
     tabWidget->setCurrentIndex(0);
 //    QMetaObject::connectSlotsByName(this);
@@ -1796,6 +1808,18 @@ void MainWindow::slot_rb1putBack() {
 
 void MainWindow::slot_rb2putBack() {
     system("rosservice call /placeMagicCube \"data:1\"");
+}
+
+//是机器人解魔方进度展示
+void MainWindow::callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray data_msg) {
+    if(pProgressBar== nullptr){
+        return;
+    }
+    float sumStep_rbSolve=static_cast<float >(data_msg.data[0]);
+    float curStep_rbSolve=static_cast<float >(data_msg.data[1]);
+    float curProcess=(curStep_rbSolve/sumStep_rbSolve)*100;
+    pProgressBar->setValue(curProcess);  // 当前进度
+    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：%1%").arg(QString::number(curProcess, 'f', 1)));
 }
 
 CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)

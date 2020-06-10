@@ -21,6 +21,7 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QProgressBar>
 #include <QDialog>
 
 #include <QDir>
@@ -183,6 +184,7 @@ private:
     QTimer* updateTimer_RightCamera;
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
+    ros::Subscriber Progress_rbSolve;//机器人解魔方进度采集
     ros::Subscriber camera_subscriber;//相机数据采集
     ros::Subscriber rob1Status_subscriber;//机器人1状态数据采集
     ros::Subscriber rob2Status_subscriber;//机器人2状态数据采集
@@ -273,6 +275,7 @@ private:
     void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
     void callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg);
+    void callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray data_msg);
     //线程处理
     void thread_SysCheck();
     void thread_rbConnCommand();
@@ -382,6 +385,7 @@ private:
     QPushButton *btn_magicAutoSolve;
     QPushButton *btn_updateData;
     vector<QLineEdit*> line_updataDataList;
+    QProgressBar* pProgressBar= nullptr;
 
     QWidget *tab_4;
     QHBoxLayout *horizontalLayout_10;
