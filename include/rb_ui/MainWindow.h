@@ -181,6 +181,7 @@ private:
     QTimer* updateTimer_rob2status;
     QTimer* updateTimer_LeftCamera;
     QTimer* updateTimer_RightCamera;
+    ros::Publisher test_publisher;//机器人停止命令
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber camera_subscriber;//相机数据采集

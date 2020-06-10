@@ -52,6 +52,7 @@ void MainWindow::SysVarInit() {
     Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     MagicSolve_subscriber=Node->subscribe<rb_msgAndSrv::rb_StringArray>("changeColor",1000,&MainWindow::callback_magicSolve_subscriber,this);
+    test_publisher= Node->advertise<rb_msgAndSrv::rb_StringArray>("changeColor", 1);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
     MagicDataUpdate_client = Node->serviceClient<rb_msgAndSrv::rb_string>("cube_correct");
@@ -584,10 +585,15 @@ void MainWindow::callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbim
 //接受魔方解析数据
 void MainWindow::callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg) {
     QString sumString ;
-    for (int i = 0; i < data_msg.data.size(); ++i) {
+    int length=data_msg.data.size();
+    char tmpChar[length+1];
+    for (int i = 0; i < length; ++i) {
         char c_str = data_msg.data[i].data.at(0);
-        sumString +=QString(QLatin1String(&c_str));
+        c_str = (c_str>='a'&& c_str<='z') ?(c_str-32):c_str;
+        tmpChar[i]=c_str;
     }
+    tmpChar[data_msg.data.size()]='\n';
+    sumString +=QString(QLatin1String(tmpChar));
     line_updataData->setText(sumString);
 }
 
@@ -634,6 +640,16 @@ void MainWindow::thread_GagicRunSolve() {
 }
 //一键解魔方－－－－1
 void MainWindow::magicCube_AutoRun() {
+    rb_msgAndSrv::rb_StringArray msg;
+    msg.data.resize(5);
+    msg.data[0].data="aaa";
+    msg.data[1].data="bbb";
+    msg.data[2].data="ccc";
+    msg.data[3].data="ddd";
+    msg.data[4].data="eee";
+    test_publisher.publish(msg);
+    cout<<"发送完了"<<endl;
+    return;
     cout<<"点击了一键解算魔方按钮"<<endl;
     //如果机器人运行中则返回
     if(isRunning_grab){
