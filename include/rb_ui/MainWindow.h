@@ -185,6 +185,7 @@ private:
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
     ros::Subscriber Progress_rbSolve;//机器人解魔方进度采集
+    ros::Subscriber MagicSolveSolution;//图详解析结果
     ros::Subscriber camera_subscriber;//相机数据采集
     ros::Subscriber rob1Status_subscriber;//机器人1状态数据采集
     ros::Subscriber rob2Status_subscriber;//机器人2状态数据采集
@@ -276,6 +277,7 @@ private:
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
     void callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg);
     void callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray data_msg);
+    void callback_MagicSolveSolution_subscriber(std_msgs::Bool data_msg);
     //线程处理
     void thread_SysCheck();
     void thread_rbConnCommand();
@@ -302,6 +304,7 @@ private slots:
     void showLightColor(QLabel* label,string color);
     void runTimer(QTimer* timer);
     void slot_cBox_setRunMode(const QString& text);
+    void slot_tabWidgetClicked(int index_tab);
 
 private:
     //qt控件

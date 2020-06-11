@@ -53,6 +53,7 @@ void MainWindow::SysVarInit() {
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     MagicSolve_subscriber=Node->subscribe<rb_msgAndSrv::rb_StringArray>("changeColor",1000,&MainWindow::callback_magicSolve_subscriber,this);
     Progress_rbSolve=Node->subscribe<std_msgs::Int8MultiArray>("/progress_rbSolveMagic",1000,&MainWindow::callback_ProgressRbSolve_subscriber,this);
+    MagicSolveSolution=Node->subscribe<std_msgs::Bool>("solution_situation",1000,&MainWindow::callback_MagicSolveSolution_subscriber,this);
 
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
@@ -144,6 +145,8 @@ void MainWindow::signalAndSlot() {
     connect(btn_SatetyRb2Reset,&QPushButton::clicked,this,&MainWindow::safety_rob2Stop);
     //下拉框触发事件
     connect(comboBox_setRunMode,SIGNAL(currentIndexChanged(const QString)), this, SLOT(slot_cBox_setRunMode(const QString)));
+    //切换页面触发事件
+    connect(tabWidget,SIGNAL(tabBarClicked(int)), this, SLOT(slot_tabWidgetClicked(int)));
     //单步调试页面信号与槽连接
     connect(btn_rb1SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1SetEnable);
     connect(btn_rb2SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2SetEnable);
@@ -174,6 +177,7 @@ void MainWindow::signalAndSlot() {
     connect(thread_MagicStepRun, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitQmessageBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitStartTimer(QTimer*)), this,SLOT(runTimer(QTimer*)));  //将自定义槽连接到自定义信号
+
 /****************************************************************************************************/
 }
 
@@ -352,6 +356,8 @@ void MainWindow::thread_rbCloseRvizCommand() {
 //运行启动按钮-1
 void MainWindow::run_statup() {
     cout<<"点击了运行启动按钮"<<endl;
+    pProgressBar->setValue(0);  // 当前进度
+    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
     thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
 }
 
@@ -540,10 +546,13 @@ void MainWindow::run_stop() {
 void MainWindow::SysReset() {
     try {
         thread_forRbConn->terminate();
+        thread_forBeginRun->terminate();
     }
     catch(int e1){
         cout<<"抛异常了"<<endl;
     }
+    pProgressBar->setValue(0);  // 当前进度
+    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
     flag_syscheckOk= false;
     flag_sysckCancel= false;
     system("rosnode kill $(rosnode list | grep -v /robot_UI)");
@@ -1543,6 +1552,7 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     showMagicStepLable =new QLabel();
     isRunning_solveMagic_Lable=new QLabel();
     isRunning_grab_Lable=new QLabel();
+    showMagicStepLable->setVisible(false);
     statusBar->addWidget(showMagicStepLable);
     statusBar->addWidget(isRunning_solveMagic_Lable);
     statusBar->addWidget(isRunning_grab_Lable);
@@ -1553,7 +1563,8 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     pProgressBar->setMinimum(0);  // 最小值
     pProgressBar->setMaximum(100);  // 最大值
     pProgressBar->setValue(0);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：%1%").arg(QString::number(0, 'f', 1)));
+    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
+    pProgressBar->setVisible(false);  // 不可见
     statusBar->addWidget(pProgressBar);
     MainWindow->setStatusBar(statusBar);
     tabWidget->setCurrentIndex(0);
@@ -1802,11 +1813,11 @@ void MainWindow::magicUpdateData() {
 }
 
 void MainWindow::slot_rb1putBack() {
-    system("rosservice call /placeMagicCube \"data: - 0\"");
+    system("rosservice call /placeMagicCube \"data:- 0\"");
 }
 
 void MainWindow::slot_rb2putBack() {
-    system("rosservice call /placeMagicCube \"data: - 1\"");
+    system("rosservice call /placeMagicCube \"data:- 1\"");
 }
 
 //是机器人解魔方进度展示
@@ -1818,7 +1829,25 @@ void MainWindow::callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray da
     float curStep_rbSolve=static_cast<float >(data_msg.data[1]);
     float curProcess=(curStep_rbSolve/sumStep_rbSolve)*100;
     pProgressBar->setValue(curProcess);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：%1%").arg(QString::number(curProcess, 'f', 1)));
+    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：%1/%2").arg(data_msg.data[1],data_msg.data[0]));
+}
+
+void MainWindow::slot_tabWidgetClicked(int index_tab) {
+    if(index_tab!=2){
+        pProgressBar->setVisible(false);
+        showMagicStepLable->setVisible(false);
+    } else{
+        pProgressBar->setVisible(true);
+        showMagicStepLable->setVisible(true);
+    }
+}
+
+void MainWindow::callback_MagicSolveSolution_subscriber(std_msgs::Bool data_msg) {
+    if(data_msg.data){
+        emit emitQmessageBox(infoLevel::information,QString("魔方图像解析成功"));
+    } else{
+        emit emitQmessageBox(infoLevel::information,QString("魔方图像解析失败"));
+    }
 }
 
 CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)
