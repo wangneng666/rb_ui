@@ -357,7 +357,7 @@ void MainWindow::thread_rbCloseRvizCommand() {
 void MainWindow::run_statup() {
     cout<<"点击了运行启动按钮"<<endl;
     pProgressBar->setValue(0);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
+    pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
 }
 
@@ -552,7 +552,7 @@ void MainWindow::SysReset() {
         cout<<"抛异常了"<<endl;
     }
     pProgressBar->setValue(0);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
+    pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     flag_syscheckOk= false;
     flag_sysckCancel= false;
     system("rosnode kill $(rosnode list | grep -v /robot_UI)");
@@ -646,7 +646,6 @@ void MainWindow::thread_GagicRunSolve() {
     rb_msgAndSrv::rb_ArrayAndBool data_srvs;
     data_srvs.request.data.resize(1);
     data_srvs.request.data[0]=3;
-    emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             index_magicStep=0;
@@ -1563,7 +1562,7 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     pProgressBar->setMinimum(0);  // 最小值
     pProgressBar->setMaximum(100);  // 最大值
     pProgressBar->setValue(0);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
+    pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     pProgressBar->setVisible(false);  // 不可见
     statusBar->addWidget(pProgressBar);
     MainWindow->setStatusBar(statusBar);
@@ -1829,7 +1828,7 @@ void MainWindow::callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray da
     float curStep_rbSolve=static_cast<float >(data_msg.data[1]);
     float curProcess=(curStep_rbSolve/sumStep_rbSolve)*100;
     pProgressBar->setValue(curProcess);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：%1/%2").arg(data_msg.data[1],data_msg.data[0]));
+    pProgressBar->setFormat(QString("当前解魔方进度为：%1/%2").arg(data_msg.data[1]).arg(data_msg.data[0]));
 }
 
 void MainWindow::slot_tabWidgetClicked(int index_tab) {
