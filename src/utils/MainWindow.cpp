@@ -1802,11 +1802,11 @@ void MainWindow::magicUpdateData() {
 }
 
 void MainWindow::slot_rb1putBack() {
-    system("rosservice call /placeMagicCube \"data:0\"");
+    system("rosservice call /placeMagicCube \"data: - 0\"");
 }
 
 void MainWindow::slot_rb2putBack() {
-    system("rosservice call /placeMagicCube \"data:1\"");
+    system("rosservice call /placeMagicCube \"data: - 1\"");
 }
 
 //是机器人解魔方进度展示
