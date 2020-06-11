@@ -299,9 +299,6 @@ void MainWindow::thread_SysCheck() {
     //4.s_camera.launch             左边相机连接
     //5.publish_d435i_calibration_dual.launch  发布标定参数
     //6.vision_bridge_yolo6d_dual            视觉桥
-    //7.grasp_place grasp.launch            抓取参数
-    //8.rubik_cube_solve solve.launch       解析参数
-    //9.rosrun cubeParse cube       魔方解析参数
     cout<<"进入SysCheck子线程"<<endl;
     while ((!flag_syscheckOk)&&(!flag_sysckCancel)) {
         sleep(2);
@@ -311,12 +308,8 @@ void MainWindow::thread_SysCheck() {
         checkArray[3]=connFlag_RightCamera?1:0;
         checkArray[4]=isRunning_d435i?1:0;
         checkArray[5]=1;
-        checkArray[6]=1;
-        checkArray[7]=1;
-        checkArray[8]=1;
         cout<<"发送"<<endl;
         emit emitSwapDataWithCMsgBox(checkArray);
-
     }
     flag_syscheckOk= false;
     flag_sysckCancel= false;
@@ -349,7 +342,7 @@ void MainWindow::rviz_statup() {
 
 //进入子线程－－－２
 void MainWindow::thread_rbRvizCommand() {
-    system("rosrun rb_ui RvizAndTestPoint.sh");
+    system("roslaunch co605_dual_arm_gripper_moveit_config demo.launch");
 }
 
 void MainWindow::thread_rbCloseRvizCommand() {
@@ -365,7 +358,11 @@ void MainWindow::run_statup() {
 //运行启动按钮开启的子线程-2
 void MainWindow::thread_BeginRun() {
     int index=comboBox_setRunMode->currentIndex();
-    if((index==1)||(index==0)){
+    if(index==0){
+        return;
+    }
+    if(index==1){
+        system("rosrun rb_ui RvizAndTestPoint.sh");
         return;
     }
     //左右夹具设置服务
@@ -505,6 +502,8 @@ void MainWindow::thread_BeginRun() {
     {
         emit emitQmessageBox(infoLevel::warning,QString("右机器人上使能服务连接失败"));
     }
+    system("roslaunch rb_ui dualRobotLaunch.launch");
+
 }
 
 //监听故障状态子线程-3
@@ -1835,7 +1834,7 @@ int CMsgBox::showMsgBox(QWidget *parent)
 
 void CMsgBox::init()
 {
-    this->setFixedSize(533,400);
+    this->setFixedSize(533,300);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog); //隐藏标题栏
     this->setWindowModality(Qt::ApplicationModal); //窗口模态
 
@@ -1902,21 +1901,15 @@ void CMsgBox::slot_timerUpdate() {
     //4.s_camera.launch             左边相机连接
     //5.publish_d435i_calibration_dual.launch  发布标定参数启动
     //6.vision_bridge_yolo6d_dual            视觉桥启动
-    //7.grasp_place grasp.launch            抓取程序启动
-    //8.rubik_cube_solve solve.launch       机器人解算魔方程序启动
-    //9.rosrun cubeParse cube       魔方解析程序启动
     QString arrayString[]{"机器人连接:",
                           "夹爪桥连接:",
                           "右边相机连接:",
                           "左边相机连接:",
                           "发布标定参数启动:",
-                          "视觉桥启动:",
-                          "抓取程序启动:",
-                          "机器人解算魔方程序启动:",
-                          "魔方解析程序启动:"
+                          "视觉桥启动:"
     };
     int sum=0;
-    for (int i = 0; i <9; ++i) {
+    for (int i = 0; i <6; ++i) {
         if(c_array[i]==1){
             arrayString[i]+="成功";
         } else{
@@ -1926,7 +1919,7 @@ void CMsgBox::slot_timerUpdate() {
         m_plaintext->appendPlainText(arrayString[i]);
     }
 
-    if(sum==9){
+    if(sum==6){
         pBtn_checkCancel->setVisible(false);
         pBtn_checkOk->setVisible(true);
         flag_syscheckOk= true;
