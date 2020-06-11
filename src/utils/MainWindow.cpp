@@ -357,7 +357,7 @@ void MainWindow::thread_rbCloseRvizCommand() {
 void MainWindow::run_statup() {
     cout<<"点击了运行启动按钮"<<endl;
     pProgressBar->setValue(0);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
+    pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
 }
 
@@ -552,7 +552,7 @@ void MainWindow::SysReset() {
         cout<<"抛异常了"<<endl;
     }
     pProgressBar->setValue(0);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
+    pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     flag_syscheckOk= false;
     flag_sysckCancel= false;
     system("rosnode kill $(rosnode list | grep -v /robot_UI)");
@@ -1373,11 +1373,16 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     verticalLayout_11 = new QVBoxLayout();
     verticalLayout_11->setSpacing(6);
     verticalLayout_11->setObjectName(QString::fromUtf8("verticalLayout_11"));
-    label_2 = new QLabel(tab_4);
-    label_2->setObjectName(QString::fromUtf8("label_2"));
-    label_2->setAlignment(Qt::AlignCenter);
-
-    verticalLayout_11->addWidget(label_2);
+    label_leftCamera = new QLabel(tab_4);
+    label_leftCamera->setObjectName(QString::fromUtf8("label_leftCamera"));
+    label_leftCamera->setAlignment(Qt::AlignCenter);
+    label_leftCamera->setFixedSize(600,600);
+    label_rightCamera = new QLabel(tab_4);
+    label_rightCamera->setObjectName(QString::fromUtf8("label_rightCamera"));
+    label_rightCamera->setAlignment(Qt::AlignCenter);
+    label_rightCamera->setFixedSize(600,600);
+    verticalLayout_11->addWidget(label_rightCamera);
+    verticalLayout_11->addWidget(label_leftCamera);
 
 
     horizontalLayout_9->addLayout(verticalLayout_11);
@@ -1563,7 +1568,7 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     pProgressBar->setMinimum(0);  // 最小值
     pProgressBar->setMaximum(100);  // 最大值
     pProgressBar->setValue(0);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：0/0"));
+    pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     pProgressBar->setVisible(false);  // 不可见
     statusBar->addWidget(pProgressBar);
     MainWindow->setStatusBar(statusBar);
@@ -1608,7 +1613,6 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         btn_magicRunSolve->setText(QApplication::translate("MainWindow", "\346\211\247\350\241\214\350\247\243\347\256\227", nullptr));
         btn_magicAutoSolve->setText(QApplication::translate("MainWindow", "\344\270\200\351\224\256\350\247\243\347\256\227", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_3), QApplication::translate("MainWindow", "\351\255\224\346\226\271\347\225\214\351\235\242", nullptr));
-        label_2->setText(QApplication::translate("MainWindow", "\345\233\276\345\203\217\346\230\276\347\244\272", nullptr));
         groupBox_setMod->setTitle(QApplication::translate("MainWindow", "\346\250\241\345\274\217\350\256\276\347\275\256", nullptr));
         comboBox->setItemText(0, QApplication::translate("MainWindow", "从货架抓,放桌子上", nullptr));
         comboBox_setRunMode->setItemText(0, QApplication::translate("MainWindow", "请选择运行模式", nullptr));
@@ -1649,18 +1653,27 @@ if(color=="red"){
 void MainWindow::callback_LeftCamera_subscriber(sensor_msgs::Image::ConstPtr image) {
     connFlag_LeftCamera= true;
     emit emitStartTimer(updateTimer_LeftCamera);
+    //显示图片
+    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+    cv::Mat mat = ptr->image;
+    QImage qimage = cvMat2QImage(mat);
+    QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+//    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
+    label_leftCamera->setPixmap(new_pixmap);
 }
 
 void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image) {
     connFlag_RightCamera= true;
     emit emitStartTimer(updateTimer_RightCamera);
-//    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
-//    cv::Mat mat = ptr->image;
-//    QImage image = cvMat2QImage(mat);
-//    QPixmap pixmap1 = QPixmap::fromImage(image);
-//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
-//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
-//    label_picture1->setPixmap(fitpixmap1);
+    //显示图片
+    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+    cv::Mat mat = ptr->image;
+    QImage qimage = cvMat2QImage(mat);
+    QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+//    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
+    label_rightCamera->setPixmap(new_pixmap);
 }
 
 void MainWindow::callback_rob1Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
@@ -1831,7 +1844,7 @@ void MainWindow::callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray da
     float curStep_rbSolve=static_cast<float >(data_msg.data[1]);
     float curProcess=(curStep_rbSolve/sumStep_rbSolve)*100;
     pProgressBar->setValue(curProcess);  // 当前进度
-    pProgressBar->setFormat(QString::fromLocal8Bit("当前解魔方进度为：%1/%2").arg(data_msg.data[1],data_msg.data[0]));
+    pProgressBar->setFormat(QString("当前解魔方进度为：%1/%2").arg(data_msg.data[1]).arg(data_msg.data[0]));
 }
 
 void MainWindow::slot_tabWidgetClicked(int index_tab) {

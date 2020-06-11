@@ -394,7 +394,8 @@ private:
     QHBoxLayout *horizontalLayout_10;
     QHBoxLayout *horizontalLayout_9;
     QVBoxLayout *verticalLayout_11;
-    QLabel *label_2;
+    QLabel *label_leftCamera;
+    QLabel *label_rightCamera;
     QVBoxLayout *verticalLayout_9;
     QGroupBox *groupBox_setMod;
     QHBoxLayout *horizontalLayout_11;
