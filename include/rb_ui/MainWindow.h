@@ -23,7 +23,6 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QProgressBar>
 #include <QDialog>
-
 #include <QDir>
 #include <QMessageBox>
 #include <QProcess>
@@ -33,7 +32,6 @@
 #include <iostream>
 #include <fstream>
 #include "QDebug"
-
 #include "qdebug.h"
 #include "ros/ros.h"
 #include "std_srvs/Empty.h"
@@ -163,11 +161,19 @@ private:
     bool connFlag_RightCamera;//右边相机连接状态
     bool connFlag_LeftGripper;//左夹爪连接状态
     bool connFlag_RightGripper;//右夹爪连接状态
-
     bool flag_rb1Enable= false;
     bool flag_rb2Enable= false;
     bool flag_gripper1= false;
     bool flag_gripper2= false;
+    //holdOnFlag 监控下降沿信号
+    bool holdOnFlag_LeftRobotConn= false;
+    bool holdOnFlag_RightRobotConn= false;
+    bool holdOnFlag_LeftRobotErr= false;
+    bool holdOnFlag_RightRobotErr= false;
+    bool holdOnFlag_LeftRobotEnable= false;
+    bool holdOnFlag_RightRobotEnable= false;
+    bool holdOnFlag_LeftCamera= false;
+    bool holdOnFlag_RightCamera= false;
     //rosparam参数
     bool isRunning_solveMagic;
     bool isRunning_grab;
@@ -285,7 +291,6 @@ private:
     void thread_rbCloseRvizCommand();
     void thread_BeginRun();
     void thread_RbGrepSet();
-    void thread_LisionErrInfo();
 //    void thread_MagicStepRunCommand();
     void thread_GagicGetData();
     void thread_GagicSolve();
@@ -305,6 +310,7 @@ private slots:
     void runTimer(QTimer* timer);
     void slot_cBox_setRunMode(const QString& text);
     void slot_tabWidgetClicked(int index_tab);
+    void slot_combox3_Clicked(int index);
 
 private:
     //qt控件

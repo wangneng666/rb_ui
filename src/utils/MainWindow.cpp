@@ -101,9 +101,6 @@ void MainWindow::SysVarInit() {
     //机器人抓取子线程
     thread_forRbGrepSet= new qthreadForRos();
     thread_forRbGrepSet->setParm(this,&MainWindow::thread_RbGrepSet);
-    //监听机器人故障子线程
-    thread_forLisionErrInfo= new qthreadForRos();
-    thread_forLisionErrInfo->setParm(this,&MainWindow::thread_LisionErrInfo);
     //获取工程文件路径
     photoPath= QDir::currentPath() +QString("/src/HsDualAppBridge/rb_ui/photo/");
     logPath= QDir::currentPath();
@@ -139,14 +136,16 @@ void MainWindow::signalAndSlot() {
     connect(btn_clearRecord,&QPushButton::clicked,this,&MainWindow::clearRecord);
     //系统停止
     connect(btn_SatetyStop,&QPushButton::clicked,this,&MainWindow::safety_sysStop);
-    //机器人1停止
+    //机器人1复位
     connect(btn_SatetyRb1Reset,&QPushButton::clicked,this,&MainWindow::safety_rob1Stop);
-    //机器人2停止
+    //机器人2复位
     connect(btn_SatetyRb2Reset,&QPushButton::clicked,this,&MainWindow::safety_rob2Stop);
     //下拉框触发事件
     connect(comboBox_setRunMode,SIGNAL(currentIndexChanged(const QString)), this, SLOT(slot_cBox_setRunMode(const QString)));
     //切换页面触发事件
     connect(tabWidget,SIGNAL(tabBarClicked(int)), this, SLOT(slot_tabWidgetClicked(int)));
+    //切换左右机器人时间
+    connect(comboBox_3,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox3_Clicked(int)));
     //单步调试页面信号与槽连接
     connect(btn_rb1SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1SetEnable);
     connect(btn_rb2SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2SetEnable);
@@ -240,6 +239,64 @@ void MainWindow::timer_comUpdate() {
     } else{
         isRunning_grab_Lable->setText("机器人抓盒子停止");
     }
+
+    //状态监控下降沿报警提醒
+    if(holdOnFlag_LeftRobotConn){
+        if(!connFlag_LeftRobot){
+            emit emitQmessageBox(infoLevel::warning ,QString("左机器人连接中断,请重新连接"));
+            LOG("ERRINFO")->logWarnMessage("左机器人连接中断");
+            holdOnFlag_LeftRobotConn= false;
+        }
+    }
+    if(holdOnFlag_RightRobotConn){
+        if(!connFlag_RightRobot){
+            emit emitQmessageBox(infoLevel::warning ,QString("右机器人连接中断,请重新连接"));
+            LOG("ERRINFO")->logWarnMessage("右机器人连接中断");
+            holdOnFlag_RightRobotConn= false;
+        }
+    }
+    if(holdOnFlag_LeftRobotErr){
+        if(errFlag_LeftRobot){
+            emit emitQmessageBox(infoLevel::warning ,QString("左机器人报警"));
+            LOG("ERRINFO")->logWarnMessage("左机器人报警");
+            holdOnFlag_LeftRobotErr= false;
+        }
+    }
+    if(holdOnFlag_RightRobotErr){
+        if(errFlag_RightRobot){
+            emit emitQmessageBox(infoLevel::warning ,QString("右机器人报警"));
+            LOG("ERRINFO")->logWarnMessage("右机器人报警");
+            holdOnFlag_RightRobotErr= false;
+        }
+    }
+    if(holdOnFlag_LeftRobotEnable){
+        if(enableFlag_LeftRobot){
+            emit emitQmessageBox(infoLevel::warning ,QString("左机器人下使能"));
+            LOG("ERRINFO")->logWarnMessage("左机器人下使能,请重新连接");
+            holdOnFlag_LeftRobotEnable= false;
+        }
+    }
+    if(holdOnFlag_RightRobotEnable){
+        if(enableFlag_RightRobot){
+            emit emitQmessageBox(infoLevel::warning ,QString("右机器人下使能"));
+            LOG("ERRINFO")->logWarnMessage("右机器人下使能,请重新连接");
+            holdOnFlag_RightRobotEnable= false;
+        }
+    }
+    if(holdOnFlag_LeftCamera){
+        if(connFlag_LeftCamera){
+            emit emitQmessageBox(infoLevel::warning ,QString("左相机断开连接,请重新连接"));
+            LOG("ERRINFO")->logWarnMessage("左相机断开连接");
+            holdOnFlag_LeftCamera= false;
+        }
+    }
+    if(holdOnFlag_RightCamera){
+        if(connFlag_RightCamera){
+            emit emitQmessageBox(infoLevel::warning ,QString("右相机断开连接,请重新连接"));
+            LOG("ERRINFO")->logWarnMessage("右相机断开连接");
+            holdOnFlag_RightCamera= false;
+        }
+    }
 }
 
 //定时器回调函数，实时更新状态信息
@@ -303,9 +360,8 @@ void MainWindow::thread_SysCheck() {
     //4.s_camera.launch             左边相机连接
     //5.publish_d435i_calibration_dual.launch  发布标定参数
     //6.vision_bridge_yolo6d_dual            视觉桥
-    cout<<"进入SysCheck子线程"<<endl;
     while ((!flag_syscheckOk)&&(!flag_sysckCancel)) {
-        sleep(2);
+        sleep(1);
         checkArray[0]=connFlag_RightRobot?1:0;
         checkArray[1]=1;
         checkArray[2]=connFlag_LeftCamera?1:0;
@@ -317,7 +373,6 @@ void MainWindow::thread_SysCheck() {
     }
     flag_syscheckOk= false;
     flag_sysckCancel= false;
-    cout<<"退出SysCheck子线程"<<endl;
 }
 
 
@@ -355,7 +410,7 @@ void MainWindow::thread_rbCloseRvizCommand() {
 
 //运行启动按钮-1
 void MainWindow::run_statup() {
-    cout<<"点击了运行启动按钮"<<endl;
+    LOG("RUNINFO")->logInfoMessage("开始运行启动!");
     pProgressBar->setValue(0);  // 当前进度
     pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
@@ -378,32 +433,34 @@ void MainWindow::thread_BeginRun() {
     {
         if(data_setgripper.response.isSucceeful)
         {
-            LOG("ROS_NODE")->logWarnMessage("左夹具设置成功!");
+            LOG("RUNINFO")->logInfoMessage("左夹具设置成功!");
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("左夹具设置失败!");
+            LOG("ERRINFO")->logWarnMessage("左夹具设置失败!");
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("左夹具设置服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("左夹具设置服务连接失败!");
     }
 
     if(RightGripperSet_client.call(data_setgripper))
     {
         if(data_setgripper.response.isSucceeful)
         {
-            LOG("ROS_NODE")->logWarnMessage("右夹具设置成功!");
+            LOG("RUNINFO")->logWarnMessage("右夹具设置成功!");
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("右夹具设置失败!");
+            LOG("ERRINFO")->logWarnMessage("右夹具设置失败!");
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("右夹具设置服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("右夹具设置服务连接失败!");
     }
     //左右夹具连接服务
     hirop_msgs::connectGripper data_conngripper;
@@ -411,34 +468,37 @@ void MainWindow::thread_BeginRun() {
     {
         if(data_conngripper.response.isConnected)
         {
-            LOG("ROS_NODE")->logWarnMessage("左夹具连接成功!");
+            LOG("RUNINFO")->logWarnMessage("左夹具连接成功!");
             connFlag_LeftGripper= true;
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("左夹具连接失败!");
+            LOG("ERRINFO")->logWarnMessage("左夹具连接失败!");
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("左夹具连接服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("左夹具连接服务连接失败!");
     }
 
     if(RightGripperConn_client.call(data_conngripper))
     {
         if(data_conngripper.response.isConnected)
         {
-            LOG("ROS_NODE")->logWarnMessage("右夹具连接成功!");
+            LOG("RUNINFO")->logWarnMessage("右夹具连接成功!");
             connFlag_RightGripper= true;
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("右夹具连接失败!");
+            LOG("ERRINFO")->logWarnMessage("右夹具连接失败!");
+
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("右夹具连接服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("右夹具连接服务连接失败!");
     }
 
     //左右机器人复位报警服务
@@ -447,32 +507,35 @@ void MainWindow::thread_BeginRun() {
     {
         if(data_robotClear.response.finsh)
         {
-            LOG("ROS_NODE")->logWarnMessage("左机器人清除错误成功!");
+            LOG("RUNINFO")->logWarnMessage("左机器人清除错误成功!");
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("左机器人清除错误失败!");
+            LOG("ERRINFO")->logWarnMessage("左机器人清除错误失败!");
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("左机器人清除错误服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("左机器人清除错误服务连接失败!");
     }
 
     if(RightRobReset_client.call(data_robotClear))
     {
         if(data_robotClear.response.finsh)
         {
-            LOG("ROS_NODE")->logWarnMessage("右机器人清除错误成功!");
+            LOG("RUNINFO")->logWarnMessage("右机器人清除错误成功!");
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("右机器人清除错误失败!");
+            LOG("ERRINFO")->logWarnMessage("右机器人清除错误失败!");
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("右机器人清除错误服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("右机器人清除错误服务连接失败!");
+
     }
     //左右机器人上使能服务
     hsr_rosi_device::SetEnableSrv data_robotEnable;
@@ -481,58 +544,40 @@ void MainWindow::thread_BeginRun() {
     {
         if(data_robotEnable.response.finsh)
         {
-            LOG("ROS_NODE")->logWarnMessage("左机器人上使能成功!");
+            LOG("RUNINFO")->logWarnMessage("左机器人上使能成功!");
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("左机器人上使能失败!");
+            LOG("ERRINFO")->logWarnMessage("左机器人上使能失败!");
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("左机器人上使能服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("左机器人上使能服务连接失败!");
     }
 
     if(RightRobEnable_client.call(data_robotEnable))
     {
         if(data_robotEnable.response.finsh)
         {
-            LOG("ROS_NODE")->logWarnMessage("右机器人上使能成功!");
+            LOG("RUNINFO")->logWarnMessage("右机器人上使能成功!");
         }
         else
         {
-            LOG("ROS_NODE")->logWarnMessage("右机器人上使能失败!");
+            LOG("ERRINFO")->logWarnMessage("右机器人上使能失败!");
         }
     }
     else
     {
         emit emitQmessageBox(infoLevel::warning,QString("右机器人上使能服务连接失败"));
+        LOG("ERRINFO")->logWarnMessage("右机器人上使能服务连接失败!");
     }
+    //运行魔方解算程序和抓取程序
     system("roslaunch rb_ui dualRobotLaunch.launch");
 
 }
 
-//监听故障状态子线程-3
-void MainWindow::thread_LisionErrInfo() {
-    //每隔一秒监听一次报警信息,并在机器人报警状态显示上刷新
-    rb_msgAndSrv::robotError errorMsg;
-    while (!flag_rbErrStatus){
-        sleep(1);
-        if(rbErrStatus_client.call(errorMsg)){
-        //如果报警
-            if(errorMsg.response.isError)
-            {
-                flag_rbErrStatus= true;
-                emit thread_forLisionErrInfo->signal_SendMsgBox(infoLevel::warning,QString("机器人故障!"));
-            }
-        }
-        else
-        {
-            emit thread_forLisionErrInfo->signal_SendMsgBox(infoLevel::warning,QString("rbErrStatus_client接收消息失败!"));
-            return;
-        }
-    }
-}
 
 //运行停止
 void MainWindow::run_stop() {
@@ -564,7 +609,8 @@ void MainWindow::magicCube_get() {
     if(isRunning_grab){
         return;
     }
-        thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicGetData);
+    LOG("RUNINFO")->logInfoMessage("机器人开始解魔方!");
+    thread_MagicStepRun->setParm(this,&MainWindow::thread_GagicGetData);
         thread_MagicStepRun->start();
 }
 //进入采集魔方数据子线程－－－２
@@ -577,7 +623,8 @@ void MainWindow::thread_GagicGetData() {
         cubeParse::Detection srv;
         ImageGet_client.call(srv);
     } else{
-        LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
+        emit emitQmessageBox(infoLevel::warning,QString("MagicStepRunCommand_client连接失败"));
+        LOG("ERRINFO")->logWarnMessage("MagicStepRunCommand_client连接失败!");
     }
     index_magicStep=1;
 }
@@ -632,7 +679,8 @@ void MainWindow::thread_GagicSolve() {
             index_magicStep=2;
         }
     } else{
-        LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
+        emit emitQmessageBox(infoLevel::warning,QString("MagicStepRunCommand_client连接失败"));
+        LOG("ERRINFO")->logWarnMessage("MagicStepRunCommand_client连接失败!");
     }
 
 }
@@ -650,10 +698,11 @@ void MainWindow::thread_GagicRunSolve() {
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
             index_magicStep=0;
-            cout<<"执行解算魔方成功"<<endl;
+            LOG("RUNINFO")->logWarnMessage("机器人执行解算魔方成功!");
         }
     } else{
-        LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
+        emit emitQmessageBox(infoLevel::warning,QString("MagicStepRunCommand_client连接失败"));
+        LOG("ERRINFO")->logWarnMessage("MagicStepRunCommand_client连接失败!");
     }
     
 }
@@ -676,12 +725,13 @@ void MainWindow::thread_AutoSolveMagic() {
     emit emitQmessageBox(infoLevel::information,QString("发送成功"));
     if(MagicStepRunCommand_client.call(data_srvs)){
         if(data_srvs.response.respond){
-            cout<<"一键解算魔方成功"<<endl;
+            LOG("RUNINFO")->logWarnMessage("一键解算魔方成功!");
         } else{
-            cout<<"一键解算魔方失败"<<endl;
+            LOG("ERRINFO")->logWarnMessage("一键解算魔方失败!");
         }
     } else{
-        LOG("ROS_NODE")->logWarnMessage("MagicStepRunCommand_client接收消息失败!");
+        emit emitQmessageBox(infoLevel::warning,QString("MagicStepRunCommand_client连接失败"));
+        LOG("ERRINFO")->logWarnMessage("MagicStepRunCommand_client连接失败!");
     }
     index_magicStep=0;
 }
@@ -693,7 +743,7 @@ void MainWindow::robot_grab() {
         return;
     }
 //机器人没运行，则开始行动
-    cout<<"点击了机器人抓取按钮"<<endl;
+    LOG("RUNINFO")->logInfoMessage("机器人开始抓取运行中!");
     thread_forRbGrepSet->start();
 
 }
@@ -705,17 +755,15 @@ void MainWindow::safety_sysStop() {
     data_srvs2.request.enable= false;
     if((rbSetEnable1_client.call(data_srvs1))&&(rbSetEnable2_client.call(data_srvs2))){
         if(data_srvs1.response.finsh&&data_srvs2.response.finsh){
-            LOG("ROBOT")->logInfoMessage("机器人伺服停止成功!");
+            LOG("RUNINFO")->logInfoMessage("机器人伺服停止成功!");
         } else{
-            LOG("ROBOT")->logInfoMessage("机器人伺服停止错误!");
+            LOG("ERRINFO")->logWarnMessage("机器人伺服停止错误!");
             emit emitQmessageBox(infoLevel::warning,QString("机器人伺服停止错误!"));
         }
     } else{
-        LOG("ROS_NODE")->logErrorMessage("rbRunCommand_client接收消息失败!");
-        emit emitQmessageBox(infoLevel::warning,QString("rbRunCommand_client接收消息失败!"));
-        return;
+        LOG("ERRINFO")->logErrorMessage("rbSetEnable_client连接失败!");
+        emit emitQmessageBox(infoLevel::warning,QString("rbSetEnable_client连接失败!"));
     }
-    cout<<"点击了系统停止按钮"<<endl;
 }
 
 void MainWindow::safety_rob1Stop() {
@@ -726,27 +774,8 @@ void MainWindow::safety_rob2Stop() {
     cout<<"点击了机器人2复位按钮"<<endl;
 }
 
-void MainWindow::callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg) {
-    //两台机器人均连上了才表示连接标志成功
-    sleep(1);
-//    if(data_msg.data[0]==1&&data_msg.data[1]==1){
-//        cout<<"接收到连接成功数据"<<endl;
-//    } else{
-//    }
-}
 
-void MainWindow::callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg) {
-    sleep(1);
-    if(data_msg.data[0]==1){
-        label_rb1ErrStatus->setPixmap(QPixmap(QString::fromUtf8("/home/wangneng/catkin_ws/src/HsDualAppBridge/rb_msgs/photo/light_red.png")));
-        LOG("Robot")->logErrorMessage("机器人1故障");
-    }
-    if(data_msg.data[1]==1){
-        label_rb2ErrStatus->setPixmap(QPixmap(QString::fromUtf8("/home/wangneng/catkin_ws/src/HsDualAppBridge/rb_msgs/photo/light_red.png")));
-        LOG("Robot")->logErrorMessage("机器人2故障");
-    }
-}
-
+//pc相机连接
 void MainWindow::callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg) {
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
     cv::Mat mat = ptr->image;
@@ -798,14 +827,13 @@ void MainWindow::thread_RbGrepSet() {
     data_msg.request.data[2]=index3;
     if(rbGrepSetCommand_client.call(data_msg)){
     if(data_msg.response.respond){
-        cout<<"抓取成功"<<endl;
+        LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
     }
     } else{
-        LOG("Warning")->logErrorMessage("rbGrepSetCommand_client接收消息失败!");
+        LOG("ERRINFO")->logErrorMessage("机器人抓取物品失败!");
+        emit emitQmessageBox(infoLevel::warning,QString("机器人抓取物品失败,请将机器人回原点,并复位程序,重新启动!"));
     }
 }
-
-
 
 MainWindow::~MainWindow() {
     system("rosnode kill -a");
@@ -1376,14 +1404,15 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     label_leftCamera = new QLabel(tab_4);
     label_leftCamera->setObjectName(QString::fromUtf8("label_leftCamera"));
     label_leftCamera->setAlignment(Qt::AlignCenter);
-    label_leftCamera->setFixedSize(600,600);
+    label_leftCamera->setFixedSize(600,400);
+    label_leftCamera->setText("左摄像头");
     label_rightCamera = new QLabel(tab_4);
     label_rightCamera->setObjectName(QString::fromUtf8("label_rightCamera"));
     label_rightCamera->setAlignment(Qt::AlignCenter);
-    label_rightCamera->setFixedSize(600,600);
+    label_rightCamera->setFixedSize(600,400);
+    label_rightCamera->setText("右摄像头");
     verticalLayout_11->addWidget(label_rightCamera);
     verticalLayout_11->addWidget(label_leftCamera);
-
 
     horizontalLayout_9->addLayout(verticalLayout_11);
 
@@ -1394,7 +1423,6 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     groupBox_setMod = new QGroupBox(tab_4);
     groupBox_setMod->setObjectName(QString::fromUtf8("groupBox_setMod"));
     groupBox_setMod->setStyleSheet(groupBox_qss);
-
 
 
     horizontalLayout_11 = new QHBoxLayout(groupBox_setMod);
@@ -1652,41 +1680,46 @@ if(color=="red"){
 
 void MainWindow::callback_LeftCamera_subscriber(sensor_msgs::Image::ConstPtr image) {
     connFlag_LeftCamera= true;
+    holdOnFlag_LeftCamera= true;
     emit emitStartTimer(updateTimer_LeftCamera);
     //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
     QImage qimage = cvMat2QImage(mat);
     QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
-    QPixmap new_pixmap = tmp_pixmap.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_leftCamera->width(), label_leftCamera->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
     label_leftCamera->setPixmap(new_pixmap);
 }
 
 void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image) {
     connFlag_RightCamera= true;
+    holdOnFlag_RightCamera=true;
     emit emitStartTimer(updateTimer_RightCamera);
     //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
     QImage qimage = cvMat2QImage(mat);
     QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
-    QPixmap new_pixmap = tmp_pixmap.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_rightCamera->width(), label_rightCamera->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
     label_rightCamera->setPixmap(new_pixmap);
 }
 
 void MainWindow::callback_rob1Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
     connFlag_LeftRobot= true;
+    holdOnFlag_LeftRobotConn= true;
     emit emitStartTimer(updateTimer_rob1status);
     if(robot_status->in_error.val==0){
         errFlag_LeftRobot= false;
+        holdOnFlag_LeftRobotErr= true;
     } else{
         errFlag_LeftRobot=true;
     }
 
     if(robot_status->drives_powered.val==1){
         enableFlag_LeftRobot= true;
+        holdOnFlag_LeftRobotEnable= true;
     } else{
         enableFlag_LeftRobot= false;
     }
@@ -1694,15 +1727,18 @@ void MainWindow::callback_rob1Status_subscriber(const industrial_msgs::RobotStat
 
 void MainWindow::callback_rob2Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
     connFlag_RightRobot= true;
+    holdOnFlag_RightRobotConn=true;
     emit emitStartTimer(updateTimer_rob2status);
     if(robot_status->in_error.val==0){
         errFlag_RightRobot= false;
+        holdOnFlag_RightRobotErr= true;
     } else{
         errFlag_RightRobot=true;
     }
 
     if(robot_status->drives_powered.val==1){
         enableFlag_RightRobot= true;
+        holdOnFlag_RightRobotEnable= true;
     } else{
         enableFlag_RightRobot= false;
     }
@@ -1865,6 +1901,21 @@ void MainWindow::callback_MagicSolveSolution_subscriber(std_msgs::Bool data_msg)
     }
 }
 
+void MainWindow::slot_combox3_Clicked(int index) {
+    switch (index){
+        case 0:
+            label_leftCamera->setVisible(true);
+            label_rightCamera->setVisible(false);
+            break;
+        case 1:
+            label_leftCamera->setVisible(false);
+            label_rightCamera->setVisible(true);
+            break;
+    }
+
+
+}
+
 CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)
 {
     init();
@@ -1947,8 +1998,8 @@ void CMsgBox::slot_timerUpdate() {
     //6.vision_bridge_yolo6d_dual            视觉桥启动
     QString arrayString[]{"机器人连接:",
                           "夹爪桥连接:",
-                          "右边相机连接:",
                           "左边相机连接:",
+                          "右边相机连接:",
                           "发布标定参数启动:",
                           "视觉桥启动:"
     };
