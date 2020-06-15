@@ -46,6 +46,8 @@
 #include "rb_msgAndSrv/robotError.h"
 #include "cubeParse/Detection.h"
 #include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include "sensor_msgs/Image.h"
 #include <cv_bridge/cv_bridge.h>
 #include "rb_msgAndSrv/rbImageList.h"

@@ -777,11 +777,12 @@ void MainWindow::safety_rob2Stop() {
 
 //pc相机连接
 void MainWindow::callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg) {
+
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(msg, "bgr8");
     cv::Mat mat = ptr->image;
     QImage image = cvMat2QImage(mat);
     QPixmap pixmap1 = QPixmap::fromImage(image);
-//    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap fitpixmap1 = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
 //    label_picture1->setPixmap(fitpixmap1);
 }
@@ -1916,15 +1917,20 @@ void MainWindow::slot_combox3_Clicked(int index) {
 void MainWindow::callback_preview1_subscriber(const sensor_msgs::Image::ConstPtr image) {
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
-    cv::imshow("UR51_previewImage1",mat);
+    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
+    cv::imshow("UR51_previewImage",mat);
     cv::waitKey();
+    cv::destroyWindow("UR51_previewImage");
 }
 
 void MainWindow::callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr image) {
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
-    cv::imshow("UR52_previewImage1",mat);
+    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
+    cv::imshow("UR52_previewImage",mat);
     cv::waitKey();
+    cv::destroyWindow("UR52_previewImage");
+
 }
 
 CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)

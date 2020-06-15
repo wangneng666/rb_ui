@@ -19,8 +19,10 @@ rb_msgAndSrv
   image_transport
 )
 
+#set(OpenCV_DIR "/home/wangneng/devtool/libs/OpenCV-3.4.6/share/OpenCV")
 find_package(OpenCV)
-
+MESSAGE(STATUS "OpenCV--include path: ${OpenCV_INCLUDE_DIRS}")
+MESSAGE(STATUS "    version: ${OpenCV_VERSION}")
 # 自动调用moc，uic，rcc处理qt的扩展部分
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
