@@ -239,8 +239,8 @@ void MainWindow::timer_comUpdate() {
         isRunning_grab_Lable->setText("机器人抓盒子停止");
     }
 
-    //当在工作中才进行检测
-    if(isRunning_solveMagic||isRunning_grab){
+    //当不在工作中时跳过检测
+    if(~(isRunning_solveMagic||isRunning_grab)){
         return;
     }
     //状态监控下降沿报警提醒
