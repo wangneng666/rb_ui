@@ -141,7 +141,6 @@ public:
 
 private:
     //全局状态标志
-    bool flag_rbErrStatus;//机器人连接状态标志
     int index_magicStep;
     int* checkArray;
     bool flag_RvizRun= false;

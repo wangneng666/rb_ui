@@ -16,7 +16,6 @@ MainWindow::MainWindow(ros::NodeHandle *node, QWidget *parent):QMainWindow(paren
 
 void MainWindow::SysVarInit() {
     checkArray = new int[9]{0};
-    flag_rbErrStatus= false;//机器人故障标志
     isRunning_solveMagic= false;
     isRunning_grab= false;
     index_magicStep=0;
@@ -240,6 +239,10 @@ void MainWindow::timer_comUpdate() {
         isRunning_grab_Lable->setText("机器人抓盒子停止");
     }
 
+    //当在工作中才进行检测
+    if(isRunning_solveMagic||isRunning_grab){
+        return;
+    }
     //状态监控下降沿报警提醒
     if(holdOnFlag_LeftRobotConn){
         if(!connFlag_LeftRobot){
