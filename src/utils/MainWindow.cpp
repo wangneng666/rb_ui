@@ -47,7 +47,7 @@ void MainWindow::SysVarInit() {
     updateTimer_rob2status->setInterval(1000);
     //话题或服务对象初始化
     previewImage1_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview1_subscriber,this,_1));
-    previewImage2_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview2_subscriber,this,_1));
+    previewImage2_subscriber=Node->subscribe<sensor_msgs::Image>("/UR52/preview_image",1,boost::bind(&MainWindow::callback_preview2_subscriber,this,_1));
     rob1Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR51/robot_status",1,boost::bind(&MainWindow::callback_rob1Status_subscriber,this,_1));
     rob2Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR52/robot_status",1,boost::bind(&MainWindow::callback_rob2Status_subscriber,this,_1));
     Leftcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base/color/image_raw",1,boost::bind(&MainWindow::callback_LeftCamera_subscriber,this,_1));
