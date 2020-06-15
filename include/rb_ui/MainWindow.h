@@ -52,8 +52,6 @@
 #include <qregion.h>
 #include "rb_msgAndSrv/SetEnableSrv.h"
 #include "logmanager.h"
-#include "hirop_msgs/robotConn.h"
-#include "hirop_msgs/robotError.h"
 #include "hirop_msgs/SetGripper.h"
 #include "hirop_msgs/connectGripper.h"
 #include "hsr_rosi_device/ClearFaultSrv.h"
@@ -190,6 +188,8 @@ private:
     QTimer* updateTimer_RightCamera;
     ros::Publisher rbStopCommand_publisher;//机器人停止命令
     ros::Publisher SafetyStop_publisher;//机器人紧急停止
+    ros::Subscriber previewImage1_subscriber;//
+    ros::Subscriber previewImage2_subscriber;//
     ros::Subscriber Progress_rbSolve;//机器人解魔方进度采集
     ros::Subscriber MagicSolveSolution;//图详解析结果
     ros::Subscriber camera_subscriber;//相机数据采集
@@ -277,6 +277,8 @@ private:
     void callback_rob2Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status);
     void callback_LeftCamera_subscriber(const sensor_msgs::Image::ConstPtr image);
     void callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image);
+    void callback_preview1_subscriber(const sensor_msgs::Image::ConstPtr image);
+    void callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr image);
     void callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg);
     void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
     void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);

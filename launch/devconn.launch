@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<launch>
+    <include file="$(find hsr_bringup)/launch/co605_dual_arm_real.launch" />
+    <include file="$(find realsense2_camera)/launch/rs_camera_right.launch" />
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+    <include file="$(find hsr_bringup)/launch/publish_d435i_calibration_dual.launch" />
+    <include file="$(find vision_bridge)/launch/vision_bridge_yolo6d_dual.launch" />
+    <include file="$(find gripper_bridge)/launch/gripper_bridge_dual.launch" />
+</launch>
+

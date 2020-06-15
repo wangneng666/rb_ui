@@ -46,10 +46,12 @@ void MainWindow::SysVarInit() {
     updateTimer_rob2status = new QTimer(this);
     updateTimer_rob2status->setInterval(1000);
     //话题或服务对象初始化
-    rob1Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR51/robot_status",1000,boost::bind(&MainWindow::callback_rob1Status_subscriber,this,_1));
-    rob2Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR52/robot_status",1000,boost::bind(&MainWindow::callback_rob2Status_subscriber,this,_1));
-    Leftcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base/color/image_raw",1000,boost::bind(&MainWindow::callback_LeftCamera_subscriber,this,_1));
-    Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1000,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
+    previewImage1_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview1_subscriber,this,_1));
+    previewImage2_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview2_subscriber,this,_1));
+    rob1Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR51/robot_status",1,boost::bind(&MainWindow::callback_rob1Status_subscriber,this,_1));
+    rob2Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR52/robot_status",1,boost::bind(&MainWindow::callback_rob2Status_subscriber,this,_1));
+    Leftcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base/color/image_raw",1,boost::bind(&MainWindow::callback_LeftCamera_subscriber,this,_1));
+    Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     MagicSolve_subscriber=Node->subscribe<rb_msgAndSrv::rb_StringArray>("changeColor",1000,&MainWindow::callback_magicSolve_subscriber,this);
     Progress_rbSolve=Node->subscribe<std_msgs::Int8MultiArray>("/progress_rbSolveMagic",1000,&MainWindow::callback_ProgressRbSolve_subscriber,this);
@@ -70,12 +72,11 @@ void MainWindow::SysVarInit() {
 
     rbStopCommand_publisher= Node->advertise<std_msgs::Bool>("/stop_move", 1);
     SafetyStop_publisher=Node->advertise<std_msgs::Bool>("/Safety_stop", 1);
-    rbConnCommand_client = Node->serviceClient<hirop_msgs::robotConn>("getRobotConnStatus");
     rbRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_DoubleBool>("/Rb_runCommand");
     rbSetEnable1_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR51/set_robot_enable");
     rbSetEnable2_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR52/set_robot_enable");
     rbErrStatus_client = Node->serviceClient<rb_msgAndSrv::robotError>("/Rb_errStatus");
-//    camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1000,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
+    camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
     rbGrepSetCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/Rb_grepSetCommand");
     MagicStepRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/MagicStepRunCommand");
 
@@ -176,7 +177,6 @@ void MainWindow::signalAndSlot() {
     connect(thread_MagicStepRun, SIGNAL(signal_SendMsgBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitQmessageBox(infoLevel ,QString)), this,SLOT(showQmessageBox(infoLevel,QString)));  //将自定义槽连接到自定义信号
     connect(this, SIGNAL(emitStartTimer(QTimer*)), this,SLOT(runTimer(QTimer*)));  //将自定义槽连接到自定义信号
-
 /****************************************************************************************************/
 }
 
@@ -270,28 +270,28 @@ void MainWindow::timer_comUpdate() {
         }
     }
     if(holdOnFlag_LeftRobotEnable){
-        if(enableFlag_LeftRobot){
+        if(!enableFlag_LeftRobot){
             emit emitQmessageBox(infoLevel::warning ,QString("左机器人下使能"));
             LOG("ERRINFO")->logWarnMessage("左机器人下使能,请重新连接");
             holdOnFlag_LeftRobotEnable= false;
         }
     }
     if(holdOnFlag_RightRobotEnable){
-        if(enableFlag_RightRobot){
+        if(!enableFlag_RightRobot){
             emit emitQmessageBox(infoLevel::warning ,QString("右机器人下使能"));
             LOG("ERRINFO")->logWarnMessage("右机器人下使能,请重新连接");
             holdOnFlag_RightRobotEnable= false;
         }
     }
     if(holdOnFlag_LeftCamera){
-        if(connFlag_LeftCamera){
+        if(!connFlag_LeftCamera){
             emit emitQmessageBox(infoLevel::warning ,QString("左相机断开连接,请重新连接"));
             LOG("ERRINFO")->logWarnMessage("左相机断开连接");
             holdOnFlag_LeftCamera= false;
         }
     }
     if(holdOnFlag_RightCamera){
-        if(connFlag_RightCamera){
+        if(!connFlag_RightCamera){
             emit emitQmessageBox(infoLevel::warning ,QString("右相机断开连接,请重新连接"));
             LOG("ERRINFO")->logWarnMessage("右相机断开连接");
             holdOnFlag_RightCamera= false;
@@ -1798,7 +1798,6 @@ void MainWindow::slot_gripper2() {
         gripper2->setText("右夹具张开");
         system("rosservice call /UR52/closeGripper \"{}\"");
     }
-
 }
 
 
@@ -1867,7 +1866,7 @@ void MainWindow::slot_rb1putBack() {
 }
 
 void MainWindow::slot_rb2putBack() {
-        cout<<"右边放置魔方"<<endl;
+    cout<<"右边放置魔方"<<endl;
     system("rosservice call /placeMagicCube \"data:\n- 1\"");
 }
 
@@ -1912,8 +1911,20 @@ void MainWindow::slot_combox3_Clicked(int index) {
             label_rightCamera->setVisible(true);
             break;
     }
+}
 
+void MainWindow::callback_preview1_subscriber(const sensor_msgs::Image::ConstPtr image) {
+    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+    cv::Mat mat = ptr->image;
+    cv::imshow("UR51_previewImage1",mat);
+    cv::waitKey();
+}
 
+void MainWindow::callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr image) {
+    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+    cv::Mat mat = ptr->image;
+    cv::imshow("UR52_previewImage1",mat);
+    cv::waitKey();
 }
 
 CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)

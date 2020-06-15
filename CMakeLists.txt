@@ -19,6 +19,7 @@ rb_msgAndSrv
   image_transport
 )
 
+find_package(OpenCV)
 
 # 自动调用moc，uic，rcc处理qt的扩展部分
 set(CMAKE_AUTOMOC ON)
