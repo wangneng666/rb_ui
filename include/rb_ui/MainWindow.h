@@ -22,6 +22,7 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QProgressBar>
+#include <QDateTime>
 #include <QDialog>
 #include <QDir>
 #include <QMessageBox>
@@ -31,6 +32,7 @@
 #include <QImage>
 #include <iostream>
 #include <fstream>
+#include <QMutex>
 #include "QDebug"
 #include "qdebug.h"
 #include "ros/ros.h"
@@ -149,6 +151,7 @@ private:
     QString logPath;//图片路径
     QPixmap fitpixmap_redLight;
     QPixmap fitpixmap_greenLight;
+    QMutex mutex_showImg;
     bool Flag_connOk= false;//连接状态
     bool connFlag_LeftRobot;//左机器人连接状态
     bool connFlag_RightRobot;//右机器人连接状态
@@ -261,6 +264,7 @@ private:
     void timer_comUpdate();//公共刷新连接状态
     void timer_robot1Status();//公共刷新连接状态
     void timer_robot2Status();//公共刷新连接状态
+    void button_style(QPushButton& btn);
 
     //单步调试页面按钮槽函数
     void slot_btn_rb1SetEnable();
@@ -271,6 +275,7 @@ private:
     void slot_gripper2();
     void slot_rb1putBack();
     void slot_rb2putBack();
+    void slot_ResetGrepFun();
     //opencv相关
     QImage cvMat2QImage(const cv::Mat& mat);
     //ros节点回调函数
@@ -328,6 +333,9 @@ private:
     QTabWidget *tabWidget;
 
     QWidget *tab;
+    QGroupBox *groupBox_tab1_status;
+    QGroupBox *groupBox_tab1_mod;
+    QGroupBox *groupBox_tab1_func;
     QHBoxLayout *horizontalLayout_4;
     QVBoxLayout *verticalLayout_4;
     QHBoxLayout *horizontalLayout_2;
@@ -375,6 +383,7 @@ private:
     QHBoxLayout *horizontalLayout_20;
     QPushButton *btn_rb1putBack;
     QPushButton *btn_rb2putBack;
+    QPushButton *btn_ResetGrepFun;
 
 
     QWidget *tab_3;
@@ -403,8 +412,8 @@ private:
     QHBoxLayout *horizontalLayout_10;
     QHBoxLayout *horizontalLayout_9;
     QVBoxLayout *verticalLayout_11;
-    QLabel *label_leftCamera;
-    QLabel *label_rightCamera;
+    QLabel *label_processImag;
+    QLabel *label_preImag;
     QVBoxLayout *verticalLayout_9;
     QGroupBox *groupBox_setMod;
     QHBoxLayout *horizontalLayout_11;
@@ -437,6 +446,7 @@ private:
     QLabel* showMagicStepLable;
     QLabel* isRunning_solveMagic_Lable;
     QLabel* isRunning_grab_Lable;
+    QLabel* showtime_Lable;
 
 };
 

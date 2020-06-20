@@ -11,8 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   cubeParse
-std_srvs
-rb_msgAndSrv
+  std_srvs
+  rb_msgAndSrv
   message_generation
   sensor_msgs
   cv_bridge

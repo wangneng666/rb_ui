@@ -155,6 +155,7 @@ void MainWindow::signalAndSlot() {
     connect(gripper2,&QPushButton::clicked,this,&MainWindow::slot_gripper2);
     connect(btn_rb1putBack,&QPushButton::clicked,this,&MainWindow::slot_rb1putBack);
     connect(btn_rb2putBack,&QPushButton::clicked,this,&MainWindow::slot_rb2putBack);
+    connect(btn_ResetGrepFun,&QPushButton::clicked,this,&MainWindow::slot_ResetGrepFun);
 
     //定时器启动
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::timer_onUpdate);
@@ -238,6 +239,10 @@ void MainWindow::timer_comUpdate() {
     } else{
         isRunning_grab_Lable->setText("机器人抓盒子停止");
     }
+
+    QDateTime time = QDateTime::currentDateTime();
+    QString str = time.toString("yyyy-MM-dd hh:mm:ss dddd");
+    showtime_Lable->setText(str);
 
     //当不在工作中时跳过检测
     if(~(isRunning_solveMagic||isRunning_grab)){
@@ -592,12 +597,11 @@ void MainWindow::run_stop() {
 
 //系统复位
 void MainWindow::SysReset() {
-    try {
+    if(thread_forRbConn->isRunning()){
         thread_forRbConn->terminate();
-        thread_forBeginRun->terminate();
     }
-    catch(int e1){
-        cout<<"抛异常了"<<endl;
+    if(thread_forBeginRun->isRunning()){
+        thread_forBeginRun->terminate();
     }
     pProgressBar->setValue(0);  // 当前进度
     pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
@@ -742,13 +746,11 @@ void MainWindow::thread_AutoSolveMagic() {
 
 void MainWindow::robot_grab() {
 //如果机器人运行中则返回
-    if(isRunning_solveMagic|isRunning_grab){
+    if(isRunning_solveMagic){
         return;
     }
 //机器人没运行，则开始行动
-    LOG("RUNINFO")->logInfoMessage("机器人开始抓取运行中!");
     thread_forRbGrepSet->start();
-
 }
 
 void MainWindow::safety_sysStop() {
@@ -820,6 +822,7 @@ void MainWindow::displayTextControl(QString text) {
 
 
 void MainWindow::thread_RbGrepSet() {
+    LOG("RUNINFO")->logInfoMessage("机器人开始抓取运行中!");
     int index1=comboBox->currentIndex();
     int index2=comboBox_2->currentIndex();
     int index3=comboBox_3->currentIndex();
@@ -837,6 +840,7 @@ void MainWindow::thread_RbGrepSet() {
         LOG("ERRINFO")->logErrorMessage("机器人抓取物品失败!");
         emit emitQmessageBox(infoLevel::warning,QString("机器人抓取物品失败,请将机器人回原点,并复位程序,重新启动!"));
     }
+    sleep(100);
 }
 
 MainWindow::~MainWindow() {
@@ -946,6 +950,9 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     font.setBold(true);
     font.setItalic(false);
     font.setWeight(75);
+    QString tab_qss=
+            "QTabBar::tab{width:100}\n"
+            "QTabBar::tab{height:40}";
     groupBox_qss=
             "QGroupBox{\n""\n"
             "border-width:2px;\n""\n"
@@ -975,6 +982,7 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
     tabWidget = new QTabWidget(centralWidget);
     tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
+    tabWidget->setStyleSheet(tab_qss);
     tab = new QWidget();
     tab->setObjectName(QString::fromUtf8("tab"));
     horizontalLayout_4 = new QHBoxLayout(tab);
@@ -985,13 +993,15 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     verticalLayout_4->setSpacing(30);
     verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
     verticalLayout_4->setSizeConstraint(QLayout::SetDefaultConstraint);
-//    verticalLayout_4->setStretch(0,1);
-//    verticalLayout_4->setStretch(1,1);
-    verticalLayout_4->setContentsMargins(-1, -1, -1, 100);
+//    verticalLayout_4->setContentsMargins(-1, -1, -1, 100);
+
+
     horizontalLayout_2 = new QHBoxLayout();
     horizontalLayout_2->setSpacing(6);
     horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
     horizontalLayout_2->setContentsMargins(-1, -1, 0, 50);
+
+
     gridLayout = new QGridLayout();
     gridLayout->setSpacing(6);
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
@@ -1109,7 +1119,16 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     gridLayout->addWidget(label_RightCameraConnStatus, 2, 7, 1, 1);
 
     horizontalLayout_2->addLayout(gridLayout);
-    verticalLayout_4->addLayout(horizontalLayout_2);
+
+    groupBox_tab1_status = new QGroupBox(tab);
+    groupBox_tab1_status->setObjectName(QString::fromUtf8("groupBox_tab1_status"));
+    groupBox_tab1_status->setStyleSheet(groupBox_qss);
+    groupBox_tab1_status->setTitle(QApplication::translate("MainWindow", "系统状态显示", nullptr));
+    groupBox_tab1_status->setLayout(horizontalLayout_2);
+//    horizontalLayout_2->addWidget(groupBox_tab1_status);
+
+//    verticalLayout_4->addLayout(horizontalLayout_2);
+    verticalLayout_4->addWidget(groupBox_tab1_status);
 
     horizontalLayout_21 = new QHBoxLayout();
     horizontalLayout_21->setSpacing(6);
@@ -1121,12 +1140,17 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     comboBox_setRunMode->addItem(QString());
     comboBox_setRunMode->setFixedSize(COMBOX_W,COMBOX_H);
     comboBox_setRunMode->setObjectName(QString::fromUtf8("comboBox_setRunMode"));
-
     horizontalLayout_21->addWidget(comboBox_setRunMode);
 
+    groupBox_tab1_mod = new QGroupBox();
+    groupBox_tab1_mod->setObjectName(QString::fromUtf8("groupBox_tab1_mod"));
+    groupBox_tab1_mod->setStyleSheet(groupBox_qss);
+    groupBox_tab1_mod->setTitle(QApplication::translate("MainWindow", "运行模式选择", nullptr));
+    groupBox_tab1_mod->setLayout(horizontalLayout_21);
+//    horizontalLayout_21->addWidget(groupBox_tab1_mod);
 
-    verticalLayout_4->addLayout(horizontalLayout_21);
-
+    verticalLayout_4->addWidget(groupBox_tab1_mod);
+//    verticalLayout_4->addLayout(horizontalLayout_21);
 
     horizontalLayout_5 = new QHBoxLayout();
     horizontalLayout_5->setSpacing(6);
@@ -1134,43 +1158,56 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     btn_rbConn = new QPushButton(tab);
     btn_rbConn->setObjectName(QString::fromUtf8("btn_rbConn"));
     btn_rbConn->setFixedSize(BTN_W,BTN_H);
-
-    horizontalLayout_5->addWidget(btn_rbConn);
+    //根据窗口，去设置按钮的位置
+    button_style(*btn_rbConn); //设置按钮的样式
 
     btn_rvizRun = new QPushButton(tab);
     btn_rvizRun->setObjectName(QString::fromUtf8("btn_rvizRun"));
     btn_rvizRun->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_5->addWidget(btn_rvizRun);
 
     btn_beginRun = new QPushButton(tab);
     btn_beginRun->setObjectName(QString::fromUtf8("btn_beginRun"));
     btn_beginRun->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_5->addWidget(btn_beginRun);
 
     btn_normalStop = new QPushButton(tab);
     btn_normalStop->setObjectName(QString::fromUtf8("btn_normalStop"));
     btn_normalStop->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_5->addWidget(btn_normalStop);
 
     btn_SysReset= new QPushButton(tab);
     btn_SysReset->setObjectName(QString::fromUtf8("btn_SysReset"));
     btn_SysReset->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_5->addWidget(btn_SysReset);
+
     btn_rbConn->setEnabled(false);
     btn_rvizRun->setEnabled(false);
     btn_beginRun->setEnabled(false);
     btn_normalStop->setEnabled(false);
     btn_SysReset->setEnabled(false);
 
-    verticalLayout_4->addLayout(horizontalLayout_5);
+    groupBox_tab1_func = new QGroupBox();
+    groupBox_tab1_func->setObjectName(QString::fromUtf8("groupBox_tab1_func"));
+    groupBox_tab1_func->setStyleSheet(groupBox_qss);
+    groupBox_tab1_func->setTitle(QApplication::translate("MainWindow", "系统功能", nullptr));
 
-    verticalLayout_4->setStretch(0, 1);
-    verticalLayout_4->setStretch(1, 1);
+    horizontalLayout_5->addWidget(btn_rbConn);
+    horizontalLayout_5->addWidget(btn_rvizRun);
+    horizontalLayout_5->addWidget(btn_beginRun);
+    horizontalLayout_5->addWidget(btn_normalStop);
+    horizontalLayout_5->addWidget(btn_SysReset);
 
+    groupBox_tab1_func->setLayout(horizontalLayout_5);
+
+//    verticalLayout_4->addLayout(horizontalLayout_5);
+    verticalLayout_4->addWidget(groupBox_tab1_func);
+//    verticalLayout_4->setStretch(0, 1);
+//    verticalLayout_4->setStretch(1, 1);
+
+    verticalLayout_4->setStretch(0,2);
+    verticalLayout_4->setStretch(1,1);
+    verticalLayout_4->setStretch(2,2);
     horizontalLayout_4->addLayout(verticalLayout_4);
 
     tabWidget->addTab(tab, QString());
@@ -1256,8 +1293,14 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     btn_rb2putBack->setObjectName(QString::fromUtf8("btn_rb2putBack"));
     btn_rb2putBack->setText("右边机器人放回魔方");
     btn_rb2putBack->setFixedSize(BTN_W,BTN_H);
-
     horizontalLayout_20->addWidget(btn_rb2putBack);
+
+    btn_ResetGrepFun = new QPushButton(groupBox_tab3_3);
+    btn_ResetGrepFun->setObjectName(QString::fromUtf8("btn_ResetGrepFun"));
+    btn_ResetGrepFun->setText("重置抓取功能");
+    btn_ResetGrepFun->setFixedSize(BTN_W,BTN_H);
+
+    horizontalLayout_20->addWidget(btn_ResetGrepFun);
 
 
 
@@ -1405,18 +1448,18 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     verticalLayout_11 = new QVBoxLayout();
     verticalLayout_11->setSpacing(6);
     verticalLayout_11->setObjectName(QString::fromUtf8("verticalLayout_11"));
-    label_leftCamera = new QLabel(tab_4);
-    label_leftCamera->setObjectName(QString::fromUtf8("label_leftCamera"));
-    label_leftCamera->setAlignment(Qt::AlignCenter);
-    label_leftCamera->setFixedSize(600,400);
-    label_leftCamera->setText("左摄像头");
-    label_rightCamera = new QLabel(tab_4);
-    label_rightCamera->setObjectName(QString::fromUtf8("label_rightCamera"));
-    label_rightCamera->setAlignment(Qt::AlignCenter);
-    label_rightCamera->setFixedSize(600,400);
-    label_rightCamera->setText("右摄像头");
-    verticalLayout_11->addWidget(label_rightCamera);
-    verticalLayout_11->addWidget(label_leftCamera);
+    label_processImag = new QLabel(tab_4);
+    label_processImag->setObjectName(QString::fromUtf8("label_processImag"));
+    label_processImag->setAlignment(Qt::AlignCenter);
+    label_processImag->setFixedSize(600,400);
+    label_processImag->setText("深度匹配效果图");
+    label_preImag = new QLabel(tab_4);
+    label_preImag->setObjectName(QString::fromUtf8("label_preImag"));
+    label_preImag->setAlignment(Qt::AlignCenter);
+    label_preImag->setFixedSize(600,400);
+    label_preImag->setText("实时画面展示");
+    verticalLayout_11->addWidget(label_preImag);
+    verticalLayout_11->addWidget(label_processImag);
 
     horizontalLayout_9->addLayout(verticalLayout_11);
 
@@ -1582,7 +1625,7 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     MainWindow->setCentralWidget(centralWidget);
     menuBar = new QMenuBar(MainWindow);
     menuBar->setObjectName(QString::fromUtf8("menuBar"));
-    menuBar->setGeometry(QRect(0, 0, 967, 31));
+//    menuBar->setGeometry(QRect(0, 0, 967, 31));
     MainWindow->setMenuBar(menuBar);
     statusBar = new QStatusBar(MainWindow);
     statusBar->setObjectName(QString::fromUtf8("statusBar"));
@@ -1603,6 +1646,10 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     pProgressBar->setVisible(false);  // 不可见
     statusBar->addWidget(pProgressBar);
+
+    showtime_Lable=new QLabel();
+    statusBar->addWidget(showtime_Lable);
+
     MainWindow->setStatusBar(statusBar);
     tabWidget->setCurrentIndex(0);
 //    QMetaObject::connectSlotsByName(this);
@@ -1628,7 +1675,6 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         btn_SysReset->setText(QApplication::translate("MainWindow", "系统复位", nullptr));
 
         tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("MainWindow", "\344\270\273\347\225\214\351\235\242", nullptr));
-
         groupBox_tab2_1->setTitle(QApplication::translate("MainWindow", "\346\234\272\345\231\250\344\272\272\350\260\203\350\257\225", nullptr));
         btn_rb1SetEnable->setText(QApplication::translate("MainWindow", "\345\267\246\346\234\272\345\231\250\344\272\272\344\270\212\344\275\277\350\203\275", nullptr));
         btn_rb2SetEnable->setText(QApplication::translate("MainWindow", "\345\217\263\346\234\272\345\231\250\344\272\272\344\270\212\344\275\277\350\203\275", nullptr));
@@ -1639,7 +1685,6 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         gripper2->setText(QApplication::translate("MainWindow", "\345\217\263\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
         groupBox_tab3_3->setTitle(QApplication::translate("MainWindow", "\345\205\266\344\273\226\350\260\203\350\257\225", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "单步调试界面", nullptr));
-
         btn_magicGetdata->setText(QApplication::translate("MainWindow", "\351\207\207\351\233\206\351\255\224\346\226\271\346\225\260\346\215\256", nullptr));
         btn_magicSolve->setText(QApplication::translate("MainWindow", "\350\247\243\347\256\227", nullptr));
         btn_magicRunSolve->setText(QApplication::translate("MainWindow", "\346\211\247\350\241\214\350\247\243\347\256\227", nullptr));
@@ -1686,28 +1731,38 @@ void MainWindow::callback_LeftCamera_subscriber(sensor_msgs::Image::ConstPtr ima
     connFlag_LeftCamera= true;
     holdOnFlag_LeftCamera= true;
     emit emitStartTimer(updateTimer_LeftCamera);
+    if(comboBox_3->currentIndex()==1){
+        return;
+    }
+    mutex_showImg.lock();
     //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
     QImage qimage = cvMat2QImage(mat);
     QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
-    QPixmap new_pixmap = tmp_pixmap.scaled(label_leftCamera->width(), label_leftCamera->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
-    label_leftCamera->setPixmap(new_pixmap);
+    label_preImag->setPixmap(new_pixmap);
+    mutex_showImg.unlock();
 }
 
 void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image) {
     connFlag_RightCamera= true;
     holdOnFlag_RightCamera=true;
     emit emitStartTimer(updateTimer_RightCamera);
+    if(comboBox_3->currentIndex()==0){
+        return;
+    }
+    mutex_showImg.lock();
     //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
     QImage qimage = cvMat2QImage(mat);
     QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
-    QPixmap new_pixmap = tmp_pixmap.scaled(label_rightCamera->width(), label_rightCamera->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
 //    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
-    label_rightCamera->setPixmap(new_pixmap);
+    label_preImag->setPixmap(new_pixmap);
+    mutex_showImg.unlock();
 }
 
 void MainWindow::callback_rob1Status_subscriber(const industrial_msgs::RobotStatus::ConstPtr robot_status) {
@@ -1867,6 +1922,7 @@ void MainWindow::magicUpdateData() {
 void MainWindow::slot_rb1putBack() {
     cout<<"左边放置魔方"<<endl;
     system("rosservice call /placeMagicCube \"data:\n- 0\"");
+
 }
 
 void MainWindow::slot_rb2putBack() {
@@ -1905,34 +1961,65 @@ void MainWindow::callback_MagicSolveSolution_subscriber(std_msgs::Bool data_msg)
 }
 
 void MainWindow::slot_combox3_Clicked(int index) {
-    switch (index){
-        case 0:
-            label_leftCamera->setVisible(true);
-            label_rightCamera->setVisible(false);
-            break;
-        case 1:
-            label_leftCamera->setVisible(false);
-            label_rightCamera->setVisible(true);
-            break;
-    }
+//    switch (index){
+//        case 0:
+//            label_leftCamera->setVisible(true);
+//            label_preImag->setVisible(false);
+//            break;
+//        case 1:
+//            label_leftCamera->setVisible(false);
+//            label_preImag->setVisible(true);
+//            break;
+//    }
 }
 
 void MainWindow::callback_preview1_subscriber(const sensor_msgs::Image::ConstPtr image) {
+//    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+//    cv::Mat mat = ptr->image;
+//    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
+//    cv::imshow("UR51_previewImage",mat);
+//    cv::waitKey();
+//    cv::destroyWindow("UR51_previewImage");
+    //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
-    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
-    cv::imshow("UR51_previewImage",mat);
-    cv::waitKey();
-    cv::destroyWindow("UR51_previewImage");
+    QImage qimage = cvMat2QImage(mat);
+    QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_processImag->width(), label_processImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+//    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
+    label_processImag->setPixmap(new_pixmap);
 }
 
 void MainWindow::callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr image) {
+//    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+//    cv::Mat mat = ptr->image;
+//    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
+//    cv::imshow("UR52_previewImage",mat);
+//    cv::waitKey();
+//    cv::destroyWindow("UR52_previewImage");
+    //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
-    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
-    cv::imshow("UR52_previewImage",mat);
-    cv::waitKey();
-    cv::destroyWindow("UR52_previewImage");
+    QImage qimage = cvMat2QImage(mat);
+    QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
+    QPixmap new_pixmap = tmp_pixmap.scaled(label_processImag->width(), label_processImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
+//    QPixmap tmp_pixmap = pixmap1.scaled(label_picture1->width(), label_picture1->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);  // 按比例缩放
+    label_processImag->setPixmap(new_pixmap);
+
+}
+
+void MainWindow::button_style(QPushButton& btn) {
+    QFile file("/home/wangneng/catkin_ws/src/HsDualAppBridge/rb_ui/config/button.qss"); //通过文件路径创建文件对象
+    file.open(QFile::ReadOnly); //文件打开方式
+    QString str = file.readAll(); //获取qss中全部字符
+    btn.setStyleSheet(str); //设置样式表
+}
+
+void MainWindow::slot_ResetGrepFun() {
+    if(thread_forRbGrepSet->isRunning()){
+        thread_forRbGrepSet->terminate();
+        emit emitQmessageBox(infoLevel::information,QString("退出线程成功!"));
+    }
 
 }
 
@@ -2049,11 +2136,6 @@ void CMsgBox::slot_SwapDataWithMainwin(int* array) {
     checkOk= true;
     c_array=array;
 }
-
-
-
-
-
 
 
 
