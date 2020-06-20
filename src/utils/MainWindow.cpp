@@ -746,9 +746,9 @@ void MainWindow::thread_AutoSolveMagic() {
 
 void MainWindow::robot_grab() {
 //如果机器人运行中则返回
-    if(isRunning_solveMagic){
-        return;
-    }
+    // if(isRunning_solveMagic){
+    //     return;
+    // }
 //机器人没运行，则开始行动
     thread_forRbGrepSet->start();
 }
@@ -839,8 +839,9 @@ void MainWindow::thread_RbGrepSet() {
     } else{
         LOG("ERRINFO")->logErrorMessage("机器人抓取物品失败!");
         emit emitQmessageBox(infoLevel::warning,QString("机器人抓取物品失败,请将机器人回原点,并复位程序,重新启动!"));
+
     }
-    sleep(100);
+    isRunning_solveMagic=false;
 }
 
 MainWindow::~MainWindow() {
