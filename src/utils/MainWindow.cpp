@@ -833,12 +833,12 @@ void MainWindow::thread_RbGrepSet() {
     data_msg.request.data[1]=index2;
     data_msg.request.data[2]=index3;
     if(rbGrepSetCommand_client.call(data_msg)){
-    if(data_msg.response.respond){
+    if(data_msg.response.respond == true){
         LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
+    }else
+    {
+        LOG("RUNINFO")->logErrorMessage("机器人抓取物品失败!");
     }
-    } else{
-        LOG("ERRINFO")->logErrorMessage("机器人抓取物品失败!");
-        emit emitQmessageBox(infoLevel::warning,QString("机器人抓取物品失败,请将机器人回原点,并复位程序,重新启动!"));
 
     }
     isRunning_solveMagic=false;
