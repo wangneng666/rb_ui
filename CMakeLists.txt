@@ -104,7 +104,12 @@ include_directories(
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 add_executable(rb_ui src/rb_ui.cpp
         include/rb_ui/MainWindow.h
+        include/rb_ui/CMsgBox.h
+        include/rb_ui/qthreadForRos.h
+        include/rb_ui/gloalVal.h
         src/utils/MainWindow.cpp
+        src/utils/CMsgBox.cpp
+        src/utils/gloalVal.cpp
         )
 
 target_link_libraries(

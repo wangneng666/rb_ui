@@ -1,10 +1,5 @@
 #include "MainWindow.h"
 
-bool flag_syscheckOk= false;//系统自检通过标志
-bool flag_sysckCancel= false;//系统自检取消
-bool flag_delCbox= false;//释放自检弹框
-
-
 MainWindow::MainWindow(ros::NodeHandle *node, QWidget *parent):QMainWindow(parent),Node(node){
     //系统变量初始化
     SysVarInit();
@@ -78,6 +73,7 @@ void MainWindow::SysVarInit() {
     camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
     rbGrepSetCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/Rb_grepSetCommand");
     MagicStepRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/MagicStepRunCommand");
+    //魔方点位调试页面
 
     qRegisterMetaType<infoLevel>("infoLevel");//信号与槽连接自定义类型需要注册
     //线程句柄初始化
@@ -96,6 +92,9 @@ void MainWindow::SysVarInit() {
     //开始运行子线程
     thread_forBeginRun= new qthreadForRos();
     thread_forBeginRun->setParm(this,&MainWindow::thread_BeginRun);
+    //系统复位子线程
+    thread_forSysReset= new qthreadForRos();
+    thread_forSysReset->setParm(this,&MainWindow::thread_SysReset);
     //分步解魔方子线程
     thread_MagicStepRun= new qthreadForRos();
     //机器人抓取子线程
@@ -144,7 +143,7 @@ void MainWindow::signalAndSlot() {
     connect(comboBox_setRunMode,SIGNAL(currentIndexChanged(const QString)), this, SLOT(slot_cBox_setRunMode(const QString)));
     //切换页面触发事件
     connect(tabWidget,SIGNAL(tabBarClicked(int)), this, SLOT(slot_tabWidgetClicked(int)));
-    //切换左右机器人时间
+    //切换左右机器人事件
     connect(comboBox_3,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox3_Clicked(int)));
     //单步调试页面信号与槽连接
     connect(btn_rb1SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1SetEnable);
@@ -156,6 +155,13 @@ void MainWindow::signalAndSlot() {
     connect(btn_rb1putBack,&QPushButton::clicked,this,&MainWindow::slot_rb1putBack);
     connect(btn_rb2putBack,&QPushButton::clicked,this,&MainWindow::slot_rb2putBack);
     connect(btn_ResetGrepFun,&QPushButton::clicked,this,&MainWindow::slot_ResetGrepFun);
+    //魔方点位校准页面
+    connect(btn_tabmp_do,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_do);
+    connect(btn_tabmp_step,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_step);
+    connect(btn_tabmp_recordPose,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_recordPose);
+    connect(btn_tabmp_newteach,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_newteach);
+    connect(btn_tabmp_resetPose,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_resetPose);
+
 
     //定时器启动
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::timer_onUpdate);
@@ -335,11 +341,17 @@ void MainWindow::timer_RightCamera() {
 
 //设备连接按钮-1
 void MainWindow::dev_connect() {
-    if(cbox==nullptr){
-        cbox=new CMsgBox();
-        connect(this, SIGNAL(emitSwapDataWithCMsgBox(int*)), cbox,SLOT(slot_SwapDataWithMainwin(int*)),Qt::DirectConnection);  //将自定义槽连接到自定义信号
+    if (cbox == nullptr) {
+        cbox = new CMsgBox();
+        connect(this, SIGNAL(emitSwapDataWithCMsgBox(int * )), cbox, SLOT(slot_SwapDataWithMainwin(int * )),
+                Qt::DirectConnection);  //将自定义槽连接到自定义信号
     }
-    thread_forRbConn->start();//运行子线程代码:设备连接按钮中开辟的子线程程序-2
+    if (thread_forRbConn->isRunning()) {
+        emit emitQmessageBox(infoLevel::warning, QString("功能程序正在运行中,请不要重复启动!如要再次启动,请先复位程序!"));
+
+    } else {
+        thread_forRbConn->start();//运行子线程代码:设备连接按钮中开辟的子线程程序-2
+    }
 }
 //设备连接按钮中开辟的子线程程序-2
 void MainWindow::thread_rbConnCommand() {
@@ -421,7 +433,11 @@ void MainWindow::run_statup() {
     LOG("RUNINFO")->logInfoMessage("开始运行启动!");
     pProgressBar->setValue(0);  // 当前进度
     pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
-    thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
+    if(thread_forBeginRun->isRunning()){
+        emit emitQmessageBox(infoLevel::warning,QString("功能程序正在运行中,请不要重复启动!"));
+    } else{
+        thread_forBeginRun->start();//转到运行启动按钮开启的子线程-2
+    }
 }
 
 //运行启动按钮开启的子线程-2
@@ -607,8 +623,29 @@ void MainWindow::SysReset() {
     pProgressBar->setFormat(QString("当前解魔方进度为：0/0"));
     flag_syscheckOk= false;
     flag_sysckCancel= false;
-    system("rosnode kill $(rosnode list | grep -v /robot_UI)");
+    if(thread_forSysReset->isRunning()){
+        thread_forSysReset->terminate();
+        sleep(1);
+        thread_forSysReset->start();
+    } else{
+        thread_forSysReset->start();
+    }
+
 }
+
+
+void MainWindow::thread_SysReset() {
+    cout<<"杀死节点"<<endl;
+    system("rosnode kill $(rosnode list | grep -v /robot_UI)");
+    cout<<"是杀死所有关于ros的进程"<<endl;
+    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
+//    system("killall -9 roscore");
+//    system("killall -9 rosmaster");
+    sleep(1);
+    cout<<"重启roscore"<<endl;
+    system("roscore");
+}
+
 
 //点击采集魔方数据按钮－－－１
 void MainWindow::magicCube_get() {
@@ -750,7 +787,11 @@ void MainWindow::robot_grab() {
     //     return;
     // }
 //机器人没运行，则开始行动
-    thread_forRbGrepSet->start();
+    if (thread_forRbGrepSet->isRunning()) {
+        emitQmessageBox(infoLevel::warning, QString("功能程序正在运行中,请不要重复启动!如要再次启动,请先复位程序!"));
+    } else {
+        thread_forRbGrepSet->start();
+    }
 }
 
 void MainWindow::safety_sysStop() {
@@ -832,20 +873,23 @@ void MainWindow::thread_RbGrepSet() {
     data_msg.request.data[0]=index1;
     data_msg.request.data[1]=index2;
     data_msg.request.data[2]=index3;
-    if(rbGrepSetCommand_client.call(data_msg)){
-    if(data_msg.response.respond){
-        LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
-    }
-    } else{
-        LOG("ERRINFO")->logErrorMessage("机器人抓取物品失败!");
-        emit emitQmessageBox(infoLevel::warning,QString("机器人抓取物品失败,请将机器人回原点,并复位程序,重新启动!"));
-
+    if(rbGrepSetCommand_client.call(data_msg))
+    {
+        if(data_msg.response.respond)
+        {
+            LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
+        } else
+        {
+            LOG("RUNINFO")->logErrorMessage("机器人抓取物品失败!");
+        }
     }
     isRunning_solveMagic=false;
 }
 
 MainWindow::~MainWindow() {
     system("rosnode kill -a");
+    //关闭ros相关进程
+//    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
 }
 
 QImage MainWindow::cvMat2QImage(const cv::Mat &mat) {
@@ -1160,7 +1204,6 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     btn_rbConn->setObjectName(QString::fromUtf8("btn_rbConn"));
     btn_rbConn->setFixedSize(BTN_W,BTN_H);
     //根据窗口，去设置按钮的位置
-    button_style(*btn_rbConn); //设置按钮的样式
 
     btn_rvizRun = new QPushButton(tab);
     btn_rvizRun->setObjectName(QString::fromUtf8("btn_rvizRun"));
@@ -1284,6 +1327,19 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_20->setSpacing(6);
     horizontalLayout_20->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_20->setObjectName(QString::fromUtf8("horizontalLayout_20"));
+
+    btn_rb1_goHomePose = new QPushButton(groupBox_tab3_3);
+    btn_rb1_goHomePose->setText("左机器人回原点");
+    btn_rb1_goHomePose->setObjectName(QString::fromUtf8("btn_rb1_goHomePose"));
+    btn_rb1_goHomePose->setFixedSize(BTN_W,BTN_H);
+    horizontalLayout_20->addWidget(btn_rb1_goHomePose);
+
+    btn_rb2_goHomePose = new QPushButton(groupBox_tab3_3);
+    btn_rb2_goHomePose->setText("右机器人回原点");
+    btn_rb2_goHomePose->setObjectName(QString::fromUtf8("btn_rb2_goHomePose"));
+    btn_rb2_goHomePose->setFixedSize(BTN_W,BTN_H);
+    horizontalLayout_20->addWidget(btn_rb2_goHomePose);
+
     btn_rb1putBack = new QPushButton(groupBox_tab3_3);
     btn_rb1putBack->setText("左机器人放回魔方");
     btn_rb1putBack->setObjectName(QString::fromUtf8("btn_rb1putBack"));
@@ -1302,17 +1358,104 @@ void MainWindow::initUi(QMainWindow *MainWindow) {
     btn_ResetGrepFun->setFixedSize(BTN_W,BTN_H);
 
     horizontalLayout_20->addWidget(btn_ResetGrepFun);
-
-
-
-
     verticalLayout_5->addWidget(groupBox_tab3_3);
-
-
     horizontalLayout_6->addLayout(verticalLayout_5);
-
-
     tabWidget->addTab(tab_2, QString());
+
+    //魔方点位调试页面
+    tab_magicPose = new QWidget();
+    tab_magicPose->setObjectName(QString::fromUtf8("tab_magicPose"));
+    horizontalLayout_22 = new QHBoxLayout(tab_magicPose);
+    horizontalLayout_22->setSpacing(6);
+    horizontalLayout_22->setContentsMargins(11, 11, 11, 11);
+    horizontalLayout_22->setObjectName(QString::fromUtf8("horizontalLayout_22"));
+    horizontalLayout_tabmp_1 = new QHBoxLayout();
+    horizontalLayout_tabmp_1->setSpacing(6);
+    horizontalLayout_tabmp_1->setObjectName(QString::fromUtf8("horizontalLayout_tabmp_1"));
+    verticalLayout_tabmp_11 = new QVBoxLayout();
+    verticalLayout_tabmp_11->setSpacing(6);
+    verticalLayout_tabmp_11->setObjectName(QString::fromUtf8("verticalLayout_tabmp_11"));
+    label_tabmp_1 = new QLabel(tab_magicPose);
+    label_tabmp_1->setObjectName(QString::fromUtf8("label_tabmp_1"));
+
+    verticalLayout_tabmp_11->addWidget(label_tabmp_1);
+
+
+    horizontalLayout_tabmp_1->addLayout(verticalLayout_tabmp_11);
+
+    vLayout_tabmp_12 = new QVBoxLayout();
+    vLayout_tabmp_12->setSpacing(6);
+    vLayout_tabmp_12->setObjectName(QString::fromUtf8("vLayout_tabmp_12"));
+    vLayout_tabmp_121 = new QVBoxLayout();
+    vLayout_tabmp_121->setSpacing(6);
+    vLayout_tabmp_121->setObjectName(QString::fromUtf8("vLayout_tabmp_121"));
+    comboBox_tabmp_1 = new QComboBox(tab_magicPose);
+    comboBox_tabmp_1->addItem(QString());
+    comboBox_tabmp_1->addItem(QString());
+    comboBox_tabmp_1->setObjectName(QString::fromUtf8("comboBox_tabmp_1"));
+    comboBox_tabmp_1->setFixedSize(BTN_W,BTN_H);
+
+    vLayout_tabmp_121->addWidget(comboBox_tabmp_1,0,Qt::AlignHCenter);
+
+    btn_tabmp_do = new QPushButton(tab_magicPose);
+    btn_tabmp_do->setObjectName(QString::fromUtf8("btn_tabmp_do"));
+    btn_tabmp_do->setFixedSize(BTN_W,BTN_H);
+    vLayout_tabmp_121->addWidget(btn_tabmp_do,0,Qt::AlignHCenter);
+
+    btn_tabmp_step = new QPushButton(tab_magicPose);
+    btn_tabmp_step->setObjectName(QString::fromUtf8("btn_tabmp_step"));
+    btn_tabmp_step->setFixedSize(BTN_W,BTN_H);
+
+    vLayout_tabmp_121->addWidget(btn_tabmp_step,0,Qt::AlignHCenter);
+
+    btn_tabmp_recordPose = new QPushButton(tab_magicPose);
+    btn_tabmp_recordPose->setObjectName(QString::fromUtf8("btn_tabmp_recordPose"));
+    btn_tabmp_recordPose->setFixedSize(BTN_W,BTN_H);
+
+    vLayout_tabmp_121->addWidget(btn_tabmp_recordPose,0,Qt::AlignHCenter);
+
+
+    vLayout_tabmp_12->addLayout(vLayout_tabmp_121);
+
+    hLayout_tabmp_122 = new QHBoxLayout();
+    hLayout_tabmp_122->setSpacing(6);
+    hLayout_tabmp_122->setObjectName(QString::fromUtf8("hLayout_tabmp_122"));
+    btn_tabmp_newteach = new QPushButton(tab_magicPose);
+    btn_tabmp_newteach->setObjectName(QString::fromUtf8("btn_tabmp_newteach"));
+    btn_tabmp_newteach->setFixedSize(BTN_W,BTN_H);
+    hLayout_tabmp_122->addWidget(btn_tabmp_newteach,0,Qt::AlignHCenter);
+
+    btn_tabmp_resetPose = new QPushButton(tab_magicPose);
+    btn_tabmp_resetPose->setObjectName(QString::fromUtf8("btn_tabmp_resetPose"));
+    btn_tabmp_resetPose->setFixedSize(BTN_W,BTN_H);
+
+    hLayout_tabmp_122->addWidget(btn_tabmp_resetPose,0,Qt::AlignHCenter);
+
+
+    vLayout_tabmp_12->addLayout(hLayout_tabmp_122);
+
+    hLayout_tabmp_123 = new QHBoxLayout();
+    hLayout_tabmp_123->setSpacing(6);
+    hLayout_tabmp_123->setObjectName(QString::fromUtf8("hLayout_tabmp_123"));
+    textEdit_tabmp_1 = new QTextEdit(tab_magicPose);
+    textEdit_tabmp_1->setObjectName(QString::fromUtf8("textEdit_tabmp_1"));
+
+    hLayout_tabmp_123->addWidget(textEdit_tabmp_1,0,Qt::AlignHCenter);
+
+
+    vLayout_tabmp_12->addLayout(hLayout_tabmp_123);
+
+
+    horizontalLayout_tabmp_1->addLayout(vLayout_tabmp_12);
+
+    horizontalLayout_tabmp_1->setStretch(0, 2);
+    horizontalLayout_tabmp_1->setStretch(1, 1);
+
+    horizontalLayout_22->addLayout(horizontalLayout_tabmp_1);
+
+    tabWidget->addTab(tab_magicPose, QString());
+
+
 
 
 
@@ -1685,7 +1828,19 @@ void MainWindow::retranslateUi(QMainWindow *MainWindow) {
         gripper1->setText(QApplication::translate("MainWindow", "\345\267\246\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
         gripper2->setText(QApplication::translate("MainWindow", "\345\217\263\345\244\271\345\205\267\345\274\240\345\274\200", nullptr));
         groupBox_tab3_3->setTitle(QApplication::translate("MainWindow", "\345\205\266\344\273\226\350\260\203\350\257\225", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "单步调试界面", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "设备调试界面", nullptr));
+
+        label_tabmp_1->setText(QString());
+        comboBox_tabmp_1->setItemText(0, QApplication::translate("MainWindow", "\351\255\224\346\226\271\345\244\215\345\216\237\345\212\250\344\275\234", nullptr));
+        comboBox_tabmp_1->setItemText(1, QApplication::translate("MainWindow", "\351\255\224\346\226\271\346\213\215\347\205\247\345\212\250\344\275\234", nullptr));
+
+        btn_tabmp_do->setText(QApplication::translate("MainWindow", "\346\211\247\350\241\214", nullptr));
+        btn_tabmp_step->setText(QApplication::translate("MainWindow", "\345\257\270\350\277\233", nullptr));
+        btn_tabmp_recordPose->setText(QApplication::translate("MainWindow", "\350\256\260\345\275\225\347\202\271\344\275\215", nullptr));
+        btn_tabmp_newteach->setText(QApplication::translate("MainWindow", "\351\207\215\346\226\260\347\244\272\346\225\231", nullptr));
+        btn_tabmp_resetPose->setText(QApplication::translate("MainWindow", "\345\212\250\344\275\234\347\202\271\344\275\215\347\244\272\346\225\231", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_magicPose), QApplication::translate("MainWindow", "\351\255\224\346\226\271\347\202\271\344\275\215\346\240\241\345\207\206", nullptr));
+
         btn_magicGetdata->setText(QApplication::translate("MainWindow", "\351\207\207\351\233\206\351\255\224\346\226\271\346\225\260\346\215\256", nullptr));
         btn_magicSolve->setText(QApplication::translate("MainWindow", "\350\247\243\347\256\227", nullptr));
         btn_magicRunSolve->setText(QApplication::translate("MainWindow", "\346\211\247\350\241\214\350\247\243\347\256\227", nullptr));
@@ -1975,12 +2130,6 @@ void MainWindow::slot_combox3_Clicked(int index) {
 }
 
 void MainWindow::callback_preview1_subscriber(const sensor_msgs::Image::ConstPtr image) {
-//    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
-//    cv::Mat mat = ptr->image;
-//    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
-//    cv::imshow("UR51_previewImage",mat);
-//    cv::waitKey();
-//    cv::destroyWindow("UR51_previewImage");
     //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
@@ -1992,12 +2141,6 @@ void MainWindow::callback_preview1_subscriber(const sensor_msgs::Image::ConstPtr
 }
 
 void MainWindow::callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr image) {
-//    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
-//    cv::Mat mat = ptr->image;
-//    cv::pyrDown(mat,mat,cv::Size(mat.cols / 2, mat.rows / 2));
-//    cv::imshow("UR52_previewImage",mat);
-//    cv::waitKey();
-//    cv::destroyWindow("UR52_previewImage");
     //显示图片
     const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
     cv::Mat mat = ptr->image;
@@ -2009,12 +2152,6 @@ void MainWindow::callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr
 
 }
 
-void MainWindow::button_style(QPushButton& btn) {
-    QFile file("/home/wangneng/catkin_ws/src/HsDualAppBridge/rb_ui/config/button.qss"); //通过文件路径创建文件对象
-    file.open(QFile::ReadOnly); //文件打开方式
-    QString str = file.readAll(); //获取qss中全部字符
-    btn.setStyleSheet(str); //设置样式表
-}
 
 void MainWindow::slot_ResetGrepFun() {
     if(thread_forRbGrepSet->isRunning()){
@@ -2024,119 +2161,109 @@ void MainWindow::slot_ResetGrepFun() {
 
 }
 
-CMsgBox::CMsgBox(QWidget *parent):QDialog(parent)
-{
-    init();
+void MainWindow::slot_btn_tabmp_do() {
+    //调用阿忠的服务，名字待定
+//    ros::ServiceClient calibrationClient = nh.serviceClient<fucksz::MoveToPoint>("move_to_point");
+//    fucksz::MoveToPoint calibration_srv;
+//    a = mode;
+//    b = stepNum;
+//
+//    if (a == 0)
+//    {
+//        calibration_srv.a = a;
+//        calibration_srv.b = b;
+//        stepNum++;
+//        if (stepNum == 18)
+//            stepNum = 0;
+//    }
+//
+//    if (a == 1)
+//    {
+//        calibration_srv.a = a;
+//        calibration_srv.b = b;
+//        stepNum++;
+//        if (stepNum == 8)
+//            stepNum = 0;
+//    }
+//
+//    if (calibrationClient.call(calibration_srv))
+//        ROS_INFO("Mode: %d, StepNum: %d", a, b);
+//    else
+//        ROS_INFO("Fialed to call service move_to_point");
+
 }
 
-int CMsgBox::showMsgBox(QWidget *parent)
-{
-    CMsgBox msgBox(parent);
-    return msgBox.exec();
+void MainWindow::slot_btn_tabmp_step() {
+    //调用服务
+//    ros::ServiceClient approachClient = nh.serviceClient<fucksz::Approach>("approach");
+//    fucksz::Approach approach_srv;
+//    if (approachClient.call(approach_srv))
+//        std_msgs::Bool feedback = approach_srv.response;
+//    else
+//        ROS_INFO("Fialed to call service approach");
 }
 
-void CMsgBox::init()
-{
-    this->setFixedSize(533,300);
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog); //隐藏标题栏
-    this->setWindowModality(Qt::ApplicationModal); //窗口模态
-
-    QWidget *pWidget = new QWidget(this);
-    pWidget->resize(this->size());
-    QVBoxLayout *pVLayout=new QVBoxLayout;
-    QHBoxLayout *pHLayout1=new QHBoxLayout;
-    QHBoxLayout *pHLayout2=new QHBoxLayout;
-    QHBoxLayout *pHLayout3=new QHBoxLayout;
-
-    m_lableTitle=new QLabel("系统自检中,请等待完成...");
-    QFont font;
-    font.setPointSize(16);
-    font.setBold(true);
-    font.setItalic(false);
-    font.setWeight(75);
-    m_lableTitle->setFont(font);
-    pHLayout1->addWidget(m_lableTitle,0,Qt::AlignHCenter);
-
-    m_plaintext=new QPlainTextEdit();
-    pHLayout2->addWidget(m_plaintext);
-
-    pBtn_checkCancel = new QPushButton(this);
-    pBtn_checkCancel->setFixedSize(111,46);
-    pBtn_checkCancel->setText("取消自检");
-    connect(pBtn_checkCancel,&QPushButton::clicked,[=]{
-        done(ENM_OK_BTN);
-        flag_sysckCancel= true;
-        flag_delCbox= true;
-    });
-
-    pBtn_checkOk = new QPushButton(this);
-    pBtn_checkOk->setFixedSize(111,46);
-    pBtn_checkOk->setText("自检通过");
-    connect(pBtn_checkOk,&QPushButton::clicked,[=]{
-        done(ENM_CANCEL_BTN);
-        flag_delCbox= true;
-    });
-    pBtn_checkOk->setVisible(false);
-    pHLayout3->addWidget(pBtn_checkCancel);
-    pHLayout3->addWidget(pBtn_checkOk);
-    pVLayout->addLayout(pHLayout1);
-    pVLayout->addLayout(pHLayout2);
-    pVLayout->addLayout(pHLayout3);
-    this->setLayout(pVLayout);
-
-    cTimer1 = new QTimer(this);
-    cTimer1->setInterval(1000);
-    //定时器启动
-    QObject::connect(cTimer1, &QTimer::timeout, this, &CMsgBox::slot_timerUpdate);
-    cTimer1->start();
+void MainWindow::slot_btn_tabmp_recordPose() {
+    //调用服务
+//    ros::ServiceClient recordpointClient = nh.serviceClient<fucksz::RecordPoint>("record_point");
+//    fucksz::RecordPoint recordpoint_srv;
+//    if (recordpointClient.call(recordpoint_srv))
+//        std_msgs::Bool feedback = recordpoint_srv.response;
+//    else
+//        ROS_INFO("Fialed to call service record_point");
 }
 
-//定时检测有自检过程无完成
-void CMsgBox::slot_timerUpdate() {
-    cout<<"定时"<<endl;
-    if(!checkOk){
-        return;
-    }
-    m_plaintext->clear();
-    //1.co605_dual_arm_real.launch 机器人连接
-    //2.gripper_bridge_dual.launch 夹爪桥连接
-    //3.rs_camera_right.launch     右边相机连接
-    //4.s_camera.launch             左边相机连接
-    //5.publish_d435i_calibration_dual.launch  发布标定参数启动
-    //6.vision_bridge_yolo6d_dual            视觉桥启动
-    QString arrayString[]{"机器人连接:",
-                          "夹爪桥连接:",
-                          "左边相机连接:",
-                          "右边相机连接:",
-                          "发布标定参数启动:",
-                          "视觉桥启动:"
-    };
-    int sum=0;
-    for (int i = 0; i <6; ++i) {
-        if(c_array[i]==1){
-            arrayString[i]+="成功";
-        } else{
-            arrayString[i]+="失败";
-        }
-        sum+=c_array[i];
-        m_plaintext->appendPlainText(arrayString[i]);
+void MainWindow::slot_btn_tabmp_newteach() {
+//    先调用放下魔方的服务函数;
+//    mode = 0;
+//    stepNum = 0;
+}
+
+void MainWindow::slot_btn_tabmp_resetPose() {
+    //调用服务
+//    ros::ServiceClient resetposeClient = nh.serviceClient<fucksz::ResetPose>("reset_pose");
+//    fucksz::RecordPoint resetpose_srv;
+//    if (resetposeClient.call(resetpose_srv))
+//        std_msgs::Bool feedback = resetpose_srv.response;
+//    else
+//        ROS_INFO("Fialed to call service reset_pose");
+}
+
+void MainWindow::label_tabmp_1_showImage(int mode, int stepNum) {
+    //图片保存的路径
+    std::string readpath = "";
+    if (mode == 0)
+    {
+        //读取示教点位的模板效果图片
+        cv::Mat image = cv::imread(readpath + to_string(stepNum) + ".jpg", 1);
+        QImage qimage = cvMat2QImage(image);
+        QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
+        QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
 
-    if(sum==6){
-        pBtn_checkCancel->setVisible(false);
-        pBtn_checkOk->setVisible(true);
-        flag_syscheckOk= true;
+    if (mode == 1)
+    {
+        //此处假设把订阅到的照片设为全局变量来供其他函数使用
+//        cv::Point Upper_Left(738, 318);
+//        cv::Point Bottom_Right(1182, 762);
+//        cv::rectangle(camera_image, Upper_Left, Bottom_Right, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
+//        QImage qimage = cvMat2QImage(camera_image);
+//        QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
     }
+
 }
 
-CMsgBox::~CMsgBox(){
-    cout<<"析构了"<<endl;
+void MainWindow::slot_btn_rb1_goHomePose() {
+
 }
 
-void CMsgBox::slot_SwapDataWithMainwin(int* array) {
-    checkOk= true;
-    c_array=array;
+void MainWindow::slot_btn_rb2_goHomePose() {
+
 }
+
+
+
 
 
 
