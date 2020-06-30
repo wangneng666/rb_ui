@@ -985,13 +985,16 @@ void MainWindow::callback_LeftCamera_subscriber(sensor_msgs::Image::ConstPtr ima
     connFlag_LeftCamera= true;
     holdOnFlag_LeftCamera= true;
     emit emitStartTimer(updateTimer_LeftCamera);
+
+    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+    cv::Mat mat = ptr->image;
+    gl_leftImageMat=mat.clone();
     if(comboBox_3->currentIndex()==1){
         return;
     }
     mutex_showImg.lock();
     //显示图片
-    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
-    cv::Mat mat = ptr->image;
+
     QImage qimage = cvMat2QImage(mat);
     QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
     QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
@@ -1004,13 +1007,16 @@ void MainWindow::callback_RightCamera_subscriber(const sensor_msgs::Image::Const
     connFlag_RightCamera= true;
     holdOnFlag_RightCamera=true;
     emit emitStartTimer(updateTimer_RightCamera);
+
+    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
+    cv::Mat mat = ptr->image;
+    gl_rightImageMat=mat.clone();
     if(comboBox_3->currentIndex()==0){
         return;
     }
     mutex_showImg.lock();
     //显示图片
-    const cv_bridge::CvImageConstPtr &ptr = cv_bridge::toCvShare(image, "bgr8");
-    cv::Mat mat = ptr->image;
+
     QImage qimage = cvMat2QImage(mat);
     QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
     QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  // 饱满填充
@@ -1334,6 +1340,7 @@ void MainWindow::label_tabmp_1_showImage(int mode, int stepNum) {
         QImage qimage = cvMat2QImage(image);
         QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
         QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
     }
 
     if (mode == 1)
