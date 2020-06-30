@@ -2,44 +2,13 @@
 #ifndef rb_msgs_MAINWINDOW_H
 #define rb_msgs_MAINWINDOW_H
 
+
 #include "CMsgBox.h"
+#include "BaseWindow.h"
 #include "qthreadForRos.h"
 #include "gloalVal.h"
 
-#include <QtCore/QVariant>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMenuBar>
-#include <QtWidgets/QPlainTextEdit>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QStatusBar>
-#include <QtWidgets/QTabWidget>
-#include <QtWidgets/QTableView>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QWidget>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QProgressBar>
-#include <QDateTime>
-#include <QDialog>
-#include <QDir>
-#include <QMessageBox>
-#include <QProcess>
-#include <QTimer>
-#include <QThread>
-#include <QImage>
-#include <iostream>
-#include <fstream>
-#include <QMutex>
-#include "QDebug"
-#include "qdebug.h"
-#include "ros/ros.h"
+
 #include "std_srvs/Empty.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt8MultiArray.h"
@@ -68,29 +37,42 @@
 #include "rb_msgAndSrv/rb_StringArray.h"
 #include "rb_msgAndSrv/rb_string.h"
 //#include "messagehandler.h"
-using namespace std;
 
-#define  BTN_W 150
-#define  BTN_H 50
-#define  COMBOX_W 200
-#define  COMBOX_H 50
+//观察者模式(管理节点重启与关闭)
+class observer_rebootUiNode{
+public:
+    MainWindow* mainwindow;
+    ros::AsyncSpinner* sp= nullptr;
+public:
+    void setparm(MainWindow* mainwindow){
+        this->mainwindow=mainwindow;
+    }
+    //释放内存
+    void shutdownNode(){
+        ros::shutdown();
+        if(sp!= nullptr){
+            delete sp;
+            sp= nullptr;
+        }
+    }
+    //重启ui节点
+    void rebootUiNode();
+};
 
-class MainWindow: public QMainWindow {
+class MainWindow: public BaseWindow {
     Q_OBJECT
 public:
     MainWindow(ros::NodeHandle* node,QWidget* parent = Q_NULLPTR);
     ~MainWindow();
 
 private:
+    //加入节点观察者
+    observer_rebootUiNode ob_node;
     //全局状态标志
     int index_magicStep;
     int* checkArray;
     bool flag_RvizRun= false;
     CMsgBox* cbox=nullptr;
-    QString photoPath;//图片路径
-    QString logPath;//图片路径
-    QPixmap fitpixmap_redLight;
-    QPixmap fitpixmap_greenLight;
     QMutex mutex_showImg;
     bool Flag_connOk= false;//连接状态
     bool connFlag_LeftRobot;//左机器人连接状态
@@ -124,10 +106,8 @@ private:
     bool isRunning_solveMagic;
     bool isRunning_grab;
     bool isRunning_d435i;
-    //qt参数
-    QString groupBox_qss;
     //ros节点
-    ros::NodeHandle* Node;
+    QTimer* updateTimer_listen_roscore;
     QTimer* updateTimer;
     QTimer* updateTimer_com;
     QTimer* updateTimer_rob1status;
@@ -170,11 +150,13 @@ private:
     ros::Subscriber magicGetData_subscriber;//机器人连接状态
 
     //话题或服务对象初始化头文件部分
-    ros::ServiceClient cubeRecordPoseClient; //魔方示教记录点位客户端
+
     ros::ServiceClient cubeActionClient; //魔方示教点位执行客户端
     ros::ServiceClient cubeApproachClient; //魔法示教寸进客户端
+    ros::ServiceClient cubeRecordPoseClient; //魔方示教记录点位客户端
+    ros::ServiceClient cubeNewTeachClient; //魔方重新示教客户端
     ros::ServiceClient cubeResetPoseClient; //魔方示教动作点位重置客户端
-    ros::Subscriber CuberRobotPose_sub;  //魔方示教机器人ROS点位采集
+    ros::Subscriber     CuberRobotPose_sub;  //魔方示教机器人ROS点位采集
 
     //子线程句柄
     qthreadForRos *thread_forSysCheck;//设备启动自检子线程
@@ -186,12 +168,13 @@ private:
     qthreadForRos *thread_MagicStepRun;//分步运行子线程
     qthreadForRos *thread_forRbGrepSet;//机器人抓取子线程
     qthreadForRos *thread_forLisionErrInfo;//监听故障子线程
+
+public:
+    //ros话题与服务
+    void initRosTopic();
 private:
     //系统变量初始化
     void SysVarInit();
-    //UI流程
-    void initUi(QMainWindow *MainWindow);
-    void retranslateUi(QMainWindow *MainWindow);
     //处理所有信号和槽函数
     void signalAndSlot();
     //按钮槽函数
@@ -211,6 +194,7 @@ private:
     void safety_rob2Stop();//按钮槽函数_机器人2停止
     void oputRecord();
     void clearRecord();
+    void timer_listen_roscore();
     void timer_onUpdate();
     void timer_LeftCamera();
     void timer_RightCamera();
@@ -278,153 +262,12 @@ private slots:
     void slot_cBox_setRunMode(const QString& text);
     void slot_tabWidgetClicked(int index_tab);
     void slot_combox3_Clicked(int index);
+    void slot_comboBox_tabmp_1_Clicked(int index);
 
-private:
-    //qt控件
-    QMainWindow* w;
-    QWidget *centralWidget;
-    QVBoxLayout *verticalLayout_2;
-    QVBoxLayout *verticalLayout;
-    QHBoxLayout *horizontalLayout;
-    QLabel *label;
-    QLabel *label_3;
-    QHBoxLayout *horizontalLayout_3;
-    QTabWidget *tabWidget;
 
-    QWidget *tab;
-    QGroupBox *groupBox_tab1_status;
-    QGroupBox *groupBox_tab1_mod;
-    QGroupBox *groupBox_tab1_func;
-    QHBoxLayout *horizontalLayout_4;
-    QVBoxLayout *verticalLayout_4;
-    QHBoxLayout *horizontalLayout_2;
-    QGridLayout *gridLayout;
-    QHBoxLayout *horizontalLayout_21;
-    QComboBox *comboBox_setRunMode;
-    QLabel *label_5;
-    QLabel *label_6;
-    QLabel *label_7;
-    QLabel *label_8;
-    QLabel *label_rb1CoonStatus;
-    QLabel *label_rb2CoonStatus;
-    QLabel *label_rb1ErrStatus;
-    QLabel *label_rb2ErrStatus;
-    QLabel *label_121;
-    QLabel *label_122;
-    QLabel *label_123;
-    QLabel *label_124;
-    QLabel *label_rob1EnableStatus;
-    QLabel *label_rob2EnableStatus;
-    QLabel *label_LeftCameraConnStatus;
-    QLabel *label_RightCameraConnStatus;
-
-    QHBoxLayout *horizontalLayout_5;
-    QPushButton *btn_rbConn;
-    QPushButton *btn_rvizRun;
-    QPushButton *btn_beginRun;
-    QPushButton *btn_normalStop;
-    QPushButton *btn_SysReset;
-
-    QWidget *tab_2;
-    QHBoxLayout *horizontalLayout_6;
-    QVBoxLayout *verticalLayout_5;
-    QGroupBox *groupBox_tab2_1;
-    QHBoxLayout *horizontalLayout_14;
-    QPushButton *btn_rb1SetEnable;
-    QPushButton *btn_rb2SetEnable;
-    QPushButton *btn_rb1Reset;
-    QPushButton *btn_rb2Reset;
-    QGroupBox *groupBox_tab2_2;
-    QHBoxLayout *horizontalLayout_19;
-    QPushButton *gripper1;
-    QPushButton *gripper2;
-    QGroupBox *groupBox_tab3_3;
-    QHBoxLayout *horizontalLayout_20;
-    QPushButton *btn_rb1_goHomePose;
-    QPushButton *btn_rb2_goHomePose;
-    QPushButton *btn_rb1putBack;
-    QPushButton *btn_rb2putBack;
-    QPushButton *btn_ResetGrepFun;
-
-    QWidget *tab_magicPose;
-    QHBoxLayout *horizontalLayout_22;
-    QHBoxLayout *horizontalLayout_tabmp_1;
-    QVBoxLayout *verticalLayout_tabmp_11;
-    QLabel *label_tabmp_1;
-    QVBoxLayout *vLayout_tabmp_12;
-    QVBoxLayout *vLayout_tabmp_121;
-    QComboBox *comboBox_tabmp_1;
-    QPushButton *btn_tabmp_do;
-    QPushButton *btn_tabmp_step;
-    QPushButton *btn_tabmp_recordPose;
-    QHBoxLayout *hLayout_tabmp_122;
-    QPushButton *btn_tabmp_newteach;
-    QPushButton *btn_tabmp_resetPose;
-    QHBoxLayout *hLayout_tabmp_123;
-    QTextEdit *textEdit_tabmp_1;
-
-    QWidget *tab_3;
-    QHBoxLayout *horizontalLayout_8;
-    QHBoxLayout *horizontalLayout_7;
-    QHBoxLayout *horizontalLayout_tab3_1;
-    QVBoxLayout *verticalLayout_6;
-    QGridLayout* gridLayout1;
-    vector<QLabel*> list_label_picture;
-    QLabel* label_picture1;
-    QLabel* label_picture2;
-    QLabel* label_picture3;
-    QLabel* label_picture4;
-    QLabel* label_picture5;
-    QLabel* label_picture6;
-    QVBoxLayout *verticalLayout_8;
-    QPushButton *btn_magicGetdata;
-    QPushButton *btn_magicSolve;
-    QPushButton *btn_magicRunSolve;
-    QPushButton *btn_magicAutoSolve;
-    QPushButton *btn_updateData;
-    vector<QLineEdit*> line_updataDataList;
-    QProgressBar* pProgressBar= nullptr;
-
-    QWidget *tab_4;
-    QHBoxLayout *horizontalLayout_10;
-    QHBoxLayout *horizontalLayout_9;
-    QVBoxLayout *verticalLayout_11;
-    QLabel *label_processImag;
-    QLabel *label_preImag;
-    QVBoxLayout *verticalLayout_9;
-    QGroupBox *groupBox_setMod;
-    QHBoxLayout *horizontalLayout_11;
-    QComboBox *comboBox;
-    QGroupBox *groupBox_selectObject;
-    QHBoxLayout *horizontalLayout_12;
-    QComboBox *comboBox_2;
-    QGroupBox *groupBox_selectRobot;
-    QHBoxLayout *horizontalLayout_13;
-    QComboBox *comboBox_3;
-    QPushButton *btn_rbGrep;
-    QWidget *tab_5;
-    QHBoxLayout *horizontalLayout_15;
-    QHBoxLayout *horizontalLayout_16;
-    QVBoxLayout *verticalLayout_1index_magicStep3;
-    QPlainTextEdit *plainTextEdit;
-    QVBoxLayout *verticalLayout_12;
-    QPushButton *btn_oputRecord;
-    QPushButton *btn_clearRecord;
-    QWidget *tab_6;
-    QHBoxLayout *horizontalLayout_18;
-    QHBoxLayout *horizontalLayout_17;
-    QPushButton *btn_SatetyStop;
-    QPushButton *btn_SatetyRb1Reset;
-    QPushButton *btn_SatetyRb2Reset;
-    QMenuBar *menuBar;
-    QStatusBar *statusBar;
-
-    QVBoxLayout* verticalLayout_13;
-    QLabel* showMagicStepLable;
-    QLabel* isRunning_solveMagic_Lable;
-    QLabel* isRunning_grab_Lable;
-    QLabel* showtime_Lable;
 };
+
+
 
 
 #endif //rb_msgs_MAINWINDOW_H
