@@ -1,4 +1,4 @@
-#include "rb_ui/MainWindow.h"
+#include "MainWindow.h"
 #include "logmanager.h"
 #include "globalvar.h"
 #include "messagehandler.h"

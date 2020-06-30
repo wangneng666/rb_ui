@@ -2,6 +2,10 @@
 #ifndef rb_msgs_MAINWINDOW_H
 #define rb_msgs_MAINWINDOW_H
 
+#include "CMsgBox.h"
+#include "qthreadForRos.h"
+#include "gloalVal.h"
+
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
@@ -66,74 +70,10 @@
 //#include "messagehandler.h"
 using namespace std;
 
-
-
 #define  BTN_W 150
 #define  BTN_H 50
 #define  COMBOX_W 200
 #define  COMBOX_H 50
-
-
-class  MainWindow;
-extern bool flag_syscheckOk;
-extern bool flag_sysckCancel;
-extern bool flag_delCbox;
-
-
-class CMsgBox : public QDialog
-{
-Q_OBJECT
-public:
-    explicit CMsgBox(QWidget *parent = nullptr);
-    ~CMsgBox();
-    static int showMsgBox(QWidget *parent = nullptr);
-
-private:
-    void init();
-    void slot_timerUpdate();
-
-private slots:
-    void slot_SwapDataWithMainwin(int* array);
-public:
-    enum EnmButton{
-        ENM_OK_BTN = 0,
-        ENM_CANCEL_BTN,
-    };
-
-private:
-    QLabel* m_lableTitle;
-    QPlainTextEdit* m_plaintext;
-    QTimer* cTimer1;
-    QPushButton *pBtn_checkCancel;
-    QPushButton *pBtn_checkOk;
-    int* c_array;
-    bool checkOk= false;
-
-};
-
-
-
-//给信号与槽函数使用的枚举类型
-enum  infoLevel{information,warning};
-
-
-//多线程,线程与主线程信号与槽通信
-class qthreadForRos : public QThread{
-    Q_OBJECT
-public:
-    MainWindow* m;
-    void (MainWindow::*f)();
-    //函数回调
-    void setParm(MainWindow* m,void (MainWindow::*f)()){
-        this->m=m;
-        this->f=f;
-    }
-    void run(){
-        (m->*f)();
-    }
-signals:
-    void signal_SendMsgBox(infoLevel level,QString info);//infoLevel level,QString info
-};
 
 class MainWindow: public QMainWindow {
     Q_OBJECT
@@ -176,6 +116,10 @@ private:
     bool holdOnFlag_RightRobotEnable= false;
     bool holdOnFlag_LeftCamera= false;
     bool holdOnFlag_RightCamera= false;
+    //魔方点位调试页面
+    int calibration_mode =0; //魔方复原动作为0, 魔方拍照动作为1
+    int calibration_stepNum =0 ; //复原动作执行步骤数
+    int calibration_totalStep =0; //复原动作总步骤数
     //rosparam参数
     bool isRunning_solveMagic;
     bool isRunning_grab;
@@ -224,12 +168,21 @@ private:
     ros::ServiceClient MagicStepRunCommand_client ;//魔方分步完成
     ros::ServiceClient ImageGet_client;//获得图像数据
     ros::Subscriber magicGetData_subscriber;//机器人连接状态
+
+    //话题或服务对象初始化头文件部分
+    ros::ServiceClient cubeRecordPoseClient; //魔方示教记录点位客户端
+    ros::ServiceClient cubeActionClient; //魔方示教点位执行客户端
+    ros::ServiceClient cubeApproachClient; //魔法示教寸进客户端
+    ros::ServiceClient cubeResetPoseClient; //魔方示教动作点位重置客户端
+    ros::Subscriber CuberRobotPose_sub;  //魔方示教机器人ROS点位采集
+
     //子线程句柄
     qthreadForRos *thread_forSysCheck;//设备启动自检子线程
     qthreadForRos *thread_forRbConn;//设备连接子线程
     qthreadForRos *thread_forRviz;//设备连接子线程
     qthreadForRos *thread_forCloseRviz;//设备连接子线程
     qthreadForRos *thread_forBeginRun;//开始运行子线程
+    qthreadForRos *thread_forSysReset;//系统复位子线程
     qthreadForRos *thread_MagicStepRun;//分步运行子线程
     qthreadForRos *thread_forRbGrepSet;//机器人抓取子线程
     qthreadForRos *thread_forLisionErrInfo;//监听故障子线程
@@ -241,7 +194,7 @@ private:
     void retranslateUi(QMainWindow *MainWindow);
     //处理所有信号和槽函数
     void signalAndSlot();
-    //槽函数
+    //按钮槽函数
     void dev_connect();//按钮槽函数_设备连接槽函数
     void rviz_statup();//按钮槽函数_rviz启动
     void run_statup();//按钮槽函数_运行启动
@@ -264,8 +217,15 @@ private:
     void timer_comUpdate();//公共刷新连接状态
     void timer_robot1Status();//公共刷新连接状态
     void timer_robot2Status();//公共刷新连接状态
-    void button_style(QPushButton& btn);
-
+    void label_tabmp_1_showImage(int mode, int stepNum);
+    //魔方点位校准调试页面
+    void slot_btn_tabmp_do();
+    void slot_btn_tabmp_step();
+    void slot_btn_tabmp_recordPose();
+    void slot_btn_tabmp_newteach();
+    void slot_btn_tabmp_resetPose();
+    void slot_btn_rb1_goHomePose();
+    void slot_btn_rb2_goHomePose();
     //单步调试页面按钮槽函数
     void slot_btn_rb1SetEnable();
     void slot_btn_rb2SetEnable();
@@ -285,8 +245,6 @@ private:
     void callback_RightCamera_subscriber(const sensor_msgs::Image::ConstPtr image);
     void callback_preview1_subscriber(const sensor_msgs::Image::ConstPtr image);
     void callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr image);
-    void callback_rbConnStatus_subscriber(std_msgs::UInt8MultiArray data_msg);
-    void callback_rbErrStatus_subscriber(std_msgs::UInt16MultiArray data_msg);
     void callback_camera_subscriber(const sensor_msgs::Image::ConstPtr &msg);
     void callback_magicGetData_subscriber(rb_msgAndSrv::rbImageList rbimageList);
     void callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg);
@@ -298,6 +256,7 @@ private:
     void thread_rbRvizCommand();
     void thread_rbCloseRvizCommand();
     void thread_BeginRun();
+    void thread_SysReset();
     void thread_RbGrepSet();
 //    void thread_MagicStepRunCommand();
     void thread_GagicGetData();
@@ -381,10 +340,28 @@ private:
     QPushButton *gripper2;
     QGroupBox *groupBox_tab3_3;
     QHBoxLayout *horizontalLayout_20;
+    QPushButton *btn_rb1_goHomePose;
+    QPushButton *btn_rb2_goHomePose;
     QPushButton *btn_rb1putBack;
     QPushButton *btn_rb2putBack;
     QPushButton *btn_ResetGrepFun;
 
+    QWidget *tab_magicPose;
+    QHBoxLayout *horizontalLayout_22;
+    QHBoxLayout *horizontalLayout_tabmp_1;
+    QVBoxLayout *verticalLayout_tabmp_11;
+    QLabel *label_tabmp_1;
+    QVBoxLayout *vLayout_tabmp_12;
+    QVBoxLayout *vLayout_tabmp_121;
+    QComboBox *comboBox_tabmp_1;
+    QPushButton *btn_tabmp_do;
+    QPushButton *btn_tabmp_step;
+    QPushButton *btn_tabmp_recordPose;
+    QHBoxLayout *hLayout_tabmp_122;
+    QPushButton *btn_tabmp_newteach;
+    QPushButton *btn_tabmp_resetPose;
+    QHBoxLayout *hLayout_tabmp_123;
+    QTextEdit *textEdit_tabmp_1;
 
     QWidget *tab_3;
     QHBoxLayout *horizontalLayout_8;
@@ -447,7 +424,6 @@ private:
     QLabel* isRunning_solveMagic_Lable;
     QLabel* isRunning_grab_Lable;
     QLabel* showtime_Lable;
-
 };
 
 
