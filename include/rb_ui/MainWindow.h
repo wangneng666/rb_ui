@@ -68,12 +68,15 @@ public:
 private:
     //加入节点观察者
     observer_rebootUiNode ob_node;
-    //全局状态标志
+    //全局变量
     int index_magicStep;
     int* checkArray;
     bool flag_RvizRun= false;
     CMsgBox* cbox=nullptr;
     QMutex mutex_showImg;
+    cv::Mat gl_leftImageMat;
+    cv::Mat gl_rightImageMat;
+    //全局状态标志
     bool Flag_connOk= false;//连接状态
     bool connFlag_LeftRobot;//左机器人连接状态
     bool connFlag_RightRobot;//右机器人连接状态
