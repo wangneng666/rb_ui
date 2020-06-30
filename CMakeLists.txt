@@ -107,9 +107,11 @@ add_executable(rb_ui src/rb_ui.cpp
         include/rb_ui/CMsgBox.h
         include/rb_ui/qthreadForRos.h
         include/rb_ui/gloalVal.h
+        include/rb_ui/BaseWindow.h
         src/utils/MainWindow.cpp
         src/utils/CMsgBox.cpp
         src/utils/gloalVal.cpp
+        src/utils/BaseWindow.cpp
         )
 
 target_link_libraries(

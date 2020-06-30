@@ -8,7 +8,7 @@ using namespace cv;
 
 int main(int args,char** argv){
     //ros节点
-    std::string nodeName = "robot_UI";
+    std::string nodeName = "rb_ui";
     ros::init(args, argv, nodeName);
     //创建节点
     log4cplus::Initializer initializer;
