@@ -630,6 +630,8 @@ void MainWindow::thread_BeginRun() {
     system("roslaunch rb_ui dualRobotLaunch.launch");
 
 }
+
+
 void MainWindow::safety_rob1Stop() {
     cout<<"点击了机器人1复位按钮"<<endl;
 }
@@ -640,7 +642,12 @@ void MainWindow::safety_rob2Stop() {
 //运行停止
 void MainWindow::run_stop() {
     cout<<"点击了运行停止按钮"<<endl;
-
+    hsr_rosi_device::SetEnableSrv srv1;
+    hsr_rosi_device::SetEnableSrv srv2;
+    srv1.request.enable= false;
+    srv2.request.enable= false;
+    LeftRobEnable_client.call(srv1);
+    RightRobEnable_client.call(srv2);
     std_msgs::Bool msg;
     msg.data=true;
     rbStopCommand_publisher.publish(msg);
@@ -670,6 +677,12 @@ void MainWindow::SysReset() {
 
 
 void MainWindow::thread_SysReset() {
+    hsr_rosi_device::SetEnableSrv srv1;
+    hsr_rosi_device::SetEnableSrv srv2;
+    srv1.request.enable= false;
+    srv2.request.enable= false;
+    LeftRobEnable_client.call(srv1);
+    RightRobEnable_client.call(srv2);
     ob_node.shutdownNode();
     sleep(0.5);
     cout<<"杀死节点"<<endl;
@@ -828,7 +841,7 @@ void MainWindow::robot_grab() {
     // }
 //机器人没运行，则开始行动
     if (thread_forRbGrepSet->isRunning()) {
-        emitQmessageBox(infoLevel::warning, QString("功能程序正在运行中,请不要重复启动!如要再次启动,请先复位程序!"));
+        emitQmessageBox(infoLevel::warning, QString("线程正在运行中,异常情况下请重置抓取按钮"));
     } else {
         thread_forRbGrepSet->start();
     }
@@ -1210,12 +1223,15 @@ void MainWindow::callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray da
 }
 
 void MainWindow::slot_tabWidgetClicked(int index_tab) {
-    if(index_tab!=2){
+    if(index_tab!=3){
         pProgressBar->setVisible(false);
         showMagicStepLable->setVisible(false);
     } else{
         pProgressBar->setVisible(true);
         showMagicStepLable->setVisible(true);
+    }
+    if(index_tab==2){
+        updateTimer_showImage->start();
     }
 }
 
@@ -1397,12 +1413,10 @@ void MainWindow::label_tabmp_1_showImage() {
         QImage qimage = cvMat2QImage(image);
         QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
         new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
     }
 
     if (calibration_mode == 1)
     {
-
         //此处假设把订阅到的照片设为全局变量来供其他函数使用
         cv::Point Upper_Left(738, 318);
         cv::Point Bottom_Right(1182, 762);
@@ -1446,13 +1460,6 @@ void MainWindow::slot_btn_rb2_goHomePose() {
 
 void MainWindow::slot_comboBox_tabmp_1_Clicked(int index) {
     calibration_mode=index;
-    if(calibration_mode==1){
-        updateTimer_showImage->start();
-    }else
-    {
-        updateTimer_showImage->stop();
-    }
-    
 }
 
 void MainWindow::timer_listen_roscore() {
@@ -1473,12 +1480,9 @@ void observer_rebootUiNode::rebootUiNode(){
 
 void MainWindow::timer_showImage(){
     label_tabmp_1_showImage();
-    
 }
 
-void MainWindow::thread_MagicPoseTeachCom() {
 
-}
 
 
 

@@ -256,7 +256,6 @@ private:
     void thread_GagicSolve();
     void thread_GagicRunSolve();
     void thread_AutoSolveMagic();
-    void thread_MagicPoseTeachCom();
 
 signals:
     void emitTextControl(QString text) const;
