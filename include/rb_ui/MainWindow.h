@@ -76,6 +76,7 @@ private:
     QMutex mutex_showImg;
     cv::Mat gl_leftImageMat;
     cv::Mat gl_rightImageMat;
+    bool flag_showImg=false;
     //全局状态标志
     bool Flag_connOk= false;//连接状态
     bool connFlag_LeftRobot;//左机器人连接状态
@@ -110,6 +111,7 @@ private:
     bool isRunning_grab;
     bool isRunning_d435i;
     //ros节点
+    QTimer* updateTimer_showImage;
     QTimer* updateTimer_listen_roscore;
     QTimer* updateTimer;
     QTimer* updateTimer_com;
@@ -204,7 +206,8 @@ private:
     void timer_comUpdate();//公共刷新连接状态
     void timer_robot1Status();//公共刷新连接状态
     void timer_robot2Status();//公共刷新连接状态
-    void label_tabmp_1_showImage(int mode, int stepNum);
+    void label_tabmp_1_showImage();
+    void timer_showImage();
     //魔方点位校准调试页面
     void slot_btn_tabmp_do();
     void slot_btn_tabmp_step();

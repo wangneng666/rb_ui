@@ -29,6 +29,10 @@ void MainWindow::SysVarInit() {
     connFlag_LeftGripper= false;
     connFlag_RightGripper= false;
     //定时器实体化
+
+    updateTimer_showImage=new QTimer(this);
+    updateTimer_showImage->setInterval(50);
+
     updateTimer_listen_roscore = new QTimer(this);
     updateTimer_listen_roscore->setInterval(1000);
 
@@ -152,6 +156,8 @@ void MainWindow::signalAndSlot() {
     connect(updateTimer_rob2status, &QTimer::timeout, this, &MainWindow::timer_robot2Status);
     connect(updateTimer_LeftCamera, &QTimer::timeout, this, &MainWindow::timer_LeftCamera);
     connect(updateTimer_RightCamera, &QTimer::timeout, this, &MainWindow::timer_RightCamera);
+    connect(updateTimer_showImage, &QTimer::timeout, this, &MainWindow::timer_showImage);
+
 /****************************************************************************************************/
 
 /*********************************自定义信号与槽函数绑定*************************************************/
@@ -1299,6 +1305,7 @@ void MainWindow::slot_btn_tabmp_step() {
         ROS_INFO("success to call service cubeApproachClient");
     else
         ROS_INFO("Fialed to call service cubeApproachClient");
+    flag_showImg=true;
 }
 
 void MainWindow::slot_btn_tabmp_recordPose() {
@@ -1317,7 +1324,7 @@ void MainWindow::slot_btn_tabmp_newteach() {
     else
         ROS_INFO("Fialed to call service cubeNewTeachClient");
 //    先调用放下魔方的服务函数;
-    calibration_mode = 0;
+    // calibration_mode = 0;
     calibration_stepNum = 0;
 }
 
@@ -1330,29 +1337,48 @@ void MainWindow::slot_btn_tabmp_resetPose() {
         ROS_INFO("Fialed to call service cubeResetPoseClient");
 }
 
-void MainWindow::label_tabmp_1_showImage(int mode, int stepNum) {
+void MainWindow::label_tabmp_1_showImage() {
     //图片保存的路径
     std::string readpath = "";
-    if (mode == 0)
+    QPixmap new_pixmap;
+    if (calibration_mode == 0)
     {
+        if(!flag_showImg){
+            return;
+        }
+        flag_showImg=false;
         //读取示教点位的模板效果图片
-        cv::Mat image = cv::imread(readpath + to_string(stepNum) + ".jpg", 1);
+        // cv::Mat image = cv::imread(readpath + to_string(calibration_stepNum) + ".jpg", 1);
+        cv::Mat image = cv::imread("/home/de/catkin_ws/src/HsDualAppBridge/rb_ui/photo/question.jpg", 1);
         QImage qimage = cvMat2QImage(image);
         QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
-        QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     }
 
-    if (mode == 1)
+    if (calibration_mode == 1)
     {
-        //此处假设把订阅到的照片设为全局变量来供其他函数使用
-//        cv::Point Upper_Left(738, 318);
-//        cv::Point Bottom_Right(1182, 762);
-//        cv::rectangle(camera_image, Upper_Left, Bottom_Right, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
-//        QImage qimage = cvMat2QImage(camera_image);
-//        QPixmap new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
+        //此处假设把订阅到的照片设为全局变量来供其他函数使用
+        cv::Point Upper_Left(738, 318);
+        cv::Point Bottom_Right(1182, 762);
+        cv::Mat image;
+        if ( calibration_stepNum < 5)
+        {
+            image = gl_leftImageMat.clone();
+            cv::rectangle(image, Upper_Left, Bottom_Right, cv::Scalar(0, 0, 255), 5, cv::LINE_8, 0);
+        }
+        else
+        {
+            image = gl_rightImageMat.clone();
+            cv::rectangle(image, Upper_Left, Bottom_Right, cv::Scalar(0, 0, 255), 5, cv::LINE_8, 0);
+        }
+
+         QImage qimage = cvMat2QImage(image);
+         QPixmap tmp_pixmap = QPixmap::fromImage(qimage);
+         new_pixmap = tmp_pixmap.scaled(label_preImag->width(), label_preImag->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
+    label_tabmp_1->setPixmap(new_pixmap);
 
 }
 
@@ -1366,6 +1392,13 @@ void MainWindow::slot_btn_rb2_goHomePose() {
 
 void MainWindow::slot_comboBox_tabmp_1_Clicked(int index) {
     calibration_mode=index;
+    if(calibration_mode=1){
+        updateTimer_showImage->start();
+    }else
+    {
+        updateTimer_showImage->stop();
+    }
+    
 }
 
 void MainWindow::timer_listen_roscore() {
@@ -1384,7 +1417,10 @@ void observer_rebootUiNode::rebootUiNode(){
 }
 
 
-
+void MainWindow::timer_showImage(){
+    label_tabmp_1_showImage();
+    
+}
 
 
 
