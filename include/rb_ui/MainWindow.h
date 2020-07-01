@@ -5,6 +5,7 @@
 
 #include "CMsgBox.h"
 #include "BaseWindow.h"
+#include "RbQthread.h"
 #include "qthreadForRos.h"
 #include "gloalVal.h"
 
@@ -14,6 +15,7 @@
 #include "std_msgs/UInt8MultiArray.h"
 #include "std_msgs/Int8MultiArray.h"
 #include "std_msgs/UInt16MultiArray.h"
+#include "std_msgs/Int8.h"
 #include "roscpp_tutorials/TwoInts.h"
 #include "rb_msgAndSrv/rb_ArrayAndBool.h"
 #include "rb_msgAndSrv/rb_DoubleBool.h"
@@ -173,6 +175,7 @@ private:
     qthreadForRos *thread_MagicStepRun;//分步运行子线程
     qthreadForRos *thread_forRbGrepSet;//机器人抓取子线程
     qthreadForRos *thread_forLisionErrInfo;//监听故障子线程
+    rbQthread *thread_MagicPoseTeach;//魔方点位示教线程
 
 public:
     //ros话题与服务
@@ -253,6 +256,7 @@ private:
     void thread_GagicSolve();
     void thread_GagicRunSolve();
     void thread_AutoSolveMagic();
+    void thread_MagicPoseTeachCom();
 
 signals:
     void emitTextControl(QString text) const;

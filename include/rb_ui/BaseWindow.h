@@ -136,6 +136,8 @@ public:
     QHBoxLayout *horizontalLayout_22;
     QHBoxLayout *horizontalLayout_tabmp_1;
     QVBoxLayout *verticalLayout_tabmp_11;
+    QGroupBox* gBox_tabmp_1;
+    QGroupBox* gBox_tabmp_2;
     QLabel *label_tabmp_1;
     QVBoxLayout *vLayout_tabmp_12;
     QVBoxLayout *vLayout_tabmp_121;
@@ -148,6 +150,7 @@ public:
     QPushButton *btn_tabmp_resetPose;
     QHBoxLayout *hLayout_tabmp_123;
     QTextEdit *textEdit_tabmp_1;
+
 
     QWidget *tab_3;
     QHBoxLayout *horizontalLayout_8;

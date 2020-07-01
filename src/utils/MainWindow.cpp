@@ -73,6 +73,8 @@ void MainWindow::SysVarInit() {
     thread_forSysReset->setParm(this,&MainWindow::thread_SysReset);
     //分步解魔方子线程
     thread_MagicStepRun= new qthreadForRos();
+    //魔方点位示教子线程
+    thread_MagicPoseTeach=new rbQthread();
     //机器人抓取子线程
     thread_forRbGrepSet= new qthreadForRos();
     thread_forRbGrepSet->setParm(this,&MainWindow::thread_RbGrepSet);
@@ -143,7 +145,6 @@ void MainWindow::signalAndSlot() {
     connect(btn_tabmp_newteach,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_newteach);
     connect(btn_tabmp_resetPose,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_resetPose);
     connect(comboBox_tabmp_1,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_comboBox_tabmp_1_Clicked(int)));
-
 
 
     //定时器启动
@@ -921,7 +922,7 @@ void MainWindow::thread_RbGrepSet() {
 MainWindow::~MainWindow() {
     system("rosnode kill -a");
     //关闭ros相关进程
-    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
+//    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
 }
 
 QImage MainWindow::cvMat2QImage(const cv::Mat &mat) {
@@ -1271,70 +1272,113 @@ void MainWindow::slot_ResetGrepFun() {
 }
 
 void MainWindow::slot_btn_tabmp_do() {
-
-    //调用阿忠的服务，名字待定
-    rb_msgAndSrv::rb_ArrayAndBool srv;
-    srv.request.data.resize(2);
-    srv.request.data[0]=calibration_mode;
-    srv.request.data[1]=calibration_stepNum;
-
-    if (calibration_mode == 0)
-    {
-        calibration_stepNum++;
-        if (calibration_stepNum == 18)
-            calibration_stepNum = 0;
+    if(thread_MagicPoseTeach->isRunning()){
+        emit emitQmessageBox(infoLevel::information,QString("线程正在工作中,请等待结束"));
+        return;
     }
+    thread_MagicPoseTeach->setParm2([&]{
+//        调用阿忠的服务，名字待定
+        rb_msgAndSrv::rb_ArrayAndBool srv;
+        srv.request.data.resize(2);
+        srv.request.data[0]=calibration_mode;
+        srv.request.data[1]=calibration_stepNum;
 
-    if (calibration_mode == 1)
-    {
-        calibration_stepNum++;
-        if (calibration_stepNum == 8)
-            calibration_stepNum = 0;
-    }
+        if (calibration_mode == 0)
+        {
+            calibration_stepNum++;
+            if (calibration_stepNum == 18)
+                calibration_stepNum = 0;
+        }
 
-    if (cubeActionClient.call(srv))
-        ROS_INFO("Mode: %d, StepNum: %d", calibration_mode, calibration_stepNum);
-    else
-        ROS_INFO("Fialed to call service move_to_point");
+        if (calibration_mode == 1)
+        {
+            calibration_stepNum++;
+            if (calibration_stepNum == 8)
+                calibration_stepNum = 0;
+        }
+
+        if (cubeActionClient.call(srv))
+            ROS_INFO("Mode: %d, StepNum: %d", calibration_mode, calibration_stepNum);
+        else
+            ROS_INFO("Fialed to call service move_to_point");
+    });
+    thread_MagicPoseTeach->start();
+
+
+
 }
 
 void MainWindow::slot_btn_tabmp_step() {
-    //调用服务
-    std_srvs::Empty srv;
-    if (cubeApproachClient.call(srv))
-        ROS_INFO("success to call service cubeApproachClient");
-    else
-        ROS_INFO("Fialed to call service cubeApproachClient");
-    flag_showImg=true;
+    if(thread_MagicPoseTeach->isRunning()){
+        emit emitQmessageBox(infoLevel::information,QString("线程正在工作中,请等待结束"));
+        return;
+    }
+    thread_MagicPoseTeach->setParm2([&]{
+        //调用服务
+        std_srvs::Empty srv;
+        if (cubeApproachClient.call(srv))
+            ROS_INFO("success to call service cubeApproachClient");
+        else
+            ROS_INFO("Fialed to call service cubeApproachClient");
+        flag_showImg=true;
+    });
+    thread_MagicPoseTeach->start();
+
 }
 
 void MainWindow::slot_btn_tabmp_recordPose() {
-    //调用服务
-    std_srvs::Empty srv;
-    if (cubeRecordPoseClient.call(srv))
-        ROS_INFO("success to call service cubeRecordPoseClient");
-    else
-        ROS_INFO("Fialed to call service cubeRecordPoseClient");
+    if(thread_MagicPoseTeach->isRunning()){
+        emit emitQmessageBox(infoLevel::information,QString("线程正在工作中,请等待结束"));
+        return;
+    }
+    thread_MagicPoseTeach->setParm2([&]{
+        //调用服务
+        std_srvs::Empty srv;
+        if (cubeRecordPoseClient.call(srv))
+            ROS_INFO("success to call service cubeRecordPoseClient");
+        else
+            ROS_INFO("Fialed to call service cubeRecordPoseClient");
+    });
+    thread_MagicPoseTeach->start();
+
 }
 
 void MainWindow::slot_btn_tabmp_newteach() {
-    std_srvs::Empty srv;
-    if (cubeNewTeachClient.call(srv))
-        ROS_INFO("success to call service cubeNewTeachClient");
-    else
-        ROS_INFO("Fialed to call service cubeNewTeachClient");
+    if(thread_MagicPoseTeach->isRunning()){
+        emit emitQmessageBox(infoLevel::information,QString("线程正在工作中,请等待结束"));
+        return;
+    }
+    thread_MagicPoseTeach->setParm2([&]{
+        std_srvs::Empty srv;
+        if (cubeNewTeachClient.call(srv))
+            ROS_INFO("success to call service cubeNewTeachClient");
+        else
+            ROS_INFO("Fialed to call service cubeNewTeachClient");
 //    先调用放下魔方的服务函数;
-    // calibration_mode = 0;
-    calibration_stepNum = 0;
+        // calibration_mode = 0;
+        calibration_stepNum = 0;
+    });
+    thread_MagicPoseTeach->start();
+
+
 }
 
 void MainWindow::slot_btn_tabmp_resetPose() {
-    //调用服务
-    std_srvs::Empty srv;
-    if (cubeResetPoseClient.call(srv))
-        ROS_INFO("success to call service cubeResetPoseClient");
-    else
-        ROS_INFO("Fialed to call service cubeResetPoseClient");
+    if(thread_MagicPoseTeach->isRunning()){
+        emit emitQmessageBox(infoLevel::information,QString("线程正在工作中,请等待结束"));
+        return;
+    }
+    thread_MagicPoseTeach->setParm2([&]{
+        //调用服务
+        std_srvs::Empty srv;
+        if (cubeResetPoseClient.call(srv))
+            ROS_INFO("success to call service cubeResetPoseClient");
+        else
+            ROS_INFO("Fialed to call service cubeResetPoseClient");
+    });
+    thread_MagicPoseTeach->start();
+
+
 }
 
 void MainWindow::label_tabmp_1_showImage() {
@@ -1383,16 +1427,26 @@ void MainWindow::label_tabmp_1_showImage() {
 }
 
 void MainWindow::slot_btn_rb1_goHomePose() {
-
+    ros::Publisher tmp_publisher= Node->advertise<std_msgs::Bool>("/back_home", 1);
+    std_msgs::Int8 msg;
+    msg.data=0;
+    tmp_publisher.publish(msg);
+    sleep(1);
+    tmp_publisher.shutdown();
 }
 
 void MainWindow::slot_btn_rb2_goHomePose() {
-
+    ros::Publisher tmp_publisher= Node->advertise<std_msgs::Bool>("/back_home", 1);
+    std_msgs::Int8 msg;
+    msg.data=1;
+    tmp_publisher.publish(msg);
+    sleep(1);
+    tmp_publisher.shutdown();
 }
 
 void MainWindow::slot_comboBox_tabmp_1_Clicked(int index) {
     calibration_mode=index;
-    if(calibration_mode=1){
+    if(calibration_mode==1){
         updateTimer_showImage->start();
     }else
     {
@@ -1420,6 +1474,10 @@ void observer_rebootUiNode::rebootUiNode(){
 void MainWindow::timer_showImage(){
     label_tabmp_1_showImage();
     
+}
+
+void MainWindow::thread_MagicPoseTeachCom() {
+
 }
 
 

@@ -444,12 +444,27 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
 
     verticalLayout_tabmp_11->addWidget(label_tabmp_1);
 
+//    horizontalLayout_tabmp_1->addLayout(verticalLayout_tabmp_11);
+    gBox_tabmp_1 = new QGroupBox(tab_magicPose);
+    gBox_tabmp_1->setObjectName(QString::fromUtf8("gBox_tabmp_1"));
+    gBox_tabmp_1->setStyleSheet(groupBox_qss);
+    gBox_tabmp_1->setTitle("图像显示");
+    gBox_tabmp_2 = new QGroupBox(tab_magicPose);
+    gBox_tabmp_2->setObjectName(QString::fromUtf8("gBox_tabmp_2"));
+    gBox_tabmp_2->setStyleSheet(groupBox_qss);
+    gBox_tabmp_2->setTitle("操作流程");
+    horizontalLayout_tabmp_1->addWidget(gBox_tabmp_1);
+    horizontalLayout_tabmp_1->addWidget(gBox_tabmp_2);
 
-    horizontalLayout_tabmp_1->addLayout(verticalLayout_tabmp_11);
+    gBox_tabmp_1->setLayout(verticalLayout_tabmp_11);
+
 
     vLayout_tabmp_12 = new QVBoxLayout();
     vLayout_tabmp_12->setSpacing(6);
     vLayout_tabmp_12->setObjectName(QString::fromUtf8("vLayout_tabmp_12"));
+
+    gBox_tabmp_2->setLayout(vLayout_tabmp_12);
+
     vLayout_tabmp_121 = new QVBoxLayout();
     vLayout_tabmp_121->setSpacing(6);
     vLayout_tabmp_121->setObjectName(QString::fromUtf8("vLayout_tabmp_121"));
@@ -503,14 +518,12 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     hLayout_tabmp_123->setObjectName(QString::fromUtf8("hLayout_tabmp_123"));
     textEdit_tabmp_1 = new QTextEdit(tab_magicPose);
     textEdit_tabmp_1->setObjectName(QString::fromUtf8("textEdit_tabmp_1"));
-
+    textEdit_tabmp_1->setText("当前示教点坐标:");
     hLayout_tabmp_123->addWidget(textEdit_tabmp_1,0,Qt::AlignHCenter);
-
 
     vLayout_tabmp_12->addLayout(hLayout_tabmp_123);
 
-
-    horizontalLayout_tabmp_1->addLayout(vLayout_tabmp_12);
+//    horizontalLayout_tabmp_1->addLayout(vLayout_tabmp_12);
 
     horizontalLayout_tabmp_1->setStretch(0, 2);
     horizontalLayout_tabmp_1->setStretch(1, 1);
@@ -706,7 +719,8 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_12->setObjectName(QString::fromUtf8("horizontalLayout_12"));
     comboBox_2 = new QComboBox(groupBox_selectObject);
     comboBox_2->setFixedSize(COMBOX_W,COMBOX_H);
-
+    comboBox_2->addItem(QString());
+    comboBox_2->addItem(QString());
     comboBox_2->addItem(QString());
     comboBox_2->addItem(QString());
     comboBox_2->setObjectName(QString::fromUtf8("comboBox_2"));
@@ -901,7 +915,7 @@ void BaseWindow::retranslateUi(QMainWindow *MainWindow) {
     btn_tabmp_step->setText(QApplication::translate("MainWindow", "\345\257\270\350\277\233", nullptr));
     btn_tabmp_recordPose->setText(QApplication::translate("MainWindow", "\350\256\260\345\275\225\347\202\271\344\275\215", nullptr));
     btn_tabmp_newteach->setText(QApplication::translate("MainWindow", "\351\207\215\346\226\260\347\244\272\346\225\231", nullptr));
-    btn_tabmp_resetPose->setText(QApplication::translate("MainWindow", "\345\212\250\344\275\234\347\202\271\344\275\215\347\244\272\346\225\231", nullptr));
+    btn_tabmp_resetPose->setText(QApplication::translate("MainWindow", "动作点位重置", nullptr));
     tabWidget->setTabText(tabWidget->indexOf(tab_magicPose), QApplication::translate("MainWindow", "\351\255\224\346\226\271\347\202\271\344\275\215\346\240\241\345\207\206", nullptr));
 
     btn_magicGetdata->setText(QApplication::translate("MainWindow", "\351\207\207\351\233\206\351\255\224\346\226\271\346\225\260\346\215\256", nullptr));
@@ -919,8 +933,10 @@ void BaseWindow::retranslateUi(QMainWindow *MainWindow) {
     comboBox->setItemText(0, QApplication::translate("MainWindow", "从货架抓,放桌子上", nullptr));
     comboBox->setItemText(1, QApplication::translate("MainWindow", "从桌子抓,放货架上", nullptr));
     groupBox_selectObject->setTitle(QApplication::translate("MainWindow", "\346\212\223\345\217\226\345\257\271\350\261\241", nullptr));
-    comboBox_2->setItemText(0, QApplication::translate("MainWindow", "牛奶盒", nullptr));
-    comboBox_2->setItemText(1, QApplication::translate("MainWindow", "可乐盒", nullptr));
+    comboBox_2->setItemText(0, QApplication::translate("MainWindow", "维他奶", nullptr));
+    comboBox_2->setItemText(1, QApplication::translate("MainWindow", "可乐罐", nullptr));
+    comboBox_2->setItemText(2, QApplication::translate("MainWindow", "旺仔牛奶", nullptr));
+    comboBox_2->setItemText(3, QApplication::translate("MainWindow", "公仔", nullptr));
 
     groupBox_selectRobot->setTitle(QApplication::translate("MainWindow", "\346\234\254\344\275\223\351\200\211\346\213\251", nullptr));
     comboBox_3->setItemText(0, QApplication::translate("MainWindow", "\345\267\246\346\234\272\345\231\250\344\272\272\346\212\223", nullptr));
