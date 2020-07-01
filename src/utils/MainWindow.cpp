@@ -138,6 +138,9 @@ void MainWindow::signalAndSlot() {
     connect(btn_rb1putBack,&QPushButton::clicked,this,&MainWindow::slot_rb1putBack);
     connect(btn_rb2putBack,&QPushButton::clicked,this,&MainWindow::slot_rb2putBack);
     connect(btn_ResetGrepFun,&QPushButton::clicked,this,&MainWindow::slot_ResetGrepFun);
+    connect(btn_rb1_goHomePose,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1_goHomePose);
+    connect(btn_rb2_goHomePose,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2_goHomePose);
+
     //魔方点位校准页面
     connect(btn_tabmp_do,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_do);
     connect(btn_tabmp_step,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_step);
@@ -175,6 +178,8 @@ void MainWindow::signalAndSlot() {
 
 void MainWindow::initRosTopic(){
     //话题或服务对象初始化
+
+    tmp_publisher= Node->advertise<std_msgs::Int8>("/back_home", 1);
     previewImage1_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview1_subscriber,this,_1));
     previewImage2_subscriber=Node->subscribe<sensor_msgs::Image>("/UR52/preview_image",1,boost::bind(&MainWindow::callback_preview2_subscriber,this,_1));
     rob1Status_subscriber=Node->subscribe<industrial_msgs::RobotStatus>("/UR51/robot_status",1,boost::bind(&MainWindow::callback_rob1Status_subscriber,this,_1));
@@ -1441,21 +1446,19 @@ void MainWindow::label_tabmp_1_showImage() {
 }
 
 void MainWindow::slot_btn_rb1_goHomePose() {
-    ros::Publisher tmp_publisher= Node->advertise<std_msgs::Bool>("/back_home", 1);
     std_msgs::Int8 msg;
     msg.data=0;
     tmp_publisher.publish(msg);
-    sleep(1);
-    tmp_publisher.shutdown();
+    // sleep(1);
+    // tmp_publisher.shutdown();
 }
 
 void MainWindow::slot_btn_rb2_goHomePose() {
-    ros::Publisher tmp_publisher= Node->advertise<std_msgs::Bool>("/back_home", 1);
     std_msgs::Int8 msg;
     msg.data=1;
     tmp_publisher.publish(msg);
-    sleep(1);
-    tmp_publisher.shutdown();
+    // sleep(1);
+    // tmp_publisher.shutdown();
 }
 
 void MainWindow::slot_comboBox_tabmp_1_Clicked(int index) {
