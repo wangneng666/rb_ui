@@ -21,6 +21,7 @@
 #include "rb_msgAndSrv/rb_DoubleBool.h"
 #include "rb_msgAndSrv/robotConn.h"
 #include "rb_msgAndSrv/robotError.h"
+#include "geometry_msgs/PoseStamped.h"
 #include "cubeParse/Detection.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
@@ -134,6 +135,7 @@ private:
     ros::Subscriber Leftcamera_subscriber;//相机数据采集
     ros::Subscriber Rightcamera_subscriber;//相机数据采集
     ros::Subscriber MagicSolve_subscriber;//魔方解析数据采集
+    ros::Subscriber cubeTeachPose_subscriber;//魔方示教点数据采集
     ros::ServiceClient MagicDataUpdate_client;//魔方数据修改客户端
     ros::ServiceClient rbConnCommand_client;//机器人连接客户端
 
@@ -244,6 +246,7 @@ private:
     void callback_magicSolve_subscriber(rb_msgAndSrv::rb_StringArray data_msg);
     void callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray data_msg);
     void callback_MagicSolveSolution_subscriber(std_msgs::Bool data_msg);
+    void callback_cubeTeachPose_subscriber(geometry_msgs::PoseStamped data_msg);
     //线程处理
     void thread_SysCheck();
     void thread_rbConnCommand();

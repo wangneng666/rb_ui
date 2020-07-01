@@ -188,6 +188,7 @@ void MainWindow::initRosTopic(){
     Rightcamera_subscriber=Node->subscribe<sensor_msgs::Image>("/camera_base_right/color/image_raw",1,boost::bind(&MainWindow::callback_RightCamera_subscriber,this,_1));
     magicGetData_subscriber=Node->subscribe<rb_msgAndSrv::rbImageList>("/cube_image",1,&MainWindow::callback_magicGetData_subscriber,this);
     MagicSolve_subscriber=Node->subscribe<rb_msgAndSrv::rb_StringArray>("changeColor",1000,&MainWindow::callback_magicSolve_subscriber,this);
+    cubeTeachPose_subscriber=Node->subscribe<geometry_msgs::PoseStamped>("cubeTeachPose",1000,&MainWindow::callback_cubeTeachPose_subscriber,this);
     Progress_rbSolve=Node->subscribe<std_msgs::Int8MultiArray>("/progress_rbSolveMagic",1000,&MainWindow::callback_ProgressRbSolve_subscriber,this);
     MagicSolveSolution=Node->subscribe<std_msgs::Bool>("solution_situation",1000,&MainWindow::callback_MagicSolveSolution_subscriber,this);
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
@@ -846,7 +847,7 @@ void MainWindow::robot_grab() {
     // }
 //机器人没运行，则开始行动
     if (thread_forRbGrepSet->isRunning()) {
-        emitQmessageBox(infoLevel::warning, QString("线程正在运行中,异常情况下请重置抓取按钮"));
+        emitQmessageBox(infoLevel::warning, QString("抓取程序正在运行中,请不要重复执行,若要强行中断程序,请点击重置抓取功能"));
     } else {
         thread_forRbGrepSet->start();
     }
@@ -940,7 +941,7 @@ void MainWindow::thread_RbGrepSet() {
 MainWindow::~MainWindow() {
     system("rosnode kill -a");
     //关闭ros相关进程
-//    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
+    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
 }
 
 QImage MainWindow::cvMat2QImage(const cv::Mat &mat) {
@@ -1287,8 +1288,13 @@ void MainWindow::callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr
 
 void MainWindow::slot_ResetGrepFun() {
     if(thread_forRbGrepSet->isRunning()){
-        thread_forRbGrepSet->terminate();
+        thread_forRbGrepSet->quit();
+        thread_forRbGrepSet->wait();
+        if(thread_forRbGrepSet->isRunning()){
         emit emitQmessageBox(infoLevel::information,QString("退出线程成功!"));
+        }
+    } else{
+        emit emitQmessageBox(infoLevel::information,QString("抓取功能线程空闲中!"));
     }
 }
 
@@ -1344,7 +1350,6 @@ void MainWindow::slot_btn_tabmp_step() {
         flag_showImg=true;
     });
     thread_MagicPoseTeach->start();
-
 }
 
 void MainWindow::slot_btn_tabmp_recordPose() {
@@ -1483,6 +1488,19 @@ void observer_rebootUiNode::rebootUiNode(){
 
 void MainWindow::timer_showImage(){
     label_tabmp_1_showImage();
+}
+
+void MainWindow::callback_cubeTeachPose_subscriber(geometry_msgs::PoseStamped data_msg) {
+    double a1 = data_msg.pose.position.x;
+    double a2 =data_msg.pose.position.y;
+    double a3 =data_msg.pose.position.z;
+    double o1 = data_msg.pose.orientation.x;
+    double o2 = data_msg.pose.orientation.y;
+    double o3 = data_msg.pose.orientation.z;
+    double o4 = data_msg.pose.orientation.w;
+    QString tmp=QString("当前示教点坐标:\n位置:[%1,%2,%3]\n姿态:[%4,%5,%6,%7]").arg(a1).arg(a2).arg(a3).arg(o1).arg(o2).arg(o3).arg(o4);
+    textEdit_tabmp_1->setText(tmp);
+
 }
 
 
