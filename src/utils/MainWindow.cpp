@@ -178,7 +178,7 @@ void MainWindow::signalAndSlot() {
 
 void MainWindow::initRosTopic(){
     //话题或服务对象初始化
-
+    client = Node->serviceClient<hirop_msgs::robotError>("getRobotErrorFaultMsg");
     tmp_publisher= Node->advertise<std_msgs::Int8>("/back_home", 1);
     previewImage1_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview1_subscriber,this,_1));
     previewImage2_subscriber=Node->subscribe<sensor_msgs::Image>("/UR52/preview_image",1,boost::bind(&MainWindow::callback_preview2_subscriber,this,_1));
@@ -639,7 +639,27 @@ void MainWindow::thread_BeginRun() {
 
 
 void MainWindow::safety_rob1Stop() {
-    cout<<"点击了机器人1复位按钮"<<endl;
+    hirop_msgs::robotError srv;
+    if(client.call(srv)){
+       uint64_t level=srv.response.errorLevel;
+        int errorLevel=level;
+        string errorMsg=srv.response.errorMsg;
+        string isError=srv.response.isError?"true":"false";
+        string dealMsg=srv.response.dealMsg;
+        cout<<"errorMsg:"<<errorMsg<<endl;
+        cout<<"isError:"<<errorMsg<<endl;
+        cout<<"dealMsg:"<<errorMsg<<endl;
+
+        QString tmp=QString("errorLevel:%1\nerrorMsg:%2\nisError:%3\ndealMsg:%4").arg(errorLevel).arg(QString().fromStdString(errorMsg)).arg(QString().fromStdString(isError)).arg(QString().fromStdString(dealMsg));
+        emit emitQmessageBox(infoLevel::information,tmp);
+    }else
+    {
+           emit emitQmessageBox(infoLevel::information,QString("服务未连接"));
+    }
+    
+
+
+    cout<<"点击了机器人1按钮"<<endl;
 }
 
 void MainWindow::safety_rob2Stop() {
@@ -847,7 +867,7 @@ void MainWindow::robot_grab() {
     // }
 //机器人没运行，则开始行动
     if (thread_forRbGrepSet->isRunning()) {
-        emitQmessageBox(infoLevel::warning, QString("抓取程序正在运行中,请不要重复执行,若要强行中断程序,请点击重置抓取功能"));
+        emit emitQmessageBox(infoLevel::warning, QString("抓取程序正在运行中,请不要重复执行"));
     } else {
         thread_forRbGrepSet->start();
     }
@@ -925,6 +945,7 @@ void MainWindow::thread_RbGrepSet() {
     data_msg.request.data[0]=index1;
     data_msg.request.data[1]=index2;
     data_msg.request.data[2]=index3;
+    emit emitQmessageBox(infoLevel::information,QString("调用了抓取服务"));
     if(rbGrepSetCommand_client.call(data_msg))
     {
         if(data_msg.response.respond)
@@ -1288,8 +1309,8 @@ void MainWindow::callback_preview2_subscriber(const sensor_msgs::Image::ConstPtr
 
 void MainWindow::slot_ResetGrepFun() {
     if(thread_forRbGrepSet->isRunning()){
-        thread_forRbGrepSet->quit();
-        thread_forRbGrepSet->wait();
+        thread_forRbGrepSet->terminate();
+        thread_forRbGrepSet->wait(10*1000);
         if(thread_forRbGrepSet->isRunning()){
         emit emitQmessageBox(infoLevel::information,QString("退出线程成功!"));
         }
