@@ -71,6 +71,9 @@ void MainWindow::SysVarInit() {
     //系统复位子线程
     thread_forSysReset= new qthreadForRos();
     thread_forSysReset->setParm(this,&MainWindow::thread_SysReset);
+    //监听故障子线程
+    thread_lisionRbErrInfo= new qthreadForRos();
+    thread_lisionRbErrInfo->setParm(this,&MainWindow::thread_LisionRbErrInfo);
     //分步解魔方子线程
     thread_MagicStepRun= new qthreadForRos();
     //魔方点位示教子线程
@@ -178,7 +181,6 @@ void MainWindow::signalAndSlot() {
 
 void MainWindow::initRosTopic(){
     //话题或服务对象初始化
-
     tmp_publisher= Node->advertise<std_msgs::Int8>("/back_home", 1);
     previewImage1_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview1_subscriber,this,_1));
     previewImage2_subscriber=Node->subscribe<sensor_msgs::Image>("/UR52/preview_image",1,boost::bind(&MainWindow::callback_preview2_subscriber,this,_1));
@@ -209,7 +211,6 @@ void MainWindow::initRosTopic(){
     rbRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_DoubleBool>("/Rb_runCommand");
     rbSetEnable1_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR51/set_robot_enable");
     rbSetEnable2_client = Node->serviceClient<rb_msgAndSrv::SetEnableSrv>("/UR52/set_robot_enable");
-    rbErrStatus_client = Node->serviceClient<rb_msgAndSrv::robotError>("/Rb_errStatus");
     camera_subscriber=Node->subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1,boost::bind(&MainWindow::callback_camera_subscriber, this, _1));
     rbGrepSetCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/Rb_grepSetCommand");
     MagicStepRunCommand_client = Node->serviceClient<rb_msgAndSrv::rb_ArrayAndBool>("/MagicStepRunCommand");
@@ -284,6 +285,13 @@ void MainWindow::timer_comUpdate() {
     QDateTime time = QDateTime::currentDateTime();
     QString str = time.toString("yyyy-MM-dd hh:mm:ss dddd");
     showtime_Lable->setText(str);
+
+    //获取报警信息
+    if(connFlag_RightRobot){
+        if(!thread_lisionRbErrInfo->isRunning()){
+            thread_lisionRbErrInfo->start();
+        }
+    }
 
     //当不在工作中时跳过检测
     if(~(isRunning_solveMagic||isRunning_grab)){
@@ -639,6 +647,7 @@ void MainWindow::thread_BeginRun() {
 
 
 void MainWindow::safety_rob1Stop() {
+
     cout<<"点击了机器人1复位按钮"<<endl;
 }
 
@@ -842,12 +851,13 @@ void MainWindow::thread_AutoSolveMagic() {
 
 void MainWindow::robot_grab() {
 //如果机器人运行中则返回
-    // if(isRunning_solveMagic){
-    //     return;
-    // }
+     if(isRunning_grab||isRunning_solveMagic){
+         emit emitQmessageBox(infoLevel::warning, QString("抓取程序或解魔方正在运行中,请不要重复执行"));
+         return;
+     }
 //机器人没运行，则开始行动
     if (thread_forRbGrepSet->isRunning()) {
-        emitQmessageBox(infoLevel::warning, QString("抓取程序正在运行中,请不要重复执行,若要强行中断程序,请点击重置抓取功能"));
+        emit emitQmessageBox(infoLevel::warning, QString("抓取程序正在运行中,请不要重复执行"));
     } else {
         thread_forRbGrepSet->start();
     }
@@ -870,8 +880,6 @@ void MainWindow::safety_sysStop() {
         emit emitQmessageBox(infoLevel::warning,QString("rbSetEnable_client连接失败!"));
     }
 }
-
-
 
 
 //pc相机连接
@@ -925,17 +933,17 @@ void MainWindow::thread_RbGrepSet() {
     data_msg.request.data[0]=index1;
     data_msg.request.data[1]=index2;
     data_msg.request.data[2]=index3;
-    if(rbGrepSetCommand_client.call(data_msg))
-    {
-        if(data_msg.response.respond)
-        {
-            LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
-        } else
-        {
-            LOG("RUNINFO")->logErrorMessage("机器人抓取物品失败!");
-        }
-    }
-    isRunning_solveMagic=false;
+    rbGrepSetCommand_client.call(data_msg);//返回结果无效,不能表明机器人控制模块抓取完成,因此不使用返回值!
+//    if(rbGrepSetCommand_client.call(data_msg))
+//    {
+//        if(data_msg.response.respond)
+//        {
+//            LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
+//        } else
+//        {
+//            LOG("RUNINFO")->logErrorMessage("机器人抓取物品失败!");
+//        }
+//    }
 }
 
 MainWindow::~MainWindow() {
@@ -1501,6 +1509,21 @@ void MainWindow::callback_cubeTeachPose_subscriber(geometry_msgs::PoseStamped da
     QString tmp=QString("当前示教点坐标:\n位置:[%1,%2,%3]\n姿态:[%4,%5,%6,%7]").arg(a1).arg(a2).arg(a3).arg(o1).arg(o2).arg(o3).arg(o4);
     textEdit_tabmp_1->setText(tmp);
 
+}
+
+void MainWindow::thread_LisionRbErrInfo() {
+    hirop_msgs::robotError srv;
+    ros::ServiceClient client = Node->serviceClient<hirop_msgs::robotError>("getRobotErrorFaultMsg");
+    client.call(srv);
+    uint64_t level=srv.response.errorLevel;
+    int errorLevel=level;
+    string errorMsg=srv.response.errorMsg;
+    string isError=srv.response.isError?"true":"false";
+    string dealMsg=srv.response.dealMsg;
+    QString tmp=QString("errorLevel:%1\nerrorMsg:%2\nisError:%3\ndealMsg:%4").arg(errorLevel).arg(QString().fromStdString(errorMsg)).arg(QString().fromStdString(isError)).arg(QString().fromStdString(dealMsg));
+    if(srv.response.isError){
+        emit emitQmessageBox(infoLevel::information,tmp);
+    }
 }
 
 
