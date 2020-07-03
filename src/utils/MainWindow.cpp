@@ -1493,7 +1493,6 @@ void observer_rebootUiNode::rebootUiNode(){
     mainwindow->initRosTopic();
 }
 
-
 void MainWindow::timer_showImage(){
     label_tabmp_1_showImage();
 }
