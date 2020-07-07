@@ -2,9 +2,9 @@
 #include "logmanager.h"
 #include "globalvar.h"
 #include "messagehandler.h"
+
 using namespace std;
 using namespace cv;
-
 
 int main(int args,char** argv){
     //ros节点

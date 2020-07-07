@@ -28,8 +28,8 @@ public:
     void run(){
         (m->*f)();
     }
-    signals:
-            void signal_SendMsgBox(infoLevel level,QString info);//infoLevel level,QString info
+signals:
+    void signal_SendMsgBox(infoLevel level,QString info);//infoLevel level,QString info
 };
 
 

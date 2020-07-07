@@ -8,7 +8,7 @@
 #include "RbQthread.h"
 #include "qthreadForRos.h"
 #include "gloalVal.h"
-
+#include "logmanager.h"
 
 #include "std_srvs/Empty.h"
 #include "std_msgs/Bool.h"
@@ -19,8 +19,6 @@
 #include "roscpp_tutorials/TwoInts.h"
 #include "rb_msgAndSrv/rb_ArrayAndBool.h"
 #include "rb_msgAndSrv/rb_DoubleBool.h"
-#include "rb_msgAndSrv/robotConn.h"
-#include "rb_msgAndSrv/robotError.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "cubeParse/Detection.h"
 #include <opencv2/opencv.hpp>
@@ -31,16 +29,19 @@
 #include "rb_msgAndSrv/rbImageList.h"
 #include <qregion.h>
 #include "rb_msgAndSrv/SetEnableSrv.h"
-#include "logmanager.h"
 #include "hirop_msgs/SetGripper.h"
 #include "hirop_msgs/connectGripper.h"
+#include "hirop_msgs/robotError.h"
 #include "hsr_rosi_device/ClearFaultSrv.h"
 #include "hsr_rosi_device/SetEnableSrv.h"
 #include "industrial_msgs/RobotStatus.h"
 #include "rb_msgAndSrv/rb_StringArray.h"
 #include "rb_msgAndSrv/rb_string.h"
+<<<<<<< HEAD
 #include "hirop_msgs/robotError.h"
 //#include "messagehandler.h"
+=======
+>>>>>>> 080c21b0601b90735231f3956ae71366df635c0c
 
 //观察者模式(管理节点重启与关闭)
 class observer_rebootUiNode{
@@ -168,7 +169,7 @@ private:
     ros::ServiceClient cubeNewTeachClient; //魔方重新示教客户端
     ros::ServiceClient cubeResetPoseClient; //魔方示教动作点位重置客户端
     ros::Subscriber     CuberRobotPose_sub;  //魔方示教机器人ROS点位采集
-
+    
     //子线程句柄
     qthreadForRos *thread_forSysCheck;//设备启动自检子线程
     qthreadForRos *thread_forRbConn;//设备连接子线程
@@ -178,7 +179,7 @@ private:
     qthreadForRos *thread_forSysReset;//系统复位子线程
     qthreadForRos *thread_MagicStepRun;//分步运行子线程
     qthreadForRos *thread_forRbGrepSet;//机器人抓取子线程
-    qthreadForRos *thread_forLisionErrInfo;//监听故障子线程
+    qthreadForRos *thread_lisionRbErrInfo;//监听机器人故障子线程
     rbQthread *thread_MagicPoseTeach;//魔方点位示教线程
 
 public:
@@ -261,6 +262,7 @@ private:
     void thread_GagicSolve();
     void thread_GagicRunSolve();
     void thread_AutoSolveMagic();
+    void thread_LisionRbErrInfo();
 
 signals:
     void emitTextControl(QString text) const;
