@@ -6,7 +6,6 @@
 using namespace std;
 using namespace cv;
 
-
 int main(int args,char** argv){
     //ros节点
     std::string nodeName = "rb_ui";

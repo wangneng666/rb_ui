@@ -35,21 +35,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 #set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /opt/Qt5.12.0/5.12.0/gcc_64)
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /usr/lib/x86_64-linux-gnu/qt5)
 
-# 设置输出的路径
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/bin" CACHE PATH "Runtime directory" FORCE)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/libs" CACHE PATH "Library directory" FORCE)
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/libs" CACHE PATH "Archive directory" FORCE)
-file(
-        WRITE
-        ${CMAKE_CURRENT_SOURCE_DIR}/build/bin/qt.conf
-        "[Paths]
-#Prefix=../lib/Qt
-#Binaries=bin
-#Libraries=lib
-Plugins=${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/qt/plugins
-#Imports=imports
-#Qml2Imports=qml"
-)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
@@ -71,37 +56,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -lpthread -Wl,--no-as-needed  -
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-#   sensor_msgs
-# )
-
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES rb_ui
-#  CATKIN_DEPENDS roscpp rosmsg rospy
-#  DEPENDS system_lib
+
   CATKIN_DEPENDS message_runtime
 )
-
-###########
-## Build ##
-###########
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-3rd/include
- include/log4cplus
+3rd/log4_cplus/include
  include/rb_ui
  include ${catkin_INCLUDE_DIRS}
 #        include/rbmsg
 # /home/wangneng/catkin_ws/devel
 )
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+link_directories("3rd/log4_cplus/lib")
 add_executable(rb_ui src/rb_ui.cpp
         include/rb_ui/MainWindow.h
         include/rb_ui/CMsgBox.h
