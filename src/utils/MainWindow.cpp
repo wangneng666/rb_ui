@@ -181,10 +181,6 @@ void MainWindow::signalAndSlot() {
 
 void MainWindow::initRosTopic(){
     //话题或服务对象初始化
-<<<<<<< HEAD
-    client = Node->serviceClient<hirop_msgs::robotError>("getRobotErrorFaultMsg");
-=======
->>>>>>> 080c21b0601b90735231f3956ae71366df635c0c
     tmp_publisher= Node->advertise<std_msgs::Int8>("/back_home", 1);
     previewImage1_subscriber=Node->subscribe<sensor_msgs::Image>("/UR51/preview_image",1,boost::bind(&MainWindow::callback_preview1_subscriber,this,_1));
     previewImage2_subscriber=Node->subscribe<sensor_msgs::Image>("/UR52/preview_image",1,boost::bind(&MainWindow::callback_preview2_subscriber,this,_1));
@@ -651,32 +647,8 @@ void MainWindow::thread_BeginRun() {
 
 
 void MainWindow::safety_rob1Stop() {
-<<<<<<< HEAD
-    hirop_msgs::robotError srv;
-    if(client.call(srv)){
-       uint64_t level=srv.response.errorLevel;
-        int errorLevel=level;
-        string errorMsg=srv.response.errorMsg;
-        string isError=srv.response.isError?"true":"false";
-        string dealMsg=srv.response.dealMsg;
-        cout<<"errorMsg:"<<errorMsg<<endl;
-        cout<<"isError:"<<errorMsg<<endl;
-        cout<<"dealMsg:"<<errorMsg<<endl;
-
-        QString tmp=QString("errorLevel:%1\nerrorMsg:%2\nisError:%3\ndealMsg:%4").arg(errorLevel).arg(QString().fromStdString(errorMsg)).arg(QString().fromStdString(isError)).arg(QString().fromStdString(dealMsg));
-        emit emitQmessageBox(infoLevel::information,tmp);
-    }else
-    {
-           emit emitQmessageBox(infoLevel::information,QString("服务未连接"));
-    }
-    
-
-
-    cout<<"点击了机器人1按钮"<<endl;
-=======
 
     cout<<"点击了机器人1复位按钮"<<endl;
->>>>>>> 080c21b0601b90735231f3956ae71366df635c0c
 }
 
 void MainWindow::safety_rob2Stop() {
@@ -961,20 +933,6 @@ void MainWindow::thread_RbGrepSet() {
     data_msg.request.data[0]=index1;
     data_msg.request.data[1]=index2;
     data_msg.request.data[2]=index3;
-<<<<<<< HEAD
-    emit emitQmessageBox(infoLevel::information,QString("调用了抓取服务"));
-    if(rbGrepSetCommand_client.call(data_msg))
-    {
-        if(data_msg.response.respond)
-        {
-            LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
-        } else
-        {
-            LOG("RUNINFO")->logErrorMessage("机器人抓取物品失败!");
-        }
-    }
-    isRunning_solveMagic=false;
-=======
     rbGrepSetCommand_client.call(data_msg);//返回结果无效,不能表明机器人控制模块抓取完成,因此不使用返回值!
 //    if(rbGrepSetCommand_client.call(data_msg))
 //    {
@@ -986,7 +944,6 @@ void MainWindow::thread_RbGrepSet() {
 //            LOG("RUNINFO")->logErrorMessage("机器人抓取物品失败!");
 //        }
 //    }
->>>>>>> 080c21b0601b90735231f3956ae71366df635c0c
 }
 
 MainWindow::~MainWindow() {
@@ -1177,10 +1134,10 @@ void MainWindow::slot_gripper1() {
     flag_gripper1=!flag_gripper1;
     if(flag_gripper1){
         gripper1->setText("左夹具关闭");
-        system("rosservice call /UR51/openGripper \"{}\"");
+        system("rosservice call /UR51/openGripper \"{}\" &");
     } else{
         gripper1->setText("左夹具张开");
-        system("rosservice call /UR51/closeGripper \"{}\"");
+        system("rosservice call /UR51/closeGripper \"{}\" &");
     }
 }
 
@@ -1189,10 +1146,10 @@ void MainWindow::slot_gripper2() {
     flag_gripper2=!flag_gripper2;
     if(flag_gripper2){
         gripper2->setText("右夹具关闭");
-        system("rosservice call /UR52/openGripper \"{}\"");
+        system("rosservice call /UR52/openGripper \"{}\" &");
     } else{
         gripper2->setText("右夹具张开");
-        system("rosservice call /UR52/closeGripper \"{}\"");
+        system("rosservice call /UR52/closeGripper \"{}\" &");
     }
 }
 

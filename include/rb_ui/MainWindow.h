@@ -37,11 +37,6 @@
 #include "industrial_msgs/RobotStatus.h"
 #include "rb_msgAndSrv/rb_StringArray.h"
 #include "rb_msgAndSrv/rb_string.h"
-<<<<<<< HEAD
-#include "hirop_msgs/robotError.h"
-//#include "messagehandler.h"
-=======
->>>>>>> 080c21b0601b90735231f3956ae71366df635c0c
 
 //观察者模式(管理节点重启与关闭)
 class observer_rebootUiNode{
