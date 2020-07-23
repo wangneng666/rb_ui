@@ -70,22 +70,24 @@ public:
     QMainWindow* w;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout_2;
-    QVBoxLayout *verticalLayout;
-    QHBoxLayout *horizontalLayout;
+    QVBoxLayout *vLayout_centralWidget_1;
+    QHBoxLayout *hLayout_centralwidget_1;
+    QHBoxLayout *hLayout_centralwidget_2;
     QLabel *label;
     QLabel *label_3;
-    QHBoxLayout *horizontalLayout_3;
     QTabWidget *tabWidget;
 
-    QWidget *tab;
-    QGroupBox *groupBox_tab1_status;
-    QGroupBox *groupBox_tab1_mod;
-    QGroupBox *groupBox_tab1_func;
+    //主界面
+    QWidget *tab_main;
+    QGroupBox *gBox_tabmain_status;
+    QGroupBox *gBox_tabmain_mode;
+    QGroupBox *gBox_tabmain_func;
     QHBoxLayout *horizontalLayout_4;
-    QVBoxLayout *verticalLayout_4;
-    QHBoxLayout *horizontalLayout_2;
+    QVBoxLayout *vLayout_tabmain_1;
+    QHBoxLayout *hLayout_tabmain_1;
+    QHBoxLayout *hLayout_tabmain_2;
+    QHBoxLayout *hLayout_tabmain_3;
     QGridLayout *gridLayout;
-    QHBoxLayout *horizontalLayout_21;
     QComboBox *comboBox_setRunMode;
     QLabel *label_5;
     QLabel *label_6;
@@ -104,27 +106,27 @@ public:
     QLabel *label_LeftCameraConnStatus;
     QLabel *label_RightCameraConnStatus;
 
-    QHBoxLayout *horizontalLayout_5;
     QPushButton *btn_rbConn;
     QPushButton *btn_rvizRun;
     QPushButton *btn_beginRun;
     QPushButton *btn_normalStop;
     QPushButton *btn_SysReset;
 
-    QWidget *tab_2;
+    //单步调试界面
+    QWidget *tab_stepDebug;
     QHBoxLayout *horizontalLayout_6;
-    QVBoxLayout *verticalLayout_5;
-    QGroupBox *groupBox_tab2_1;
+    QVBoxLayout *vLayout_tabStepDebug_1;
+    QGroupBox *groupBox_tabStepDebug_1;
     QHBoxLayout *horizontalLayout_14;
     QPushButton *btn_rb1SetEnable;
     QPushButton *btn_rb2SetEnable;
     QPushButton *btn_rb1Reset;
     QPushButton *btn_rb2Reset;
-    QGroupBox *groupBox_tab2_2;
+    QGroupBox *groupBox_tabStepDebug_2;
     QHBoxLayout *horizontalLayout_19;
     QPushButton *gripper1;
     QPushButton *gripper2;
-    QGroupBox *groupBox_tab3_3;
+    QGroupBox *groupBox_tabStepDebug_3;
     QHBoxLayout *horizontalLayout_20;
     QPushButton *btn_rb1_goHomePose;
     QPushButton *btn_rb2_goHomePose;
@@ -132,7 +134,8 @@ public:
     QPushButton *btn_rb2putBack;
     QPushButton *btn_ResetGrepFun;
 
-    QWidget *tab_magicPose;
+    //魔方点位校准界面
+    QWidget *tab_checkMagicPose;
     QHBoxLayout *horizontalLayout_22;
     QHBoxLayout *horizontalLayout_tabmp_1;
     QVBoxLayout *verticalLayout_tabmp_11;
@@ -151,8 +154,8 @@ public:
     QHBoxLayout *hLayout_tabmp_123;
     QTextEdit *textEdit_tabmp_1;
 
-
-    QWidget *tab_3;
+    //魔方功能界面
+    QWidget *tab_magicFun;
     QHBoxLayout *horizontalLayout_8;
     QHBoxLayout *horizontalLayout_7;
     QHBoxLayout *horizontalLayout_tab3_1;
@@ -174,7 +177,8 @@ public:
     vector<QLineEdit*> line_updataDataList;
     QProgressBar* pProgressBar= nullptr;
 
-    QWidget *tab_4;
+    //抓取界面
+    QWidget *tab_grabFun;
     QHBoxLayout *horizontalLayout_10;
     QHBoxLayout *horizontalLayout_9;
     QVBoxLayout *verticalLayout_11;
@@ -194,7 +198,8 @@ public:
     QPushButton *btn_rbGrep;
     QPushButton *btn_rbGrepStop;
 
-    QWidget *tab_5;
+    //日志界面
+    QWidget *tab_recoder;
     QHBoxLayout *horizontalLayout_15;
     QHBoxLayout *horizontalLayout_16;
     QVBoxLayout *verticalLayout_1index_magicStep3;
@@ -202,7 +207,9 @@ public:
     QVBoxLayout *verticalLayout_12;
     QPushButton *btn_oputRecord;
     QPushButton *btn_clearRecord;
-    QWidget *tab_6;
+
+    //安全界面
+    QWidget *tab_safety;
     QHBoxLayout *horizontalLayout_18;
     QHBoxLayout *horizontalLayout_17;
     QPushButton *btn_SatetyStop;

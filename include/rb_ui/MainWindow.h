@@ -94,7 +94,7 @@ private:
     bool flag_rb2Enable= false;
     bool flag_gripper1= false;
     bool flag_gripper2= false;
-    bool sub_grab_OK= false;
+    int sub_grab_OK_int= 0;
 
     bool grabContinue_istop= false;
     //holdOnFlag 监控下降沿信号

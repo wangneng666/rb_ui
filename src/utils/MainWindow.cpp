@@ -676,6 +676,7 @@ void MainWindow::run_stop() {
     std_msgs::Bool msg;
     msg.data=true;
     rbStopCommand_publisher.publish(msg);
+    grabContinue_istop= true;
 }
 
 //系统复位
@@ -926,33 +927,45 @@ void MainWindow::mode_grabContinue(){
     grabContinue_istop= false;
     while(!grabContinue_istop)
     {
-        sub_grab_OK= false;
+        sub_grab_OK_int= 0;
         int obj_index=2;//物品序号
         data_msg.request.data[1]=obj_index;
         //视觉检测
         if(rbGrepSetCommand_client.call(data_msg)){
             //识别成功
-            if(data_msg.response.respond){
+            if(data_msg.response.respond)
+            {
                 //等待抓取完成
-                while (!sub_grab_OK){
+                while (sub_grab_OK_int==0)
+                {
                     sleep(1);
                     cout<<"等待抓取完成"<<endl;
-                    if(grabContinue_istop){
+                    if(grabContinue_istop)
+                    {
                         return;
                     }
                 }
-                cout<<"抓取完成"<<endl;
-                sub_grab_OK= false;
-                continue;
+                //抓取成功则继续抓
+                if(sub_grab_OK_int==1)
+                {
+                    continue;
+                }
+                //抓取失败则退出，并检查原因
+                if(sub_grab_OK_int==-1)
+                {
+                    return;
+                }
             }
             else
             {
-                cout<<"识别失败"<<endl;
+                cout<<"识别不到任务目标，回原点退出"<<endl;
+                emit emitQmessageBox(infoLevel::warning,QString("识别不到任务目标，回原点退出!"));
             }
         }
         else
         {
             cout<<"检测服务连接失败"<<endl;
+            emit emitQmessageBox(infoLevel::warning,QString("检测服务连接失败!"));
         }
 
         //4次检测完毕，则停止
@@ -1606,7 +1619,13 @@ void MainWindow::thread_LisionRbErrInfo() {
 }
 
 void MainWindow::callback_grabOk_subscriber(std_msgs::Bool data_msg) {
-    sub_grab_OK=data_msg.data;
+    if(data_msg.data){
+        sub_grab_OK_int=1;
+        emit emitQmessageBox(infoLevel::information,"抓取成功");
+    } else{
+        sub_grab_OK_int=-1;
+        emit emitQmessageBox(infoLevel::information,"抓取失败");
+    }
 }
 
 void MainWindow::slot_combox0_Clicked(int index) {
