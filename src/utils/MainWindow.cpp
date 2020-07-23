@@ -9,7 +9,6 @@ MainWindow::MainWindow(ros::NodeHandle *node, QWidget *parent):BaseWindow(node,p
     initUi(this);
     //信号与槽绑定
     signalAndSlot();
-
 }
 
 void MainWindow::SysVarInit() {
@@ -93,47 +92,14 @@ void MainWindow::SysVarInit() {
 
 void MainWindow::signalAndSlot() {
 /*********************************按钮与槽函数绑定*************************************************/
-    //设备连接
-    connect(btn_rbConn,&QPushButton::clicked,this,&MainWindow::dev_connect);
-    //rviz启动
-    connect(btn_rvizRun,&QPushButton::clicked,this,&MainWindow::rviz_statup);
-    //运行启动
-    connect(btn_beginRun,&QPushButton::clicked,this,&MainWindow::run_statup);
-    //运行停止
-    connect(btn_normalStop,&QPushButton::clicked,this,&MainWindow::run_stop);
-    //系统复位
-    connect(btn_SysReset,&QPushButton::clicked,this,&MainWindow::SysReset);
-    //采集魔方数据
-    connect(btn_magicGetdata,&QPushButton::clicked,this,&MainWindow::magicCube_get);
-    //解算魔方数据
-    connect(btn_magicSolve,&QPushButton::clicked,this,&MainWindow::magicCube_solve);
-    //执行解算魔方
-    connect(btn_magicRunSolve,&QPushButton::clicked,this,&MainWindow::magicCube_execute);
-    //一键解算魔方
-    connect(btn_magicAutoSolve,&QPushButton::clicked,this,&MainWindow::magicCube_AutoRun);
-    //更新模仿识别错误数据
-    connect(btn_updateData,&QPushButton::clicked,this,&MainWindow::magicUpdateData);
-    //机器人抓取
-    connect(btn_rbGrep,&QPushButton::clicked,this,&MainWindow::robot_grab);
-    connect(btn_rbGrepStop,&QPushButton::clicked,this,&MainWindow::rbGrepStop);
-    //导出日志
-    connect(btn_oputRecord,&QPushButton::clicked,this,&MainWindow::oputRecord);
-    //清除日志
-    connect(btn_clearRecord,&QPushButton::clicked,this,&MainWindow::clearRecord);
-    //系统停止
-    connect(btn_SatetyStop,&QPushButton::clicked,this,&MainWindow::safety_sysStop);
-    //机器人1复位
-    connect(btn_SatetyRb1Reset,&QPushButton::clicked,this,&MainWindow::safety_rob1Stop);
-    //机器人2复位
-    connect(btn_SatetyRb2Reset,&QPushButton::clicked,this,&MainWindow::safety_rob2Stop);
-    //下拉框触发事件
+    //主界面
+    connect(btn_rbConn,&QPushButton::clicked,this,&MainWindow::dev_connect);//设备连接
+    connect(btn_rvizRun,&QPushButton::clicked,this,&MainWindow::rviz_statup);//rviz启动
+    connect(btn_beginRun,&QPushButton::clicked,this,&MainWindow::run_statup);//运行启动
+    connect(btn_normalStop,&QPushButton::clicked,this,&MainWindow::run_stop);//运行停止
+    connect(btn_SysReset,&QPushButton::clicked,this,&MainWindow::SysReset);//系统复位
     connect(comboBox_setRunMode,SIGNAL(currentIndexChanged(const QString)), this, SLOT(slot_cBox_setRunMode(const QString)));
-    //切换页面触发事件
-    connect(tabWidget,SIGNAL(tabBarClicked(int)), this, SLOT(slot_tabWidgetClicked(int)));
-    //切换左右机器人事件
-    connect(comboBox_3,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox3_Clicked(int)));
-    connect(comboBox_0,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox0_Clicked(int)));
-    //单步调试页面信号与槽连接
+    //单步调试界面
     connect(btn_rb1SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1SetEnable);
     connect(btn_rb2SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2SetEnable);
     connect(btn_rb1Reset,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1Reset);
@@ -145,15 +111,34 @@ void MainWindow::signalAndSlot() {
     connect(btn_ResetGrepFun,&QPushButton::clicked,this,&MainWindow::slot_ResetGrepFun);
     connect(btn_rb1_goHomePose,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1_goHomePose);
     connect(btn_rb2_goHomePose,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2_goHomePose);
-
-    //魔方点位校准页面
+    //魔方点位校准界面
     connect(btn_tabmp_do,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_do);
     connect(btn_tabmp_step,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_step);
     connect(btn_tabmp_recordPose,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_recordPose);
     connect(btn_tabmp_newteach,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_newteach);
     connect(btn_tabmp_resetPose,&QPushButton::clicked,this,&MainWindow::slot_btn_tabmp_resetPose);
     connect(comboBox_tabmp_1,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_comboBox_tabmp_1_Clicked(int)));
+    //魔方功能界面
+    connect(btn_magicGetdata,&QPushButton::clicked,this,&MainWindow::magicCube_get);//采集魔方数据
+    connect(btn_magicSolve,&QPushButton::clicked,this,&MainWindow::magicCube_solve); //解算魔方数据
+    connect(btn_magicRunSolve,&QPushButton::clicked,this,&MainWindow::magicCube_execute);//执行解算魔方
+    connect(btn_magicAutoSolve,&QPushButton::clicked,this,&MainWindow::magicCube_AutoRun);//一键解算魔方
+    connect(btn_updateData,&QPushButton::clicked,this,&MainWindow::magicUpdateData);//更新模仿识别错误数据
+    //抓取界面
+    connect(btn_rbGrep,&QPushButton::clicked,this,&MainWindow::robot_grab);
+    connect(btn_rbGrepStop,&QPushButton::clicked,this,&MainWindow::rbGrepStop);
+    connect(comboBox_3,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox3_Clicked(int)));//切换左右机器人事件
+    connect(comboBox_0,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox0_Clicked(int)));
+    //日志界面
+    connect(btn_oputRecord,&QPushButton::clicked,this,&MainWindow::oputRecord); //导出日志
+    connect(btn_clearRecord,&QPushButton::clicked,this,&MainWindow::clearRecord);//清除日志
+    //安全界面
+    connect(btn_SatetyStop,&QPushButton::clicked,this,&MainWindow::safety_sysStop);//系统停止
+    connect(btn_SatetyRb1Reset,&QPushButton::clicked,this,&MainWindow::safety_rob1Stop);//机器人2复位
+    connect(btn_SatetyRb2Reset,&QPushButton::clicked,this,&MainWindow::safety_rob2Stop);
 
+    //整体事件
+    connect(tabWidget,SIGNAL(tabBarClicked(int)), this, SLOT(slot_tabWidgetClicked(int)));//切换魔方
 
     //定时器启动
     connect(updateTimer_listen_roscore, &QTimer::timeout, this, &MainWindow::timer_listen_roscore);
@@ -166,8 +151,6 @@ void MainWindow::signalAndSlot() {
     connect(updateTimer_LeftCamera, &QTimer::timeout, this, &MainWindow::timer_LeftCamera);
     connect(updateTimer_RightCamera, &QTimer::timeout, this, &MainWindow::timer_RightCamera);
     connect(updateTimer_showImage, &QTimer::timeout, this, &MainWindow::timer_showImage);
-
-/****************************************************************************************************/
 
 /*********************************自定义信号与槽函数绑定*************************************************/
     connect(this, &MainWindow::emitTextControl,this, &MainWindow::displayTextControl);
@@ -1630,6 +1613,7 @@ void MainWindow::slot_combox0_Clicked(int index) {
             comboBox_2->setEnabled(false);
             comboBox_3->setEnabled(false);
             btn_rbGrep->setEnabled(false);
+            btn_rbGrepStop->setEnabled(false);
             break;
         case 1:
             comboBox->setEnabled(true);
@@ -1637,14 +1621,15 @@ void MainWindow::slot_combox0_Clicked(int index) {
             comboBox_2->setEnabled(true);
             comboBox_3->setEnabled(true);
             btn_rbGrep->setEnabled(true);
+            btn_rbGrepStop->setEnabled(true);
             break;
         case 2:
             comboBox->setEnabled(true);
             comboBox_2->setVisible(false);
             comboBox_3->setEnabled(true);
             btn_rbGrep->setEnabled(true);
+            btn_rbGrepStop->setEnabled(true);
             break;
-
     }
 }
 

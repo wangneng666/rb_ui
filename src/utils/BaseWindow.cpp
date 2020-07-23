@@ -771,6 +771,7 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     comboBox_2->setEnabled(false);
     comboBox_3->setEnabled(false);
     btn_rbGrep->setEnabled(false);
+    btn_rbGrepStop->setEnabled(false);
 
 
     verticalLayout_9->addWidget(groupBox_doWork);
