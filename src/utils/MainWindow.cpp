@@ -913,6 +913,7 @@ void MainWindow::mode_grabOnce() {
 
 //连续抓取
 void MainWindow::mode_grabContinue(){
+    cout<<"进入连续抓取模式"<<endl;
     int index1=comboBox->currentIndex();//从货架抓,放桌子上
     int index2=comboBox_2->currentIndex();//维他奶
     int index3=comboBox_3->currentIndex();//左右机器人抓
@@ -926,7 +927,7 @@ void MainWindow::mode_grabContinue(){
     while(!grabContinue_istop)
     {
         sub_grab_OK= false;
-        int obj_index=0;//物品序号
+        int obj_index=2;//物品序号
         data_msg.request.data[1]=obj_index;
         //视觉检测
         if(rbGrepSetCommand_client.call(data_msg)){
@@ -936,6 +937,9 @@ void MainWindow::mode_grabContinue(){
                 while (!sub_grab_OK){
                     sleep(1);
                     cout<<"等待抓取完成"<<endl;
+                    if(grabContinue_istop){
+                        return;
+                    }
                 }
                 cout<<"抓取完成"<<endl;
                 sub_grab_OK= false;
@@ -952,13 +956,13 @@ void MainWindow::mode_grabContinue(){
         }
 
         //4次检测完毕，则停止
-        if(obj_index==3){
+        // if(obj_index==3){
             obj_index=0;
             grabContinue_istop= true;
             data_msg.request.data[3]=1;
             rbGrepSetCommand_client.call(data_msg);
-        }
-        obj_index++;
+        // }
+        // obj_index++;
     }
 }
 
