@@ -9,6 +9,7 @@ MainWindow::MainWindow(ros::NodeHandle *node, QWidget *parent):BaseWindow(node,p
     initUi(this);
     //信号与槽绑定
     signalAndSlot();
+
 }
 
 void MainWindow::SysVarInit() {
@@ -49,7 +50,6 @@ void MainWindow::SysVarInit() {
     updateTimer_rob1status->setInterval(1000);
     updateTimer_rob2status = new QTimer(this);
     updateTimer_rob2status->setInterval(1000);
-
 
     qRegisterMetaType<infoLevel>("infoLevel");//信号与槽连接自定义类型需要注册
     //线程句柄初始化
@@ -115,6 +115,7 @@ void MainWindow::signalAndSlot() {
     connect(btn_updateData,&QPushButton::clicked,this,&MainWindow::magicUpdateData);
     //机器人抓取
     connect(btn_rbGrep,&QPushButton::clicked,this,&MainWindow::robot_grab);
+    connect(btn_rbGrepStop,&QPushButton::clicked,this,&MainWindow::rbGrepStop);
     //导出日志
     connect(btn_oputRecord,&QPushButton::clicked,this,&MainWindow::oputRecord);
     //清除日志
@@ -131,6 +132,7 @@ void MainWindow::signalAndSlot() {
     connect(tabWidget,SIGNAL(tabBarClicked(int)), this, SLOT(slot_tabWidgetClicked(int)));
     //切换左右机器人事件
     connect(comboBox_3,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox3_Clicked(int)));
+    connect(comboBox_0,SIGNAL(currentIndexChanged(int)), this, SLOT(slot_combox0_Clicked(int)));
     //单步调试页面信号与槽连接
     connect(btn_rb1SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb1SetEnable);
     connect(btn_rb2SetEnable,&QPushButton::clicked,this,&MainWindow::slot_btn_rb2SetEnable);
@@ -193,6 +195,10 @@ void MainWindow::initRosTopic(){
     cubeTeachPose_subscriber=Node->subscribe<geometry_msgs::PoseStamped>("cubeTeachPose",1000,&MainWindow::callback_cubeTeachPose_subscriber,this);
     Progress_rbSolve=Node->subscribe<std_msgs::Int8MultiArray>("/progress_rbSolveMagic",1000,&MainWindow::callback_ProgressRbSolve_subscriber,this);
     MagicSolveSolution=Node->subscribe<std_msgs::Bool>("solution_situation",1000,&MainWindow::callback_MagicSolveSolution_subscriber,this);
+    grabOk_subscriber=Node->subscribe<std_msgs::Bool>("grabOk",1,&MainWindow::callback_grabOk_subscriber,this);
+
+
+
     ImageGet_client = Node->serviceClient<cubeParse::Detection>("cube_detect");
 
     MagicDataUpdate_client = Node->serviceClient<rb_msgAndSrv::rb_string>("cube_correct");
@@ -411,7 +417,6 @@ void MainWindow::thread_rbConnCommand() {
             system("rosrun rb_ui decConnect.sh");
             break;
     }
-
 }
 
 //启动前自检子线程
@@ -464,7 +469,7 @@ void MainWindow::rviz_statup() {
 
 //进入子线程－－－２
 void MainWindow::thread_rbRvizCommand() {
-   system("roslaunch co605_dual_arm_gripper_moveit_config demo.launch");
+   system("roslaunch co605_dual_arm_gripper_moveit_config demo.launch ");
 }
 
 void MainWindow::thread_rbCloseRvizCommand() {
@@ -642,13 +647,35 @@ void MainWindow::thread_BeginRun() {
     }
     //运行魔方解算程序和抓取程序
     system("roslaunch rb_ui dualRobotLaunch.launch");
-
 }
 
 
 void MainWindow::safety_rob1Stop() {
+    if(thread_forRviz->isRunning()){
+        cout<<"线程运行中"<<endl;
+    } else{
+        cout<<"线程已经停止"<<endl;
+    }
 
+//    std::vector<std::string> vstring;
+//    ros::master::getNodes(vstring);
+//    for (auto a : vstring) {
+//        cout<<a<<endl;
+//    }
+//    string basicString = ros::master::getHost();
+//    cout<<basicString<<endl;
     cout<<"点击了机器人1复位按钮"<<endl;
+
+//    bool b = ros::master::check();
+//    uint32_t i = ros::master::getPort();
+//    cout<<i<<endl;
+//    string basicString = ros::master::getURI();
+//    cout<<basicString<<endl;
+//    ros::master::V_TopicInfo vTopicInfo;
+//    ros::master::getTopics(vTopicInfo);
+//    for(auto tmp : vTopicInfo){
+//        cout<<tmp.name<<"-----"<<tmp.datatype<<endl;
+//    }
 }
 
 void MainWindow::safety_rob2Stop() {
@@ -848,6 +875,16 @@ void MainWindow::thread_AutoSolveMagic() {
     index_magicStep=0;
 }
 
+//抓取停止
+void MainWindow::rbGrepStop() {
+    if (thread_forRbGrepSet->isRunning()) {
+        grabContinue_istop= true;
+    } else {
+        emit emitQmessageBox(infoLevel::warning, QString("抓取程序已经停止"));
+    }
+
+}
+
 
 void MainWindow::robot_grab() {
 //如果机器人运行中则返回
@@ -862,6 +899,87 @@ void MainWindow::robot_grab() {
         thread_forRbGrepSet->start();
     }
 }
+
+void MainWindow::thread_RbGrepSet() {
+
+    switch (comboBox_0->currentIndex()){
+        //单次抓取模式
+        case 1:
+            mode_grabOnce();
+            break;
+        //连续抓取模式
+        case 2:
+            mode_grabContinue();
+            break;
+    }
+}
+
+void MainWindow::mode_grabOnce() {
+    int index1=comboBox->currentIndex();//从货架抓,放桌子上
+    int index2=comboBox_2->currentIndex();//维他奶
+    int index3=comboBox_3->currentIndex();//左右机器人抓
+    rb_msgAndSrv::rb_ArrayAndBool data_msg;
+    data_msg.request.data.resize(4);
+    data_msg.request.data[0]=index1;
+    data_msg.request.data[1]=index2;
+    data_msg.request.data[2]=index3;
+    data_msg.request.data[3]=0;
+    rbGrepSetCommand_client.call(data_msg);
+
+}
+
+//连续抓取
+void MainWindow::mode_grabContinue(){
+    int index1=comboBox->currentIndex();//从货架抓,放桌子上
+    int index2=comboBox_2->currentIndex();//维他奶
+    int index3=comboBox_3->currentIndex();//左右机器人抓
+    rb_msgAndSrv::rb_ArrayAndBool data_msg;
+    data_msg.request.data.resize(4);
+    data_msg.request.data[0]=index1;
+    data_msg.request.data[1]=index2;
+    data_msg.request.data[2]=index3;
+    data_msg.request.data[3]=0;
+    grabContinue_istop= false;
+    while(!grabContinue_istop)
+    {
+        sub_grab_OK= false;
+        int obj_index=0;//物品序号
+        data_msg.request.data[1]=obj_index;
+        //视觉检测
+        if(rbGrepSetCommand_client.call(data_msg)){
+            //识别成功
+            if(data_msg.response.respond){
+                //等待抓取完成
+                while (!sub_grab_OK){
+                    sleep(1);
+                    cout<<"等待抓取完成"<<endl;
+                }
+                cout<<"抓取完成"<<endl;
+                sub_grab_OK= false;
+                continue;
+            }
+            else
+            {
+                cout<<"识别失败"<<endl;
+            }
+        }
+        else
+        {
+            cout<<"检测服务连接失败"<<endl;
+        }
+
+        //4次检测完毕，则停止
+        if(obj_index==3){
+            obj_index=0;
+            grabContinue_istop= true;
+            data_msg.request.data[3]=1;
+            rbGrepSetCommand_client.call(data_msg);
+        }
+        obj_index++;
+    }
+}
+
+
 
 void MainWindow::safety_sysStop() {
     rb_msgAndSrv::SetEnableSrv data_srvs1;
@@ -922,34 +1040,10 @@ void MainWindow::displayTextControl(QString text) {
 }
 
 
-void MainWindow::thread_RbGrepSet() {
-    LOG("RUNINFO")->logInfoMessage("机器人开始抓取运行中!");
-    int index1=comboBox->currentIndex();
-    int index2=comboBox_2->currentIndex();
-    int index3=comboBox_3->currentIndex();
-
-    rb_msgAndSrv::rb_ArrayAndBool data_msg;
-    data_msg.request.data.resize(3);
-    data_msg.request.data[0]=index1;
-    data_msg.request.data[1]=index2;
-    data_msg.request.data[2]=index3;
-    rbGrepSetCommand_client.call(data_msg);//返回结果无效,不能表明机器人控制模块抓取完成,因此不使用返回值!
-//    if(rbGrepSetCommand_client.call(data_msg))
-//    {
-//        if(data_msg.response.respond)
-//        {
-//            LOG("RUNINFO")->logErrorMessage("机器人抓取物品成功!");
-//        } else
-//        {
-//            LOG("RUNINFO")->logErrorMessage("机器人抓取物品失败!");
-//        }
-//    }
-}
-
 MainWindow::~MainWindow() {
-    system("rosnode kill -a");
-    //关闭ros相关进程
-    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
+//    system("rosnode kill -a");
+//    //关闭ros相关进程
+//    system("kill $(ps -ef | grep ros|awk '{print  $2}')");
 }
 
 QImage MainWindow::cvMat2QImage(const cv::Mat &mat) {
@@ -1216,7 +1310,6 @@ void MainWindow::magicUpdateData() {
 void MainWindow::slot_rb1putBack() {
     cout<<"左边放置魔方"<<endl;
     system("rosservice call /placeMagicCube \"data:\n- 0\"");
-
 }
 
 void MainWindow::slot_rb2putBack() {
@@ -1464,6 +1557,7 @@ void MainWindow::slot_btn_rb1_goHomePose() {
     tmp_publisher.publish(msg);
     // sleep(1);
     // tmp_publisher.shutdown();
+
 }
 
 void MainWindow::slot_btn_rb2_goHomePose() {
@@ -1507,7 +1601,6 @@ void MainWindow::callback_cubeTeachPose_subscriber(geometry_msgs::PoseStamped da
     double o4 = data_msg.pose.orientation.w;
     QString tmp=QString("当前示教点坐标:\n位置:[%1,%2,%3]\n姿态:[%4,%5,%6,%7]").arg(a1).arg(a2).arg(a3).arg(o1).arg(o2).arg(o3).arg(o4);
     textEdit_tabmp_1->setText(tmp);
-
 }
 
 void MainWindow::thread_LisionRbErrInfo() {
@@ -1524,6 +1617,39 @@ void MainWindow::thread_LisionRbErrInfo() {
         emit emitQmessageBox(infoLevel::information,tmp);
     }
 }
+
+void MainWindow::callback_grabOk_subscriber(std_msgs::Bool data_msg) {
+    sub_grab_OK=data_msg.data;
+}
+
+void MainWindow::slot_combox0_Clicked(int index) {
+    switch (index)
+    {
+        case 0:
+            comboBox->setEnabled(false);
+            comboBox_2->setEnabled(false);
+            comboBox_3->setEnabled(false);
+            btn_rbGrep->setEnabled(false);
+            break;
+        case 1:
+            comboBox->setEnabled(true);
+            comboBox_2->setVisible(true);
+            comboBox_2->setEnabled(true);
+            comboBox_3->setEnabled(true);
+            btn_rbGrep->setEnabled(true);
+            break;
+        case 2:
+            comboBox->setEnabled(true);
+            comboBox_2->setVisible(false);
+            comboBox_3->setEnabled(true);
+            btn_rbGrep->setEnabled(true);
+            break;
+
+    }
+}
+
+
+
 
 
 

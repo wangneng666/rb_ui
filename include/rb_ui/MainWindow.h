@@ -9,6 +9,7 @@
 #include "qthreadForRos.h"
 #include "gloalVal.h"
 #include "logmanager.h"
+//#include "ros/master.h"
 
 #include "std_srvs/Empty.h"
 #include "std_msgs/Bool.h"
@@ -93,6 +94,9 @@ private:
     bool flag_rb2Enable= false;
     bool flag_gripper1= false;
     bool flag_gripper2= false;
+    bool sub_grab_OK= false;
+
+    bool grabContinue_istop= false;
     //holdOnFlag 监控下降沿信号
     bool holdOnFlag_LeftRobotConn= false;
     bool holdOnFlag_RightRobotConn= false;
@@ -133,6 +137,9 @@ private:
     ros::Subscriber Rightcamera_subscriber;//相机数据采集
     ros::Subscriber MagicSolve_subscriber;//魔方解析数据采集
     ros::Subscriber cubeTeachPose_subscriber;//魔方示教点数据采集
+    ros::Subscriber grabOk_subscriber;//机器人抓取完成信号监听
+
+
     ros::ServiceClient MagicDataUpdate_client;//魔方数据修改客户端
     ros::ServiceClient rbConnCommand_client;//机器人连接客户端
 
@@ -197,6 +204,7 @@ private:
     void magicCube_execute();//按钮槽函数_执行解算魔方数据
     void magicUpdateData();//魔方数据修改
     void robot_grab();//按钮槽函数_机器人抓取
+    void rbGrepStop();//按钮槽函数_机器人抓取停止
     void safety_sysStop();//按钮槽函数_系统停止
     void safety_rob1Stop();//按钮槽函数_机器人1停止
     void safety_rob2Stop();//按钮槽函数_机器人2停止
@@ -244,6 +252,7 @@ private:
     void callback_ProgressRbSolve_subscriber(std_msgs::Int8MultiArray data_msg);
     void callback_MagicSolveSolution_subscriber(std_msgs::Bool data_msg);
     void callback_cubeTeachPose_subscriber(geometry_msgs::PoseStamped data_msg);
+    void callback_grabOk_subscriber(std_msgs::Bool data_msg);
     //线程处理
     void thread_SysCheck();
     void thread_rbConnCommand();
@@ -258,6 +267,9 @@ private:
     void thread_GagicRunSolve();
     void thread_AutoSolveMagic();
     void thread_LisionRbErrInfo();
+    //其他成员函数
+    void mode_grabOnce();//单次抓取
+    void mode_grabContinue();//连续抓取
 
 signals:
     void emitTextControl(QString text) const;
@@ -273,6 +285,7 @@ private slots:
     void slot_cBox_setRunMode(const QString& text);
     void slot_tabWidgetClicked(int index_tab);
     void slot_combox3_Clicked(int index);
+    void slot_combox0_Clicked(int index);
     void slot_comboBox_tabmp_1_Clicked(int index);
 
 
