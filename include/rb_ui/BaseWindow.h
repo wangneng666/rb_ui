@@ -183,14 +183,17 @@ public:
     QVBoxLayout *verticalLayout_9;
     QGroupBox *groupBox_setMod;
     QHBoxLayout *horizontalLayout_11;
+    QComboBox *comboBox_0;
     QComboBox *comboBox;
-    QGroupBox *groupBox_selectObject;
-    QHBoxLayout *horizontalLayout_12;
+    QGroupBox *groupBox_targetConfig;
+    QVBoxLayout *vLayout_12;
     QComboBox *comboBox_2;
-    QGroupBox *groupBox_selectRobot;
+    QGroupBox *groupBox_doWork;
     QHBoxLayout *horizontalLayout_13;
     QComboBox *comboBox_3;
     QPushButton *btn_rbGrep;
+    QPushButton *btn_rbGrepStop;
+
     QWidget *tab_5;
     QHBoxLayout *horizontalLayout_15;
     QHBoxLayout *horizontalLayout_16;

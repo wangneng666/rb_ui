@@ -75,7 +75,7 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     label->setObjectName(QString::fromUtf8("label"));
     //全局空间属性初始化
     QFont font;
-    font.setPointSize(20);
+    font.setPointSize(30);
     font.setBold(true);
     font.setItalic(false);
     font.setWeight(75);
@@ -697,27 +697,29 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_11->setSpacing(6);
     horizontalLayout_11->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_11->setObjectName(QString::fromUtf8("horizontalLayout_11"));
-    comboBox = new QComboBox(groupBox_setMod);
-    comboBox->setFixedSize(COMBOX_W,COMBOX_H);
 
-    comboBox->addItem(QString());
-    comboBox->addItem(QString());
-    comboBox->setObjectName(QString::fromUtf8("comboBox"));
-
-    horizontalLayout_11->addWidget(comboBox);
+    comboBox_0 = new QComboBox(groupBox_setMod);
+    comboBox_0->setFixedSize(COMBOX_W,COMBOX_H);
+    comboBox_0->addItem(QString());
+    comboBox_0->addItem(QString());
+    comboBox_0->addItem(QString());
+    comboBox_0->setItemText(0, QApplication::translate("MainWindow", "选择抓取模式", nullptr));
+    comboBox_0->setItemText(1, QApplication::translate("MainWindow", "单次抓取模式", nullptr));
+    comboBox_0->setItemText(2, QApplication::translate("MainWindow", "连续抓取模式", nullptr));
+    horizontalLayout_11->addWidget(comboBox_0);
 
 
     verticalLayout_9->addWidget(groupBox_setMod);
 
-    groupBox_selectObject = new QGroupBox(tab_4);
-    groupBox_selectObject->setObjectName(QString::fromUtf8("groupBox_selectObject"));
-    groupBox_selectObject->setStyleSheet(groupBox_qss);
+    groupBox_targetConfig = new QGroupBox(tab_4);
+    groupBox_targetConfig->setObjectName(QString::fromUtf8("groupBox_targetConfig"));
+    groupBox_targetConfig->setStyleSheet(groupBox_qss);
 
-    horizontalLayout_12 = new QHBoxLayout(groupBox_selectObject);
-    horizontalLayout_12->setSpacing(6);
-    horizontalLayout_12->setContentsMargins(11, 11, 11, 11);
-    horizontalLayout_12->setObjectName(QString::fromUtf8("horizontalLayout_12"));
-    comboBox_2 = new QComboBox(groupBox_selectObject);
+    vLayout_12 = new QVBoxLayout(groupBox_targetConfig);
+    vLayout_12->setSpacing(6);
+    vLayout_12->setContentsMargins(11, 11, 11, 11);
+    vLayout_12->setObjectName(QString::fromUtf8("vLayout_12"));
+    comboBox_2 = new QComboBox(groupBox_targetConfig);
     comboBox_2->setFixedSize(COMBOX_W,COMBOX_H);
     comboBox_2->addItem(QString());
     comboBox_2->addItem(QString());
@@ -725,41 +727,60 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     comboBox_2->addItem(QString());
     comboBox_2->setObjectName(QString::fromUtf8("comboBox_2"));
 
-    horizontalLayout_12->addWidget(comboBox_2);
+    vLayout_12->addWidget(comboBox_2,0,Qt::AlignHCenter);
 
+    comboBox = new QComboBox(groupBox_targetConfig);
+    comboBox->setFixedSize(COMBOX_W,COMBOX_H);
+    comboBox->addItem(QString());
+    comboBox->addItem(QString());
+    comboBox->setObjectName(QString::fromUtf8("comboBox"));
+    vLayout_12->addWidget(comboBox,0,Qt::AlignHCenter);
 
-    verticalLayout_9->addWidget(groupBox_selectObject);
-
-    groupBox_selectRobot = new QGroupBox(tab_4);
-    groupBox_selectRobot->setObjectName(QString::fromUtf8("groupBox_selectRobot"));
-    groupBox_selectRobot->setStyleSheet(groupBox_qss);
-
-    horizontalLayout_13 = new QHBoxLayout(groupBox_selectRobot);
-    horizontalLayout_13->setSpacing(6);
-    horizontalLayout_13->setContentsMargins(11, 11, 11, 11);
-    horizontalLayout_13->setObjectName(QString::fromUtf8("horizontalLayout_13"));
-    comboBox_3 = new QComboBox(groupBox_selectRobot);
+    comboBox_3 = new QComboBox(groupBox_targetConfig);
     comboBox_3->setFixedSize(COMBOX_W,COMBOX_H);
-
     comboBox_3->addItem(QString());
     comboBox_3->addItem(QString());
     comboBox_3->setObjectName(QString::fromUtf8("comboBox_3"));
+    vLayout_12->addWidget(comboBox_3,0,Qt::AlignHCenter);
 
-    horizontalLayout_13->addWidget(comboBox_3);
 
+    verticalLayout_9->addWidget(groupBox_targetConfig);
 
-    verticalLayout_9->addWidget(groupBox_selectRobot);
+    groupBox_doWork = new QGroupBox(tab_4);
+    groupBox_doWork->setObjectName(QString::fromUtf8("groupBox_doWork"));
+    groupBox_doWork->setStyleSheet(groupBox_qss);
+
+    horizontalLayout_13 = new QHBoxLayout(groupBox_doWork);
+    horizontalLayout_13->setSpacing(6);
+    horizontalLayout_13->setContentsMargins(11, 11, 11, 11);
+    horizontalLayout_13->setObjectName(QString::fromUtf8("horizontalLayout_13"));
 
     btn_rbGrep = new QPushButton(tab_4);
     btn_rbGrep->setObjectName(QString::fromUtf8("btn_rbGrep"));
     btn_rbGrep->setFixedSize(BTN_W,BTN_H);
 
-    verticalLayout_9->addWidget(btn_rbGrep,0,Qt::AlignHCenter);
+    btn_rbGrepStop = new QPushButton(tab_4);
+    btn_rbGrepStop->setObjectName(QString::fromUtf8("btn_rbGrep"));
+    btn_rbGrepStop->setFixedSize(BTN_W,BTN_H);
+    btn_rbGrepStop->setText("停止");
+    horizontalLayout_13->addWidget(btn_rbGrep);
+    horizontalLayout_13->addWidget(btn_rbGrepStop);
+
+
+    comboBox->setEnabled(false);
+    comboBox_2->setEnabled(false);
+    comboBox_3->setEnabled(false);
+    btn_rbGrep->setEnabled(false);
+
+
+    verticalLayout_9->addWidget(groupBox_doWork);
+
+//    verticalLayout_9->addWidget(btn_rbGrep,0,Qt::AlignHCenter);
 
     horizontalLayout_9->addLayout(verticalLayout_9);
+
     horizontalLayout_9->setStretch(0,3);
     horizontalLayout_9->setStretch(1,1);
-
     horizontalLayout_10->addLayout(horizontalLayout_9);
 
     tabWidget->addTab(tab_4, QString());
@@ -924,7 +945,6 @@ void BaseWindow::retranslateUi(QMainWindow *MainWindow) {
     btn_magicAutoSolve->setText(QApplication::translate("MainWindow", "\344\270\200\351\224\256\350\247\243\347\256\227", nullptr));
     tabWidget->setTabText(tabWidget->indexOf(tab_3), QApplication::translate("MainWindow", "\351\255\224\346\226\271\347\225\214\351\235\242", nullptr));
     groupBox_setMod->setTitle(QApplication::translate("MainWindow", "\346\250\241\345\274\217\350\256\276\347\275\256", nullptr));
-    comboBox->setItemText(0, QApplication::translate("MainWindow", "从货架抓,放桌子上", nullptr));
     comboBox_setRunMode->setItemText(0, QApplication::translate("MainWindow", "请选择运行模式", nullptr));
     comboBox_setRunMode->setItemText(1, QApplication::translate("MainWindow", "RVIZ虚拟点位测试模式", nullptr));
     comboBox_setRunMode->setItemText(2, QApplication::translate("MainWindow", "真机真实点位运行模式", nullptr));
@@ -932,13 +952,13 @@ void BaseWindow::retranslateUi(QMainWindow *MainWindow) {
 
     comboBox->setItemText(0, QApplication::translate("MainWindow", "从货架抓,放桌子上", nullptr));
     comboBox->setItemText(1, QApplication::translate("MainWindow", "从桌子抓,放货架上", nullptr));
-    groupBox_selectObject->setTitle(QApplication::translate("MainWindow", "\346\212\223\345\217\226\345\257\271\350\261\241", nullptr));
+    groupBox_targetConfig->setTitle(QApplication::translate("MainWindow", "目标设置", nullptr));
     comboBox_2->setItemText(0, QApplication::translate("MainWindow", "维他奶", nullptr));
     comboBox_2->setItemText(1, QApplication::translate("MainWindow", "可乐罐", nullptr));
     comboBox_2->setItemText(2, QApplication::translate("MainWindow", "旺仔牛奶", nullptr));
     comboBox_2->setItemText(3, QApplication::translate("MainWindow", "公仔", nullptr));
 
-    groupBox_selectRobot->setTitle(QApplication::translate("MainWindow", "\346\234\254\344\275\223\351\200\211\346\213\251", nullptr));
+    groupBox_doWork->setTitle(QApplication::translate("MainWindow", "功能执行", nullptr));
     comboBox_3->setItemText(0, QApplication::translate("MainWindow", "\345\267\246\346\234\272\345\231\250\344\272\272\346\212\223", nullptr));
     comboBox_3->setItemText(1, QApplication::translate("MainWindow", "\345\217\263\346\234\272\345\231\250\344\272\272\346\212\223", nullptr));
 
