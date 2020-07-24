@@ -944,14 +944,21 @@ void MainWindow::mode_grabContinue(){
                 //抓取成功则继续抓
                 if(sub_grab_OK_int==1)
                 {
+                    grabFailCount=0;
                     continue;
                 }
                 //抓取失败则换另一台机器人抓取
                 if(sub_grab_OK_int==-1)
                 {
                     grabFailCount++;
-                    if(data_msg.request.data[2]==1)data_msg.request.data[2]=0;
-                    if(data_msg.request.data[2]==0)data_msg.request.data[2]=1;
+                    if(data_msg.request.data[2]==1){
+                        data_msg.request.data[2]=0;
+                    }
+                    else
+                    {
+                        data_msg.request.data[2]=1;
+                    }
+
                     if(grabFailCount>=2)
                     {
                         emit emitQmessageBox(infoLevel::warning,QString("抓取失败两次，回原点退出!"));
