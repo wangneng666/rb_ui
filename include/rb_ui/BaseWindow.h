@@ -67,14 +67,14 @@ public:
     QPixmap fitpixmap_greenLight;
 public:
     //qt控件
-    QMainWindow* w;
+//    QMainWindow* w;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout_2;
     QVBoxLayout *vLayout_centralWidget_1;
     QHBoxLayout *hLayout_centralwidget_1;
     QHBoxLayout *hLayout_centralwidget_2;
-    QLabel *label;
-    QLabel *label_3;
+    QLabel *label_centralWidget_title;
+    QLabel *label_centralWidget_logo;
     QTabWidget *tabWidget;
 
     //主界面
@@ -137,12 +137,12 @@ public:
     //魔方点位校准界面
     QWidget *tab_checkMagicPose;
     QHBoxLayout *horizontalLayout_22;
-    QHBoxLayout *horizontalLayout_tabmp_1;
-    QVBoxLayout *verticalLayout_tabmp_11;
-    QGroupBox* gBox_tabmp_1;
-    QGroupBox* gBox_tabmp_2;
+    QHBoxLayout *hLayout_tabCheckMagicPose_1;
+    QVBoxLayout *vLayout_tabCheckMagicPose_1;
+    QVBoxLayout *vLayout_tabCheckMagicPose_2;
+    QGroupBox* gBox_tabCheckMagicPose_1;
+    QGroupBox* gBox_tabCheckMagicPose_2;
     QLabel *label_tabmp_1;
-    QVBoxLayout *vLayout_tabmp_12;
     QVBoxLayout *vLayout_tabmp_121;
     QComboBox *comboBox_tabmp_1;
     QPushButton *btn_tabmp_do;
@@ -157,9 +157,9 @@ public:
     //魔方功能界面
     QWidget *tab_magicFun;
     QHBoxLayout *horizontalLayout_8;
-    QHBoxLayout *horizontalLayout_7;
+    QHBoxLayout *hLayout_tabmagicFun_1;
     QHBoxLayout *horizontalLayout_tab3_1;
-    QVBoxLayout *verticalLayout_6;
+    QVBoxLayout *vLayout_tabmagicFun_1;
     QGridLayout* gridLayout1;
     vector<QLabel*> list_label_picture;
     QLabel* label_picture1;
@@ -168,7 +168,7 @@ public:
     QLabel* label_picture4;
     QLabel* label_picture5;
     QLabel* label_picture6;
-    QVBoxLayout *verticalLayout_8;
+    QVBoxLayout *vLayout_tabmagicFun_2;
     QPushButton *btn_magicGetdata;
     QPushButton *btn_magicSolve;
     QPushButton *btn_magicRunSolve;
@@ -180,19 +180,19 @@ public:
     //抓取界面
     QWidget *tab_grabFun;
     QHBoxLayout *horizontalLayout_10;
-    QHBoxLayout *horizontalLayout_9;
-    QVBoxLayout *verticalLayout_11;
+    QHBoxLayout *hLayout_tabgrabFun_1;
+    QVBoxLayout *vLayout_tabgrabFun_1;
     QLabel *label_processImag;
     QLabel *label_preImag;
-    QVBoxLayout *verticalLayout_9;
-    QGroupBox *groupBox_setMod;
+    QVBoxLayout *vLayout_tabgrabFun_2;
+    QGroupBox *gBox_tabgrabFun_setMod;
     QHBoxLayout *horizontalLayout_11;
     QComboBox *comboBox_0;
     QComboBox *comboBox;
-    QGroupBox *groupBox_targetConfig;
+    QGroupBox *gBox_tabgrabFun_targetConfig;
     QVBoxLayout *vLayout_12;
     QComboBox *comboBox_2;
-    QGroupBox *groupBox_doWork;
+    QGroupBox *gBox_tabgrabFun_doWork;
     QHBoxLayout *horizontalLayout_13;
     QComboBox *comboBox_3;
     QPushButton *btn_rbGrep;
@@ -201,24 +201,22 @@ public:
     //日志界面
     QWidget *tab_recoder;
     QHBoxLayout *horizontalLayout_15;
-    QHBoxLayout *horizontalLayout_16;
-    QVBoxLayout *verticalLayout_1index_magicStep3;
+    QHBoxLayout *hLayout_tabrecoder_1;
     QPlainTextEdit *plainTextEdit;
-    QVBoxLayout *verticalLayout_12;
-    QPushButton *btn_oputRecord;
-    QPushButton *btn_clearRecord;
+    QVBoxLayout* vLayout_tabrecoder_1;
+    QVBoxLayout* vLayout_tabrecoder_2;
+    QPushButton* btn_oputRecord;
+    QPushButton* btn_clearRecord;
 
     //安全界面
     QWidget *tab_safety;
-    QHBoxLayout *horizontalLayout_18;
-    QHBoxLayout *horizontalLayout_17;
+    QHBoxLayout *hLayout_tabsafety_1;
     QPushButton *btn_SatetyStop;
     QPushButton *btn_SatetyRb1Reset;
     QPushButton *btn_SatetyRb2Reset;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
 
-    QVBoxLayout* verticalLayout_13;
     QLabel* showMagicStepLable;
     QLabel* isRunning_solveMagic_Lable;
     QLabel* isRunning_grab_Lable;

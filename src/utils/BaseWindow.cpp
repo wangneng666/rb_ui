@@ -64,15 +64,15 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     hLayout_centralwidget_1 = new QHBoxLayout();
     hLayout_centralwidget_1->setSpacing(6);
     hLayout_centralwidget_1->setObjectName(QString::fromUtf8("hLayout_centralwidget_1"));
-    label_3 = new QLabel(centralWidget);
-    label_3->setObjectName(QString::fromUtf8("label_3"));
-    label_3->setPixmap(QPixmap(photoPath+"logo.png"));
-//    label_3->setPixmap(QPixmap(QString::fromUtf8("./rb_ui/photo/logo.png")));
+    label_centralWidget_logo = new QLabel(centralWidget);
+    label_centralWidget_logo->setObjectName(QString::fromUtf8("label_centralWidget_logo"));
+    label_centralWidget_logo->setPixmap(QPixmap(photoPath+"logo.png"));
+//    label_centralWidget_logo->setPixmap(QPixmap(QString::fromUtf8("./rb_ui/photo/logo.png")));
 
-    hLayout_centralwidget_1->addWidget(label_3);
+    hLayout_centralwidget_1->addWidget(label_centralWidget_logo);
 
-    label = new QLabel(centralWidget);
-    label->setObjectName(QString::fromUtf8("label"));
+    label_centralWidget_title = new QLabel(centralWidget);
+    label_centralWidget_title->setObjectName(QString::fromUtf8("label_centralWidget_title"));
     //全局空间属性初始化
     QFont font;
     font.setPointSize(30);
@@ -80,10 +80,10 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     font.setItalic(false);
     font.setWeight(75);
 
-    label->setFont(font);
-    label->setAlignment(Qt::AlignCenter);
+    label_centralWidget_title->setFont(font);
+    label_centralWidget_title->setAlignment(Qt::AlignCenter);
 
-    hLayout_centralwidget_1->addWidget(label);
+    hLayout_centralwidget_1->addWidget(label_centralWidget_title);
 
     hLayout_centralwidget_1->setStretch(0, 1);
     hLayout_centralwidget_1->setStretch(1, 6);
@@ -243,7 +243,6 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     hLayout_tabmain_2->setSpacing(6);
     hLayout_tabmain_2->setObjectName(QString::fromUtf8("hLayout_tabmain_2"));
     comboBox_setRunMode=new QComboBox();
-    comboBox_setRunMode->addItem(QString());
     comboBox_setRunMode->addItem(QString());
     comboBox_setRunMode->addItem(QString());
     comboBox_setRunMode->addItem(QString());
@@ -433,37 +432,37 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_22->setSpacing(6);
     horizontalLayout_22->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_22->setObjectName(QString::fromUtf8("horizontalLayout_22"));
-    horizontalLayout_tabmp_1 = new QHBoxLayout();
-    horizontalLayout_tabmp_1->setSpacing(6);
-    horizontalLayout_tabmp_1->setObjectName(QString::fromUtf8("horizontalLayout_tabmp_1"));
-    verticalLayout_tabmp_11 = new QVBoxLayout();
-    verticalLayout_tabmp_11->setSpacing(6);
-    verticalLayout_tabmp_11->setObjectName(QString::fromUtf8("verticalLayout_tabmp_11"));
+    hLayout_tabCheckMagicPose_1 = new QHBoxLayout();
+    hLayout_tabCheckMagicPose_1->setSpacing(6);
+    hLayout_tabCheckMagicPose_1->setObjectName(QString::fromUtf8("hLayout_tabCheckMagicPose_1"));
+    vLayout_tabCheckMagicPose_1 = new QVBoxLayout();
+    vLayout_tabCheckMagicPose_1->setSpacing(6);
+    vLayout_tabCheckMagicPose_1->setObjectName(QString::fromUtf8("vLayout_tabCheckMagicPose_1"));
     label_tabmp_1 = new QLabel(tab_checkMagicPose);
     label_tabmp_1->setObjectName(QString::fromUtf8("label_tabmp_1"));
 
-    verticalLayout_tabmp_11->addWidget(label_tabmp_1);
+    vLayout_tabCheckMagicPose_1->addWidget(label_tabmp_1);
 
-//    horizontalLayout_tabmp_1->addLayout(verticalLayout_tabmp_11);
-    gBox_tabmp_1 = new QGroupBox(tab_checkMagicPose);
-    gBox_tabmp_1->setObjectName(QString::fromUtf8("gBox_tabmp_1"));
-    gBox_tabmp_1->setStyleSheet(groupBox_qss);
-    gBox_tabmp_1->setTitle("图像显示");
-    gBox_tabmp_2 = new QGroupBox(tab_checkMagicPose);
-    gBox_tabmp_2->setObjectName(QString::fromUtf8("gBox_tabmp_2"));
-    gBox_tabmp_2->setStyleSheet(groupBox_qss);
-    gBox_tabmp_2->setTitle("操作流程");
-    horizontalLayout_tabmp_1->addWidget(gBox_tabmp_1);
-    horizontalLayout_tabmp_1->addWidget(gBox_tabmp_2);
+//    hLayout_tabCheckMagicPose_1->addLayout(vLayout_tabCheckMagicPose_1);
+    gBox_tabCheckMagicPose_1 = new QGroupBox(tab_checkMagicPose);
+    gBox_tabCheckMagicPose_1->setObjectName(QString::fromUtf8("gBox_tabCheckMagicPose_1"));
+    gBox_tabCheckMagicPose_1->setStyleSheet(groupBox_qss);
+    gBox_tabCheckMagicPose_1->setTitle("图像显示");
+    gBox_tabCheckMagicPose_2 = new QGroupBox(tab_checkMagicPose);
+    gBox_tabCheckMagicPose_2->setObjectName(QString::fromUtf8("gBox_tabCheckMagicPose_2"));
+    gBox_tabCheckMagicPose_2->setStyleSheet(groupBox_qss);
+    gBox_tabCheckMagicPose_2->setTitle("操作流程");
+    hLayout_tabCheckMagicPose_1->addWidget(gBox_tabCheckMagicPose_1);
+    hLayout_tabCheckMagicPose_1->addWidget(gBox_tabCheckMagicPose_2);
 
-    gBox_tabmp_1->setLayout(verticalLayout_tabmp_11);
+    gBox_tabCheckMagicPose_1->setLayout(vLayout_tabCheckMagicPose_1);
 
 
-    vLayout_tabmp_12 = new QVBoxLayout();
-    vLayout_tabmp_12->setSpacing(6);
-    vLayout_tabmp_12->setObjectName(QString::fromUtf8("vLayout_tabmp_12"));
+    vLayout_tabCheckMagicPose_2 = new QVBoxLayout();
+    vLayout_tabCheckMagicPose_2->setSpacing(6);
+    vLayout_tabCheckMagicPose_2->setObjectName(QString::fromUtf8("vLayout_tabCheckMagicPose_2"));
 
-    gBox_tabmp_2->setLayout(vLayout_tabmp_12);
+    gBox_tabCheckMagicPose_2->setLayout(vLayout_tabCheckMagicPose_2);
 
     vLayout_tabmp_121 = new QVBoxLayout();
     vLayout_tabmp_121->setSpacing(6);
@@ -494,7 +493,7 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     vLayout_tabmp_121->addWidget(btn_tabmp_recordPose,0,Qt::AlignHCenter);
 
 
-    vLayout_tabmp_12->addLayout(vLayout_tabmp_121);
+    vLayout_tabCheckMagicPose_2->addLayout(vLayout_tabmp_121);
 
     hLayout_tabmp_122 = new QHBoxLayout();
     hLayout_tabmp_122->setSpacing(6);
@@ -511,7 +510,7 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     hLayout_tabmp_122->addWidget(btn_tabmp_resetPose,0,Qt::AlignHCenter);
 
 
-    vLayout_tabmp_12->addLayout(hLayout_tabmp_122);
+    vLayout_tabCheckMagicPose_2->addLayout(hLayout_tabmp_122);
 
     hLayout_tabmp_123 = new QHBoxLayout();
     hLayout_tabmp_123->setSpacing(6);
@@ -521,14 +520,14 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     textEdit_tabmp_1->setText("当前示教点坐标:");
     hLayout_tabmp_123->addWidget(textEdit_tabmp_1,0,Qt::AlignHCenter);
 
-    vLayout_tabmp_12->addLayout(hLayout_tabmp_123);
+    vLayout_tabCheckMagicPose_2->addLayout(hLayout_tabmp_123);
 
-//    horizontalLayout_tabmp_1->addLayout(vLayout_tabmp_12);
+//    hLayout_tabCheckMagicPose_1->addLayout(vLayout_tabCheckMagicPose_2);
 
-    horizontalLayout_tabmp_1->setStretch(0, 2);
-    horizontalLayout_tabmp_1->setStretch(1, 1);
+    hLayout_tabCheckMagicPose_1->setStretch(0, 2);
+    hLayout_tabCheckMagicPose_1->setStretch(1, 1);
 
-    horizontalLayout_22->addLayout(horizontalLayout_tabmp_1);
+    horizontalLayout_22->addLayout(hLayout_tabCheckMagicPose_1);
 
     tabWidget->addTab(tab_checkMagicPose, QString());
 
@@ -542,16 +541,16 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_8->setSpacing(6);
     horizontalLayout_8->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_8->setObjectName(QString::fromUtf8("horizontalLayout_8"));
-    horizontalLayout_7 = new QHBoxLayout();
-    horizontalLayout_7->setSpacing(6);
-    horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
-    verticalLayout_6 = new QVBoxLayout();
-    verticalLayout_6->setSpacing(6);
-    verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
+    hLayout_tabmagicFun_1 = new QHBoxLayout();
+    hLayout_tabmagicFun_1->setSpacing(6);
+    hLayout_tabmagicFun_1->setObjectName(QString::fromUtf8("hLayout_tabmagicFun_1"));
+    vLayout_tabmagicFun_1 = new QVBoxLayout();
+    vLayout_tabmagicFun_1->setSpacing(6);
+    vLayout_tabmagicFun_1->setObjectName(QString::fromUtf8("vLayout_tabmagicFun_1"));
 //    tableView = new QTableView(tab_magicFun);
 //    tableView->setObjectName(QString::fromUtf8("tableView"));
 //
-//    verticalLayout_6->addWidget(tableView);
+//    vLayout_tabmagicFun_1->addWidget(tableView);
 
     gridLayout1 = new QGridLayout();
     gridLayout1->setSpacing(6);
@@ -626,14 +625,14 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_tab3_1->addWidget(btn_updateData);
 
 
-    verticalLayout_6->addLayout(gridLayout1);
-    verticalLayout_6->addLayout(horizontalLayout_tab3_1);
+    vLayout_tabmagicFun_1->addLayout(gridLayout1);
+    vLayout_tabmagicFun_1->addLayout(horizontalLayout_tab3_1);
 
-    horizontalLayout_7->addLayout(verticalLayout_6);
+    hLayout_tabmagicFun_1->addLayout(vLayout_tabmagicFun_1);
 
-    verticalLayout_8 = new QVBoxLayout();
-    verticalLayout_8->setSpacing(6);
-    verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
+    vLayout_tabmagicFun_2 = new QVBoxLayout();
+    vLayout_tabmagicFun_2->setSpacing(6);
+    vLayout_tabmagicFun_2->setObjectName(QString::fromUtf8("vLayout_tabmagicFun_2"));
     btn_magicGetdata = new QPushButton(tab_magicFun);
     btn_magicGetdata->setObjectName(QString::fromUtf8("btn_magicGetdata"));
     btn_magicSolve = new QPushButton(tab_magicFun);
@@ -646,15 +645,15 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     btn_magicSolve->setFixedSize(BTN_W,BTN_H);
     btn_magicRunSolve->setFixedSize(BTN_W,BTN_H);
     btn_magicAutoSolve->setFixedSize(BTN_W,BTN_H);
-    verticalLayout_8->addWidget(btn_magicGetdata);
-    verticalLayout_8->addWidget(btn_magicSolve);
-    verticalLayout_8->addWidget(btn_magicRunSolve);
-    verticalLayout_8->addWidget(btn_magicAutoSolve);
+    vLayout_tabmagicFun_2->addWidget(btn_magicGetdata);
+    vLayout_tabmagicFun_2->addWidget(btn_magicSolve);
+    vLayout_tabmagicFun_2->addWidget(btn_magicRunSolve);
+    vLayout_tabmagicFun_2->addWidget(btn_magicAutoSolve);
 
 
-    horizontalLayout_7->addLayout(verticalLayout_8);
+    hLayout_tabmagicFun_1->addLayout(vLayout_tabmagicFun_2);
 
-    horizontalLayout_8->addLayout(horizontalLayout_7);
+    horizontalLayout_8->addLayout(hLayout_tabmagicFun_1);
 
     tabWidget->addTab(tab_magicFun, QString());
     tab_grabFun = new QWidget();
@@ -663,12 +662,12 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_10->setSpacing(6);
     horizontalLayout_10->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_10->setObjectName(QString::fromUtf8("horizontalLayout_10"));
-    horizontalLayout_9 = new QHBoxLayout();
-    horizontalLayout_9->setSpacing(6);
-    horizontalLayout_9->setObjectName(QString::fromUtf8("horizontalLayout_9"));
-    verticalLayout_11 = new QVBoxLayout();
-    verticalLayout_11->setSpacing(6);
-    verticalLayout_11->setObjectName(QString::fromUtf8("verticalLayout_11"));
+    hLayout_tabgrabFun_1 = new QHBoxLayout();
+    hLayout_tabgrabFun_1->setSpacing(6);
+    hLayout_tabgrabFun_1->setObjectName(QString::fromUtf8("hLayout_tabgrabFun_1"));
+    vLayout_tabgrabFun_1 = new QVBoxLayout();
+    vLayout_tabgrabFun_1->setSpacing(6);
+    vLayout_tabgrabFun_1->setObjectName(QString::fromUtf8("vLayout_tabgrabFun_1"));
     label_processImag = new QLabel(tab_grabFun);
     label_processImag->setObjectName(QString::fromUtf8("label_processImag"));
     label_processImag->setAlignment(Qt::AlignCenter);
@@ -679,26 +678,26 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     label_preImag->setAlignment(Qt::AlignCenter);
     label_preImag->setFixedSize(600,400);
     label_preImag->setText("实时画面展示");
-    verticalLayout_11->addWidget(label_preImag);
-    verticalLayout_11->addWidget(label_processImag);
+    vLayout_tabgrabFun_1->addWidget(label_preImag);
+    vLayout_tabgrabFun_1->addWidget(label_processImag);
 
-    horizontalLayout_9->addLayout(verticalLayout_11);
+    hLayout_tabgrabFun_1->addLayout(vLayout_tabgrabFun_1);
 
-    verticalLayout_9 = new QVBoxLayout();
-    verticalLayout_9->setSpacing(6);
-    verticalLayout_9->setObjectName(QString::fromUtf8("verticalLayout_9"));
+    vLayout_tabgrabFun_2 = new QVBoxLayout();
+    vLayout_tabgrabFun_2->setSpacing(6);
+    vLayout_tabgrabFun_2->setObjectName(QString::fromUtf8("vLayout_tabgrabFun_2"));
 
-    groupBox_setMod = new QGroupBox(tab_grabFun);
-    groupBox_setMod->setObjectName(QString::fromUtf8("groupBox_setMod"));
-    groupBox_setMod->setStyleSheet(groupBox_qss);
+    gBox_tabgrabFun_setMod = new QGroupBox(tab_grabFun);
+    gBox_tabgrabFun_setMod->setObjectName(QString::fromUtf8("gBox_tabgrabFun_setMod"));
+    gBox_tabgrabFun_setMod->setStyleSheet(groupBox_qss);
 
 
-    horizontalLayout_11 = new QHBoxLayout(groupBox_setMod);
+    horizontalLayout_11 = new QHBoxLayout(gBox_tabgrabFun_setMod);
     horizontalLayout_11->setSpacing(6);
     horizontalLayout_11->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_11->setObjectName(QString::fromUtf8("horizontalLayout_11"));
 
-    comboBox_0 = new QComboBox(groupBox_setMod);
+    comboBox_0 = new QComboBox(gBox_tabgrabFun_setMod);
     comboBox_0->setFixedSize(COMBOX_W,COMBOX_H);
     comboBox_0->addItem(QString());
     comboBox_0->addItem(QString());
@@ -709,17 +708,17 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_11->addWidget(comboBox_0);
 
 
-    verticalLayout_9->addWidget(groupBox_setMod);
+    vLayout_tabgrabFun_2->addWidget(gBox_tabgrabFun_setMod);
 
-    groupBox_targetConfig = new QGroupBox(tab_grabFun);
-    groupBox_targetConfig->setObjectName(QString::fromUtf8("groupBox_targetConfig"));
-    groupBox_targetConfig->setStyleSheet(groupBox_qss);
+    gBox_tabgrabFun_targetConfig = new QGroupBox(tab_grabFun);
+    gBox_tabgrabFun_targetConfig->setObjectName(QString::fromUtf8("gBox_tabgrabFun_targetConfig"));
+    gBox_tabgrabFun_targetConfig->setStyleSheet(groupBox_qss);
 
-    vLayout_12 = new QVBoxLayout(groupBox_targetConfig);
+    vLayout_12 = new QVBoxLayout(gBox_tabgrabFun_targetConfig);
     vLayout_12->setSpacing(6);
     vLayout_12->setContentsMargins(11, 11, 11, 11);
     vLayout_12->setObjectName(QString::fromUtf8("vLayout_12"));
-    comboBox_2 = new QComboBox(groupBox_targetConfig);
+    comboBox_2 = new QComboBox(gBox_tabgrabFun_targetConfig);
     comboBox_2->setFixedSize(COMBOX_W,COMBOX_H);
     comboBox_2->addItem(QString());
     comboBox_2->addItem(QString());
@@ -729,14 +728,14 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
 
     vLayout_12->addWidget(comboBox_2,0,Qt::AlignHCenter);
 
-    comboBox = new QComboBox(groupBox_targetConfig);
+    comboBox = new QComboBox(gBox_tabgrabFun_targetConfig);
     comboBox->setFixedSize(COMBOX_W,COMBOX_H);
     comboBox->addItem(QString());
     comboBox->addItem(QString());
     comboBox->setObjectName(QString::fromUtf8("comboBox"));
     vLayout_12->addWidget(comboBox,0,Qt::AlignHCenter);
 
-    comboBox_3 = new QComboBox(groupBox_targetConfig);
+    comboBox_3 = new QComboBox(gBox_tabgrabFun_targetConfig);
     comboBox_3->setFixedSize(COMBOX_W,COMBOX_H);
     comboBox_3->addItem(QString());
     comboBox_3->addItem(QString());
@@ -744,13 +743,13 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     vLayout_12->addWidget(comboBox_3,0,Qt::AlignHCenter);
 
 
-    verticalLayout_9->addWidget(groupBox_targetConfig);
+    vLayout_tabgrabFun_2->addWidget(gBox_tabgrabFun_targetConfig);
 
-    groupBox_doWork = new QGroupBox(tab_grabFun);
-    groupBox_doWork->setObjectName(QString::fromUtf8("groupBox_doWork"));
-    groupBox_doWork->setStyleSheet(groupBox_qss);
+    gBox_tabgrabFun_doWork = new QGroupBox(tab_grabFun);
+    gBox_tabgrabFun_doWork->setObjectName(QString::fromUtf8("gBox_tabgrabFun_doWork"));
+    gBox_tabgrabFun_doWork->setStyleSheet(groupBox_qss);
 
-    horizontalLayout_13 = new QHBoxLayout(groupBox_doWork);
+    horizontalLayout_13 = new QHBoxLayout(gBox_tabgrabFun_doWork);
     horizontalLayout_13->setSpacing(6);
     horizontalLayout_13->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_13->setObjectName(QString::fromUtf8("horizontalLayout_13"));
@@ -762,7 +761,7 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     btn_rbGrepStop = new QPushButton(tab_grabFun);
     btn_rbGrepStop->setObjectName(QString::fromUtf8("btn_rbGrep"));
     btn_rbGrepStop->setFixedSize(BTN_W,BTN_H);
-    btn_rbGrepStop->setText("停止");
+    btn_rbGrepStop->setText("循环停止");
     horizontalLayout_13->addWidget(btn_rbGrep);
     horizontalLayout_13->addWidget(btn_rbGrepStop);
 
@@ -774,15 +773,15 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     btn_rbGrepStop->setEnabled(false);
 
 
-    verticalLayout_9->addWidget(groupBox_doWork);
+    vLayout_tabgrabFun_2->addWidget(gBox_tabgrabFun_doWork);
 
-//    verticalLayout_9->addWidget(btn_rbGrep,0,Qt::AlignHCenter);
+//    vLayout_tabgrabFun_2->addWidget(btn_rbGrep,0,Qt::AlignHCenter);
 
-    horizontalLayout_9->addLayout(verticalLayout_9);
+    hLayout_tabgrabFun_1->addLayout(vLayout_tabgrabFun_2);
 
-    horizontalLayout_9->setStretch(0,3);
-    horizontalLayout_9->setStretch(1,1);
-    horizontalLayout_10->addLayout(horizontalLayout_9);
+    hLayout_tabgrabFun_1->setStretch(0,3);
+    hLayout_tabgrabFun_1->setStretch(1,1);
+    horizontalLayout_10->addLayout(hLayout_tabgrabFun_1);
 
     tabWidget->addTab(tab_grabFun, QString());
     tab_recoder = new QWidget();
@@ -791,23 +790,23 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     horizontalLayout_15->setSpacing(6);
     horizontalLayout_15->setContentsMargins(11, 11, 11, 11);
     horizontalLayout_15->setObjectName(QString::fromUtf8("horizontalLayout_15"));
-    horizontalLayout_16 = new QHBoxLayout();
-    horizontalLayout_16->setSpacing(6);
-    horizontalLayout_16->setObjectName(QString::fromUtf8("horizontalLayout_16"));
-    verticalLayout_13 = new QVBoxLayout();
-    verticalLayout_13->setSpacing(6);
-    verticalLayout_13->setObjectName(QString::fromUtf8("verticalLayout_13"));
+    hLayout_tabrecoder_1 = new QHBoxLayout();
+    hLayout_tabrecoder_1->setSpacing(6);
+    hLayout_tabrecoder_1->setObjectName(QString::fromUtf8("hLayout_tabrecoder_1"));
+    vLayout_tabrecoder_1 = new QVBoxLayout();
+    vLayout_tabrecoder_1->setSpacing(6);
+    vLayout_tabrecoder_1->setObjectName(QString::fromUtf8("vLayout_tabrecoder_1"));
     plainTextEdit = new QPlainTextEdit(tab_recoder);
     plainTextEdit->setObjectName(QString::fromUtf8("plainTextEdit"));
 
-    verticalLayout_13->addWidget(plainTextEdit);
+    vLayout_tabrecoder_1->addWidget(plainTextEdit);
 
 
-    horizontalLayout_16->addLayout(verticalLayout_13);
+    hLayout_tabrecoder_1->addLayout(vLayout_tabrecoder_1);
 
-    verticalLayout_12 = new QVBoxLayout();
-    verticalLayout_12->setSpacing(6);
-    verticalLayout_12->setObjectName(QString::fromUtf8("verticalLayout_12"));
+    vLayout_tabrecoder_2 = new QVBoxLayout();
+    vLayout_tabrecoder_2->setSpacing(6);
+    vLayout_tabrecoder_2->setObjectName(QString::fromUtf8("vLayout_tabrecoder_2"));
     btn_oputRecord = new QPushButton(tab_recoder);
     btn_oputRecord->setObjectName(QString::fromUtf8("btn_oputRecord"));
     btn_oputRecord->setFixedSize(BTN_W,BTN_H);
@@ -815,45 +814,39 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
     btn_clearRecord->setObjectName(QString::fromUtf8("btn_clearRecord"));
     btn_clearRecord->setFixedSize(BTN_W,BTN_H);
 
-    verticalLayout_12->addWidget(btn_oputRecord);
-    verticalLayout_12->addWidget(btn_clearRecord);
+    vLayout_tabrecoder_2->addWidget(btn_oputRecord);
+    vLayout_tabrecoder_2->addWidget(btn_clearRecord);
 
 
-    horizontalLayout_16->addLayout(verticalLayout_12);
+    hLayout_tabrecoder_1->addLayout(vLayout_tabrecoder_2);
 
 
-    horizontalLayout_15->addLayout(horizontalLayout_16);
+    horizontalLayout_15->addLayout(hLayout_tabrecoder_1);
 
     tabWidget->addTab(tab_recoder, QString());
     tab_safety = new QWidget();
     tab_safety->setObjectName(QString::fromUtf8("tab_safety"));
-    horizontalLayout_18 = new QHBoxLayout(tab_safety);
-    horizontalLayout_18->setSpacing(6);
-    horizontalLayout_18->setContentsMargins(11, 11, 11, 11);
-    horizontalLayout_18->setObjectName(QString::fromUtf8("horizontalLayout_18"));
-    horizontalLayout_17 = new QHBoxLayout();
-    horizontalLayout_17->setSpacing(6);
-    horizontalLayout_17->setObjectName(QString::fromUtf8("horizontalLayout_17"));
+
+    hLayout_tabsafety_1 = new QHBoxLayout(tab_safety);
+    hLayout_tabsafety_1->setSpacing(6);
+    hLayout_tabsafety_1->setObjectName(QString::fromUtf8("hLayout_tabsafety_1"));
     btn_SatetyStop = new QPushButton(tab_safety);
     btn_SatetyStop->setObjectName(QString::fromUtf8("btn_SatetyStop"));
     btn_SatetyStop->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_17->addWidget(btn_SatetyStop);
+    hLayout_tabsafety_1->addWidget(btn_SatetyStop);
 
     btn_SatetyRb1Reset = new QPushButton(tab_safety);
     btn_SatetyRb1Reset->setObjectName(QString::fromUtf8("btn_SatetyRb1Reset"));
     btn_SatetyRb1Reset->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_17->addWidget(btn_SatetyRb1Reset);
+    hLayout_tabsafety_1->addWidget(btn_SatetyRb1Reset);
 
     btn_SatetyRb2Reset = new QPushButton(tab_safety);
     btn_SatetyRb2Reset->setObjectName(QString::fromUtf8("btn_SatetyRb2Reset"));
     btn_SatetyRb2Reset->setFixedSize(BTN_W,BTN_H);
 
-    horizontalLayout_17->addWidget(btn_SatetyRb2Reset);
-
-
-    horizontalLayout_18->addLayout(horizontalLayout_17);
+    hLayout_tabsafety_1->addWidget(btn_SatetyRb2Reset);
 
     tabWidget->addTab(tab_safety, QString());
 
@@ -903,8 +896,8 @@ void BaseWindow::initUi(QMainWindow *MainWindow) {
 
 void BaseWindow::retranslateUi(QMainWindow *MainWindow) {
     MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", nullptr));
-    label_3->setText(QString());
-    label->setText(QApplication::translate("MainWindow", "\345\217\214\346\234\272\345\231\250\344\272\272\344\272\222\345\212\250\344\270\216\345\215\217\344\275\234\345\271\263\345\217\260", nullptr));
+    label_centralWidget_logo->setText(QString());
+    label_centralWidget_title->setText(QApplication::translate("MainWindow", "\345\217\214\346\234\272\345\231\250\344\272\272\344\272\222\345\212\250\344\270\216\345\215\217\344\275\234\345\271\263\345\217\260", nullptr));
     label_5->setText(QApplication::translate("MainWindow", "机器人1连接状态", nullptr));
     label_6->setText(QApplication::translate("MainWindow", "机器人2连接状态", nullptr));
     label_7->setText(QApplication::translate("MainWindow", "机器人1故障状态", nullptr));
@@ -945,21 +938,20 @@ void BaseWindow::retranslateUi(QMainWindow *MainWindow) {
     btn_magicRunSolve->setText(QApplication::translate("MainWindow", "\346\211\247\350\241\214\350\247\243\347\256\227", nullptr));
     btn_magicAutoSolve->setText(QApplication::translate("MainWindow", "\344\270\200\351\224\256\350\247\243\347\256\227", nullptr));
     tabWidget->setTabText(tabWidget->indexOf(tab_magicFun), QApplication::translate("MainWindow", "\351\255\224\346\226\271\347\225\214\351\235\242", nullptr));
-    groupBox_setMod->setTitle(QApplication::translate("MainWindow", "\346\250\241\345\274\217\350\256\276\347\275\256", nullptr));
+    gBox_tabgrabFun_setMod->setTitle(QApplication::translate("MainWindow", "\346\250\241\345\274\217\350\256\276\347\275\256", nullptr));
     comboBox_setRunMode->setItemText(0, QApplication::translate("MainWindow", "请选择运行模式", nullptr));
-    comboBox_setRunMode->setItemText(1, QApplication::translate("MainWindow", "RVIZ虚拟点位测试模式", nullptr));
-    comboBox_setRunMode->setItemText(2, QApplication::translate("MainWindow", "真机真实点位运行模式", nullptr));
-    comboBox_setRunMode->setItemText(3, QApplication::translate("MainWindow", "真机虚拟点位测试模式", nullptr));
+    comboBox_setRunMode->setItemText(1, QApplication::translate("MainWindow", "仿真运行模式", nullptr));
+    comboBox_setRunMode->setItemText(2, QApplication::translate("MainWindow", "真机运行模式", nullptr));
 
     comboBox->setItemText(0, QApplication::translate("MainWindow", "从货架抓,放桌子上", nullptr));
     comboBox->setItemText(1, QApplication::translate("MainWindow", "从桌子抓,放货架上", nullptr));
-    groupBox_targetConfig->setTitle(QApplication::translate("MainWindow", "目标设置", nullptr));
+    gBox_tabgrabFun_targetConfig->setTitle(QApplication::translate("MainWindow", "目标设置", nullptr));
     comboBox_2->setItemText(0, QApplication::translate("MainWindow", "维他奶", nullptr));
     comboBox_2->setItemText(1, QApplication::translate("MainWindow", "可乐罐", nullptr));
     comboBox_2->setItemText(2, QApplication::translate("MainWindow", "旺仔牛奶", nullptr));
     comboBox_2->setItemText(3, QApplication::translate("MainWindow", "公仔", nullptr));
 
-    groupBox_doWork->setTitle(QApplication::translate("MainWindow", "功能执行", nullptr));
+    gBox_tabgrabFun_doWork->setTitle(QApplication::translate("MainWindow", "功能执行", nullptr));
     comboBox_3->setItemText(0, QApplication::translate("MainWindow", "\345\267\246\346\234\272\345\231\250\344\272\272\346\212\223", nullptr));
     comboBox_3->setItemText(1, QApplication::translate("MainWindow", "\345\217\263\346\234\272\345\231\250\344\272\272\346\212\223", nullptr));
 

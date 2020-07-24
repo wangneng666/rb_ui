@@ -394,11 +394,6 @@ void MainWindow::thread_rbConnCommand() {
             thread_forSysCheck->start();
            system("rosrun rb_ui decConnect.sh");
             break;
-        case 3:
-            cbox->show();
-            thread_forSysCheck->start();
-            system("rosrun rb_ui decConnect.sh");
-            break;
     }
 }
 
@@ -925,6 +920,7 @@ void MainWindow::mode_grabContinue(){
     data_msg.request.data[2]=index3;
     data_msg.request.data[3]=0;
     grabContinue_istop= false;
+    int grabFailCount=0;//抓取失败计数
     while(!grabContinue_istop)
     {
         sub_grab_OK_int= 0;
@@ -950,10 +946,20 @@ void MainWindow::mode_grabContinue(){
                 {
                     continue;
                 }
-                //抓取失败则退出，并检查原因
+                //抓取失败则换另一台机器人抓取
                 if(sub_grab_OK_int==-1)
                 {
-                    return;
+                    grabFailCount++;
+                    if(data_msg.request.data[2]==1)data_msg.request.data[2]=0;
+                    if(data_msg.request.data[2]==0)data_msg.request.data[2]=1;
+                    if(grabFailCount>=2)
+                    {
+                        emit emitQmessageBox(infoLevel::warning,QString("抓取失败两次，回原点退出!"));
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
             }
             else
@@ -982,21 +988,10 @@ void MainWindow::mode_grabContinue(){
 
 
 void MainWindow::safety_sysStop() {
-    rb_msgAndSrv::SetEnableSrv data_srvs1;
-    rb_msgAndSrv::SetEnableSrv data_srvs2;
-    data_srvs1.request.enable= false;
-    data_srvs2.request.enable= false;
-    if((rbSetEnable1_client.call(data_srvs1))&&(rbSetEnable2_client.call(data_srvs2))){
-        if(data_srvs1.response.finsh&&data_srvs2.response.finsh){
-            LOG("RUNINFO")->logInfoMessage("机器人伺服停止成功!");
-        } else{
-            LOG("ERRINFO")->logWarnMessage("机器人伺服停止错误!");
-            emit emitQmessageBox(infoLevel::warning,QString("机器人伺服停止错误!"));
-        }
-    } else{
-        LOG("ERRINFO")->logErrorMessage("rbSetEnable_client连接失败!");
-        emit emitQmessageBox(infoLevel::warning,QString("rbSetEnable_client连接失败!"));
-    }
+    rb_msgAndSrv::SetEnableSrv data_srvs;
+    data_srvs.request.enable= false;
+    rbSetEnable1_client.call(data_srvs);
+    rbSetEnable2_client.call(data_srvs);
 }
 
 
@@ -1268,14 +1263,6 @@ void MainWindow::slot_cBox_setRunMode(const QString& text) {
             btn_rvizRun->setVisible(true);
             break;
         case 2:
-            btn_rbConn->setEnabled(true);
-            btn_rvizRun->setEnabled(true);
-            btn_beginRun->setEnabled(true);
-            btn_normalStop->setEnabled(true);
-            btn_SysReset->setEnabled(true);
-            btn_rbConn->setVisible(true);
-            btn_rvizRun->setVisible(false);
-        case 3:
             btn_rbConn->setEnabled(true);
             btn_rvizRun->setEnabled(true);
             btn_beginRun->setEnabled(true);
@@ -1644,13 +1631,14 @@ void MainWindow::slot_combox0_Clicked(int index) {
             comboBox_2->setEnabled(true);
             comboBox_3->setEnabled(true);
             btn_rbGrep->setEnabled(true);
-            btn_rbGrepStop->setEnabled(true);
+            btn_rbGrepStop->setVisible(false);
             break;
         case 2:
             comboBox->setEnabled(true);
             comboBox_2->setVisible(false);
             comboBox_3->setEnabled(true);
             btn_rbGrep->setEnabled(true);
+            btn_rbGrepStop->setVisible(true);
             btn_rbGrepStop->setEnabled(true);
             break;
     }
